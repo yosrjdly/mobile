@@ -6,7 +6,7 @@ import { Text, View } from "react-native";
 
 
 export default function RootLayout() {
-  
+
   return (
     <ClerkProvider publishableKey={process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY}>
       <SignedIn>
@@ -21,3 +21,4 @@ export default function RootLayout() {
 
   );
 }
+
