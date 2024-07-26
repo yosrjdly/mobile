@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, ImageBackground, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, ScrollView, Alert } from 'react-native';
 import { AntDesign } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
+import { useRouter } from 'expo-router';
 import axios from 'axios';
-import { router } from 'expo-router';
 
 const RegisterScreen = () => {
   const [name, setName] = useState('');
@@ -12,6 +12,8 @@ const RegisterScreen = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigation = useNavigation();
+
+  const router = useRouter();
 
   useEffect(() => {
     navigation.setOptions({
@@ -123,7 +125,8 @@ const RegisterScreen = () => {
               <Text style={styles.googleButtonText}>Join Us With Google</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity  onPress={() => router.push("auth/SignIn")}>
+            <TouchableOpacity onPress={() => router.replace('auth/SignIn')}>
+
               <Text style={styles.registerLink}>
                 Already have an account? <Text style={styles.registerLinkBold}>Login</Text>
               </Text>
