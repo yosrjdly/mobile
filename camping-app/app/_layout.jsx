@@ -1,24 +1,13 @@
-import LoginScreen from "@/components/LoginScreen";
-import { ClerkProvider, SignedIn, SignedOut } from "@clerk/clerk-expo";
 import { Stack } from "expo-router";
-import { Text, View } from "react-native";
-
-
 
 export default function RootLayout() {
 
   return (
-    <ClerkProvider publishableKey={process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY}>
-      <SignedIn>
-        <Stack>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        </Stack>
-      </SignedIn>
-      <SignedOut>
-        <LoginScreen />
-      </SignedOut>
-    </ClerkProvider>
-
+    <Stack>
+      <Stack.Screen name="index" options={{ headerShown: false }} />
+      <Stack.Screen name="auth/SignIn" options={{ title: 'Sign In' }} />
+      <Stack.Screen name="auth/SignUp" options={{ title: 'Sign Up' }} />
+    </Stack>
   );
 }
 
