@@ -12,7 +12,6 @@ interface User {
   password: string;
 }
 
-
 const LoginScreen = () => {
   const router = useRouter();
   const navigation = useNavigation();
@@ -43,7 +42,7 @@ const LoginScreen = () => {
       };
 
       // Example: Replace with your actual login API endpoint
-      const res = await fetch('http://127.0.0.1:5000/api/users/login', {
+      const res = await fetch('http://192.168.10.4:5003/api/users/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -69,9 +68,9 @@ const LoginScreen = () => {
       console.log('Decoded Token:', decodedToken);
       setUser(decodedToken)
       console.log('Login successful!', data);
-      
+
       // Navigate to the Home tab after successful login
-     
+       router.replace('home')
 
     } catch (err: any) {
       console.error('Login failed:', err);
