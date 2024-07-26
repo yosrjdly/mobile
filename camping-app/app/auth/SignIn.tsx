@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View, ImageBackground, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, ScrollView, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
@@ -11,7 +12,8 @@ interface User {
   password: string;
 }
 
-  const LoginScreen = () => {
+
+const LoginScreen = () => {
   const router = useRouter();
   const navigation = useNavigation();
   const [email, setEmail] = useState('');
@@ -41,16 +43,17 @@ interface User {
       };
 
       // Example: Replace with your actual login API endpoint
-      const res = await fetch('http://127.0.0.1:5003/api/users/login', {
+      const res = await fetch('http://127.0.0.1:5000/api/users/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+
         },
         body: JSON.stringify(newData)
       });
 
       const data = await res.json();
-      
+
       if (!res.ok) {
         throw new Error(data.error || 'Failed to login');
       }
@@ -69,12 +72,14 @@ interface User {
       
       // Navigate to the Home tab after successful login
      
+
     } catch (err: any) {
       console.error('Login failed:', err);
       setError(err.message);
       Alert.alert('Login Error', err.message);
     }
   };
+
 
   useEffect(() => {
     navigation.setOptions({
@@ -104,10 +109,12 @@ interface User {
               style={styles.input}
               placeholder="Your Email"
               placeholderTextColor="#ddd"
+
               onChangeText={(text) => setEmail(text)}
               value={email}
               keyboardType="email-address"
               autoCapitalize="none"
+
             />
 
             <Text style={styles.label}>Password:</Text>
@@ -120,11 +127,14 @@ interface User {
               value={password}
             />
             {error ? <Text style={styles.errorText}>{error}</Text> : null}
+
             <TouchableOpacity>
               <Text style={styles.forgotPassword}>Forgot Password?</Text>
             </TouchableOpacity>
 
+
             <TouchableOpacity style={styles.loginButton} onPress={handleLogin} activeOpacity={0.8}>
+
               <Text style={styles.loginButtonText}>Login</Text>
             </TouchableOpacity>
 
@@ -260,9 +270,11 @@ const styles = StyleSheet.create({
   registerLinkBold: {
     fontWeight: 'bold',
   },
+
   errorText: {
     color: 'red',
     textAlign: 'center',
     marginBottom: 10,
   },
+
 });
