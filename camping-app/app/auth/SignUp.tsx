@@ -3,9 +3,7 @@ import { StyleSheet, Text, View, ImageBackground, TextInput, TouchableOpacity, K
 import { AntDesign } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
-
 import axios from 'axios';
-import { router } from 'expo-router';
 
 const RegisterScreen = () => {
   const [name, setName] = useState('');
@@ -14,7 +12,9 @@ const RegisterScreen = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigation = useNavigation();
+
   const router = useRouter();
+
   useEffect(() => {
     navigation.setOptions({
       headerShown: false
@@ -126,6 +126,7 @@ const RegisterScreen = () => {
             </TouchableOpacity>
 
             <TouchableOpacity onPress={() => router.replace('auth/SignIn')}>
+
               <Text style={styles.registerLink}>
                 Already have an account? <Text style={styles.registerLinkBold}>Login</Text>
               </Text>
