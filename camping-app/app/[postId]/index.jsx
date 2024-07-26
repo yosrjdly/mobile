@@ -1,5 +1,5 @@
-import React from 'react';
-import { StyleSheet, Text, View, Image, Dimensions, ScrollView, TouchableOpacity } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { StyleSheet, Text, View, Image, Dimensions, ScrollView, TouchableOpacity, Animated } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { FontAwesome } from '@expo/vector-icons';
 
@@ -11,7 +11,7 @@ const dummyPosts = [
     imageUrl: 'https://www.goodnet.org/photos/281x197/30805_hd.jpg',
     title: 'Camping by the Lake',
     location: 'Yosemite National Park, CA',
-    description: 'A relaxing weekend getaway in the heart of nature.',
+    description: 'Camping above the clouds is a breathtaking experience that offers campers the chance to witness stunning panoramic views from high altitudes, often above 2,000 meters (6,500 feet).',
     startDate: '2023-07-20',
     endDate: '2023-07-22',
     equipment: ['Tent', 'Sleeping Bag', 'Backpack'],
@@ -26,6 +26,16 @@ const dummyPosts = [
       profileImage: 'https://example.com/host1.jpg',
       name: 'John Doe',
     },
+    campMates: [
+      {
+        profileImage: 'https://example.com/camper1.jpg',
+        name: 'Alice Smith',
+      },
+      {
+        profileImage: 'https://example.com/camper2.jpg',
+        name: 'Bob Johnson',
+      },
+    ],
   },
   // Add more dummy posts as needed
 ];
@@ -35,6 +45,25 @@ const PostDetailScreen = () => {
 
   // Find the post based on postId
   const post = dummyPosts.find((post) => post.id === parseInt(postId, 10));
+
+  // Animation values
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(50)).current;
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 1000,
+        useNativeDriver: true,
+      }),
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 1000,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, [fadeAnim, slideAnim]);
 
   if (!post) {
     return (
@@ -46,7 +75,7 @@ const PostDetailScreen = () => {
 
   return (
     <ScrollView style={styles.container}>
-      <View style={styles.imageCardContainer}>
+      <Animated.View style={[styles.imageCardContainer, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
         <View style={styles.imageContainer}>
           <Image source={{ uri: post.imageUrl }} style={styles.postImage} />
           <View style={styles.overlay}>
@@ -72,24 +101,39 @@ const PostDetailScreen = () => {
             </View>
           </View>
         </View>
-      </View>
-      <View style={styles.detailsContainer}>
+      </Animated.View>
+      <Animated.View style={[styles.detailsContainer, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
         <View style={styles.postInfo}>
           <Text style={styles.postTitle}>{post.title}</Text>
           <Text style={styles.postDescription}>{post.description}</Text>
-          <Text style={styles.postDetail}>Equipment: {post.equipment.join(', ')}</Text>
-      
+          <View style={styles.equipmentSection}>
+            <Text style={styles.equipmentSubtitle}>Equipment:</Text>
+            {post.equipment.map((item, index) => (
+              <Text key={index} style={styles.equipmentItem}>- {item}</Text>
+            ))}
+          </View>
           {post.host && (
             <View style={styles.hostInfo}>
               <Image source={{ uri: post.host.profileImage }} style={styles.hostProfileImage} />
               <Text style={styles.hostName}>{post.host.name}</Text>
             </View>
           )}
+          <View style={styles.campMatesSection}>
+            <Text style={styles.campMatesTitle}>Campmates:</Text>
+            <View style={styles.campMatesList}>
+              {post.campMates.map((mate, index) => (
+                <View key={index} style={styles.campMate}>
+                  <Image source={{ uri: mate.profileImage }} style={styles.campMateImage} />
+                  <Text style={styles.campMateName}>{mate.name}</Text>
+                </View>
+              ))}
+            </View>
+          </View>
           <TouchableOpacity style={styles.joinButton}>
             <Text style={styles.joinButtonText}>Join Us</Text>
           </TouchableOpacity>
         </View>
-      </View>
+      </Animated.View>
     </ScrollView>
   );
 };
@@ -100,17 +144,19 @@ const styles = StyleSheet.create({
     backgroundColor: '#00595E',
   },
   imageCardContainer: {
-    backgroundColor: '#00595E',
-    borderRadius: 15,
+    height: 380,
+    backgroundColor: '#fff',
     overflow: 'hidden',
-    marginBottom: 20,
+    marginBottom: 0,
   },
   imageContainer: {
     position: 'relative',
+    width: '100%',
+    height: '100%',
   },
   postImage: {
-    width: width,
-    height: width * 0.5,
+    width: '100%',
+    height: '100%',
     resizeMode: 'cover',
   },
   overlay: {
@@ -118,7 +164,7 @@ const styles = StyleSheet.create({
     top: 0,
     left: 0,
     right: 0,
-    padding: 10,
+    padding: 0,
   },
   infoRow: {
     flexDirection: 'row',
@@ -126,11 +172,11 @@ const styles = StyleSheet.create({
     marginVertical: 5,
   },
   infoCard: {
+    width: width * 0.5 - 80, 
+    height: width * 0.5 - 80, 
     padding: 10,
-    borderRadius: 5,
-    flex: 1,
+    borderRadius: 15,
     marginHorizontal: 5,
-    height: 70,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -139,11 +185,12 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
     marginTop: 5,
+    fontSize: 10,
   },
   detailsContainer: {
     width: width - 30,
     marginHorizontal: 15,
-    marginTop: -80,
+    marginTop: -100, // Position the details container to overlap the image
   },
   postInfo: {
     backgroundColor: '#004d49',
@@ -162,16 +209,19 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginBottom: 10,
   },
-  postDetail: {
+  equipmentSection: {
+    marginBottom: 10,
+  },
+  equipmentSubtitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
     color: '#fff',
-    fontSize: 16,
     marginBottom: 5,
   },
-  additionalImage: {
-    width: width - 30,
-    height: width * 0.3,
-    resizeMode: 'cover',
-    marginVertical: 5,
+  equipmentItem: {
+    color: '#fff',
+    fontSize: 16,
+    marginBottom: 3,
   },
   hostInfo: {
     flexDirection: 'row',
@@ -187,6 +237,34 @@ const styles = StyleSheet.create({
   hostName: {
     color: '#fff',
     fontSize: 18,
+  },
+  campMatesSection: {
+    marginTop: 20,
+  },
+  campMatesTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#fff',
+    marginBottom: 10,
+  },
+  campMatesList: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+  },
+  campMate: {
+    alignItems: 'center',
+    marginRight: 15,
+    marginBottom: 15,
+  },
+  campMateImage: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    marginBottom: 5,
+  },
+  campMateName: {
+    color: '#fff',
+    fontSize: 14,
   },
   joinButton: {
     backgroundColor: '#B3492D',

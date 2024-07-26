@@ -1,11 +1,12 @@
 import React from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, Image, ScrollView, Dimensions } from 'react-native';
 import { MaterialCommunityIcons, Feather } from '@expo/vector-icons';
-import { Link } from 'expo-router';
+import { Link, useRouter } from 'expo-router';
 
 const { width, height } = Dimensions.get('window');
 
 const Home = () => {
+  const router = useRouter();
   const profileImage = require('../../assets/images/default-avatar.webp');
 
   const dummyPosts = [
@@ -81,9 +82,9 @@ const Home = () => {
                 </View>
               )}
               <View style={styles.postActions}>
-                <Link href={`/${post.id}`} style={styles.exploreButton}>
+                <TouchableOpacity onPress={() => router.push(`/${post.id}`)} style={styles.exploreButton}>
                   <Text style={styles.exploreText}>Explore</Text>
-                </Link>
+                </TouchableOpacity>
               </View>
             </View>
           </View>
@@ -161,7 +162,7 @@ const styles = StyleSheet.create({
     color: 'white',
     fontWeight: 'bold',
     marginLeft: 8,
-    fontSize: 16,
+    fontSize: 10,
   },
   postList: {
     padding: 20,
