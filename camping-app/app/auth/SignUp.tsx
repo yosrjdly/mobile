@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, ImageBackground, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, ScrollView, Alert } from 'react-native';
 import { AntDesign } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
+import { useRouter } from 'expo-router';
 import axios from 'axios';
 
 const RegisterScreen = () => {
@@ -11,6 +12,8 @@ const RegisterScreen = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigation = useNavigation();
+
+  const router = useRouter();
 
   useEffect(() => {
     navigation.setOptions({
@@ -27,18 +30,23 @@ const RegisterScreen = () => {
     setIsSubmitting(true);
 
     try {
-      const response = await axios.post('http://localhost:5000/api/users/register', {
+      const response = await axios.post('http://127.0.0.1:5000/api/users/register', {
         name,
         email,
         password,
         confirmPassword
       });
-      console.log('Registration Success');
+      console.log("success")
       Alert.alert('Success', response.data.message);
-      navigation.navigate('SignIn'); // Redirect to the SignIn screen upon successful registration
-    } catch (error) {
-      console.error(error.response?.data || error.message);
-      Alert.alert('Registration Error', 'There was an error with registration.');
+      router.replace('auth/SignIn');
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        console.error(error.response?.data || error.message);
+        Alert.alert('Registration Error', error.response?.data?.message || 'There was an error with registration.');
+      } else {
+        console.error((error as Error).message);
+        Alert.alert('Registration Error', 'There was an error with registration.');
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -117,7 +125,8 @@ const RegisterScreen = () => {
               <Text style={styles.googleButtonText}>Join Us With Google</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity onPress={() => navigation.navigate('SignIn')}>
+            <TouchableOpacity onPress={() => router.replace('auth/SignIn')}>
+
               <Text style={styles.registerLink}>
                 Already have an account? <Text style={styles.registerLinkBold}>Login</Text>
               </Text>
@@ -130,7 +139,6 @@ const RegisterScreen = () => {
 };
 
 export default RegisterScreen;
-
 
 const styles = StyleSheet.create({
   background: {
@@ -193,34 +201,29 @@ const styles = StyleSheet.create({
   },
   or: {
     color: 'white',
-    textAlign: 'center',
+    fontSize: 16,
     marginBottom: 20,
   },
   googleButton: {
-    backgroundColor: '#FFFFFF',
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'white',
     borderRadius: 10,
     paddingVertical: 10,
-    paddingHorizontal: 30,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
+    paddingHorizontal: 20,
+    marginBottom: 20,
     width: '100%',
-  },
-  googleButtonText: {
-    color: '#000000',
-    fontSize: 18,
-    textAlign: 'center',
-    marginLeft: 10,
   },
   googleIcon: {
     marginRight: 10,
   },
-  registerLink: {
-    color: '#B3492D',
+  googleButtonText: {
     fontSize: 16,
-    marginTop: 20,
-    textDecorationLine: 'underline',
-    textAlign: 'center',
+  },
+  registerLink: {
+    color: 'white',
+    fontSize: 16,
+    marginTop: 10,
   },
   registerLinkBold: {
     fontWeight: 'bold',
