@@ -11,7 +11,7 @@ interface User {
   password: string;
 }
 
-const LoginScreen = () => {
+  const LoginScreen = () => {
   const router = useRouter();
   const navigation = useNavigation();
   const [email, setEmail] = useState('');
@@ -45,13 +45,12 @@ const LoginScreen = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-
         },
         body: JSON.stringify(newData)
       });
 
       const data = await res.json();
-
+      
       if (!res.ok) {
         throw new Error(data.error || 'Failed to login');
       }
@@ -70,7 +69,6 @@ const LoginScreen = () => {
       
       // Navigate to the Home tab after successful login
      
-
     } catch (err: any) {
       console.error('Login failed:', err);
       setError(err.message);
