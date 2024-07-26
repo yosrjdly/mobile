@@ -1,11 +1,16 @@
-import { Redirect } from "expo-router";
-import { Text, View } from "react-native";
+import { StyleSheet, View } from "react-native";
+import Welcome from "@/components/Welcome";
 
 export default function Index() {
   return (
-    <View>
-   <Redirect href={"/home"}/>
-   <Redirect href={"/invitations"}/>
-   </View>
+    <View style={styles.container}>
+      <Welcome />
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+});
