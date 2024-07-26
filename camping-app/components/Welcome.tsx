@@ -4,8 +4,8 @@ import * as Animatable from 'react-native-animatable';
 import { useRouter } from 'expo-router';
 
 const Welcome = () => {
+  const router = useRouter();
 
-  const router= useRouter()
   return (
     <View style={styles.container}>
       <Animatable.View 
@@ -43,6 +43,13 @@ const Welcome = () => {
           activeOpacity={0.8}
         >
           <Text style={styles.buttonText}>Let's Get Started</Text>
+        </TouchableOpacity>
+        <TouchableOpacity 
+          style={[styles.button, styles.homeButton]} 
+          onPress={() => router.push("/home")} // Ensure correct path
+          activeOpacity={0.8}
+        >
+          <Text style={styles.buttonText}>Home</Text>
         </TouchableOpacity>
       </Animatable.View>
     </View>
@@ -95,6 +102,10 @@ const styles = StyleSheet.create({
   buttonWrapper: {
     position: 'absolute',
     bottom: 20,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+    paddingHorizontal: 20,
   },
   button: {
     backgroundColor: '#B3492D',
@@ -106,6 +117,9 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.8,
     shadowRadius: 2,
     elevation: 5,
+  },
+  homeButton: {
+    backgroundColor: '#014043', // Different color for the Home button
   },
   buttonText: {
     fontSize: 18,
