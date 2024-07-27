@@ -1,18 +1,80 @@
-import React, { useEffect } from 'react';
-import { StyleSheet, Text, View, ImageBackground, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+
+import React, { useEffect, useState } from 'react';
+import { StyleSheet, Text, View, ImageBackground, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, ScrollView, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
+import JWT from 'expo-jwt';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AntDesign } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
+
+interface User {
+  email: string;
+  password: string;
+}
 
 const LoginScreen = () => {
   const router = useRouter();
-  const navigation = useNavigation();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+
+  const validateEmail = (email: string): boolean => {
+    const pattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return pattern.test(email);
+  };
+
+  const handleLogin = async () => {
+    try {
+      if (!email || !password) {
+        throw new Error('Email and password are required');
+      }
+
+      if (!validateEmail(email)) {
+        throw new Error('Please enter a valid email address');
+      }
+
+      const newData: User = { email, password };
+
+
+
+      const res = await fetch('http://192.168.10.21:5000/api/users/login', {
+
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newData)
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to login');
+      }
+
+      await AsyncStorage.setItem('token', data.token);
+      await AsyncStorage.setItem('isAuthenticated', 'true');
+      const token = data.token.replace('Bearer ', '');
+
+      const key = 'mySuperSecretPrivateKey';
+      const decodedToken = JWT.decode(token, key);
+      console.log('Decoded Token:', decodedToken);
+
+      console.log('Login successful!', data);
+
+      // Navigate to the Home tab after successful login
+
+      router.replace('home');
+
+
+    } catch (err: any) {
+      console.error('Login failed:', err);
+      setError(err.message);
+      Alert.alert('Login Error', err.message);
+    }
+  };
+
 
   useEffect(() => {
-    navigation.setOptions({
-      headerShown: false
-    });
-  }, []);
+    // Optionally hide the header or set other navigation options here
+  },);
 
   return (
     <ImageBackground
@@ -36,6 +98,12 @@ const LoginScreen = () => {
               style={styles.input}
               placeholder="Your Email"
               placeholderTextColor="#ddd"
+
+              onChangeText={(text) => setEmail(text)}
+              value={email}
+              keyboardType="email-address"
+              autoCapitalize="none"
+
             />
 
             <Text style={styles.label}>Password:</Text>
@@ -44,13 +112,18 @@ const LoginScreen = () => {
               placeholder="Your Password"
               placeholderTextColor="#ddd"
               secureTextEntry
+              onChangeText={(text) => setPassword(text)}
+              value={password}
             />
+            {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
             <TouchableOpacity>
               <Text style={styles.forgotPassword}>Forgot Password?</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.loginButton} activeOpacity={0.8}>
+
+            <TouchableOpacity style={styles.loginButton} onPress={handleLogin} activeOpacity={0.8}>
+
               <Text style={styles.loginButtonText}>Login</Text>
             </TouchableOpacity>
 
@@ -70,6 +143,7 @@ const LoginScreen = () => {
     </ImageBackground>
   );
 };
+
 
 export default LoginScreen;
 
@@ -186,4 +260,11 @@ const styles = StyleSheet.create({
   registerLinkBold: {
     fontWeight: 'bold',
   },
+
+  errorText: {
+    color: 'red',
+    textAlign: 'center',
+    marginBottom: 10,
+  },
+
 });
