@@ -13,7 +13,9 @@ const RegisterScreen = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigation = useNavigation();
+
   const router = useRouter();
+
   useEffect(() => {
     navigation.setOptions({
       headerShown: false
@@ -125,6 +127,7 @@ const RegisterScreen = () => {
             </TouchableOpacity>
 
             <TouchableOpacity onPress={() => router.replace('auth/SignIn')}>
+
               <Text style={styles.registerLink}>
                 Already have an account? <Text style={styles.registerLinkBold}>Login</Text>
               </Text>
