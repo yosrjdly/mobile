@@ -13,6 +13,6 @@
     "**/*.tsx",
     ".expo/types/**/*.ts",
     "expo-env.d.ts"
-, "app/_layout.jsx", "components/Welcome.tsx", "app/index.tsx", "app/auth/SignUp.tsx", "app/auth/SignIn/SignIn.tsx"  ]
+, "app/_layout.tsx", "components/Welcome.tsx", "app/index.tsx", "app/auth/SignUp.tsx", "app/auth/SignIn/SignIn.tsx"  ]
 }
 
