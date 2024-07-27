@@ -5,6 +5,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
 import axios from 'axios';
 
+
 const RegisterScreen = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -30,7 +31,7 @@ const RegisterScreen = () => {
     setIsSubmitting(true);
 
     try {
-      const response = await axios.post('http://127.0.0.1:5000/api/users/register', {
+      const response = await axios.post('http://172.19.3.206:5000/api/users/register', {
         name,
         email,
         password,
@@ -38,7 +39,7 @@ const RegisterScreen = () => {
       });
       console.log("success")
       Alert.alert('Success', response.data.message);
-      router.replace('auth/SignIn');
+      router.replace('UserInterests/Interests');
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {
         console.error(error.response?.data || error.message);
