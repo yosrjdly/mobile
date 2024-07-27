@@ -1,7 +1,8 @@
+// src/components/Home/Home.tsx
 import React from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, Image, ScrollView, Dimensions } from 'react-native';
 import { MaterialCommunityIcons, Feather } from '@expo/vector-icons';
-import { Link, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
 
 const { width, height } = Dimensions.get('window');
 
@@ -52,7 +53,9 @@ const Home = () => {
         </View>
       </View>
       <View style={styles.actionSection}>
-        <Image source={profileImage} style={styles.profileImage} />
+        <TouchableOpacity onPress={() => router.replace ('/profile/Profile')}>
+          <Image source={profileImage} style={styles.profileImage} />
+        </TouchableOpacity>
         <TouchableOpacity style={[styles.actionButton, styles.campingPostButton]}>
           <MaterialCommunityIcons name="tent" size={24} color="white" />
           <Text style={styles.actionButtonText}>Add a Camp</Text>
