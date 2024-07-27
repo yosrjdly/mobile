@@ -1,92 +1,112 @@
-import React, { useEffect, useRef, useState } from 'react'
+// src/components/Profile/Profile.tsx
+import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View, Image, TouchableOpacity, ScrollView, Dimensions, FlatList } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useRouter , useNavigation } from 'expo-router';
-import JWT from 'expo-jwt'
+import { useRouter, useNavigation } from 'expo-router';
+import JWT from 'expo-jwt';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
 
 const { width } = Dimensions.get('window');
 
 const Profile = () => {
   const router = useRouter();
-  const navigation = useNavigation()
-  const profileImage = require('../../assets/images/default-avatar.webp');
+  const navigation = useNavigation();
+  const profileImage = require('../../assets/images/default-avatar.webp'); // Default profile image
   
-  // Dummy data for demonstration
-  const userAge = 28;
-  const userLocation = 'New York, USA';
-  const userBio = 'Outdoor enthusiast, love hiking and camping. Always up for an adventure!';
-  const friendsCount = 120;
-  const campsJoined = 15;
+  const [user, setUser] = useState<any>(null);
+  const [userData, setUserData] = useState<any>(null);
+  const [selectedCamp, setSelectedCamp] = useState<any>(null);
+  const [camps, setCamps] = useState<any[]>([]);
+  const [participants, setParticipants] = useState<any[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
   const handleMenuPress = () => {
     navigation.openDrawer(); // Open drawer on button press
   };
 
-  const interests = ['Hiking', 'Camping', 'Fishing'];
-  const campOffers = [
-    { id: '1', title: 'Mountain Adventure', location: 'Rocky Mountains', date: '2024-08-01' },
-    { id: '2', title: 'Beach Camping', location: 'Santa Monica Beach', date: '2024-08-15' },
-    { id: '3', title: 'Forest Expedition', location: 'Amazon Rainforest', date: '2024-09-10' },
-  ];
-
-  const participants = [
-    { id: '1', name: 'Alice', image: profileImage },
-    { id: '2', name: 'Bob', image: profileImage },
-    { id: '3', name: 'Charlie', image: profileImage },
-  ];
-
-  const [selectedCamp, setSelectedCamp] = useState(null);
-
-  const handleCampPress = (camp) => {
+  const handleCampPress = (camp: any) => {
     setSelectedCamp(camp);
+    // Fetch participants for the selected camp
+    fetchParticipants(camp.id);
   };
 
-  const handleAccept = (participantId) => {
+  const handleAccept = (participantId: string) => {
     console.log(`Accepted: ${participantId}`);
     // Add your accept logic here
   };
 
-  const handleReject = (participantId) => {
+  const handleReject = (participantId: string) => {
     console.log(`Rejected: ${participantId}`);
     // Add your reject logic here
   };
-  const [user, setUser] = useState(null);
 
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const data = await AsyncStorage.getItem('token');
-        if (data) {
-          const token = data.startsWith('Bearer ') ? data.replace('Bearer ', '') : data;
+        const tokenData = await AsyncStorage.getItem('token');
+        if (tokenData) {
+          const token = tokenData.startsWith('Bearer ') ? tokenData.replace('Bearer ', '') : tokenData;
           const key = 'mySuperSecretPrivateKey'; // Ensure this matches the encoding key
 
           try {
             const decodedToken = JWT.decode(token, key);
-            if (decodedToken) {
-              setUser({
-                id: decodedToken.id || '',
-                name: decodedToken.name || '',
-                email: decodedToken.email || '',
-                role: decodedToken.role || '',
+            if (decodedToken && decodedToken.id) {
+              // Fetch user data based on ID from decoded token
+              const response = await axios.get(`http://172.19.0.185:5000/api/users/${decodedToken.id}`);
+              setUser(response.data);
+              setUserData({
+                id: response.data.id,
+                name: response.data.name,
+                email: response.data.email,
+                age: response.data.age,
+                location: response.data.location,
+                bio: response.data.bio,
+                friendsCount: response.data.friendsCount,
+                campsJoined: response.data.campsJoined,
+                interests: response.data.interests,
+                camps: response.data.camps,
               });
             } else {
-              console.error('Failed to decode token');
+              console.error('Failed to decode token or token does not contain ID');
+              setError('Failed to decode token or token does not contain ID');
             }
           } catch (decodeError) {
             console.error('Error decoding token:', decodeError);
+            setError('Failed to decode token');
           }
         } else {
           console.error('Token not found in AsyncStorage');
+          setError('Token not found');
         }
       } catch (storageError) {
         console.error('Failed to fetch token from AsyncStorage:', storageError);
+        setError('Failed to fetch token');
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchUser();
-  }, []); // Refresh to be included as dependency
-  console.log('user',user)
+  }, []);
+
+  const fetchParticipants = async (campId) => {
+    try {
+      const response = await axios.get(`http:// 172.19.0.185:5000/api/camps/${campId}/participants`);
+      setParticipants(response.data);
+    } catch (error) {
+      console.error('Error fetching participants:', error);
+    }
+  };
+
+  if (loading) {
+    return <Text style={styles.loadingText}>Loading...</Text>;
+  }
+
+  if (error) {
+    return <Text style={styles.errorText}>Error: {error}</Text>;
+  }
 
   return (
     <ScrollView style={styles.container}>
@@ -96,23 +116,23 @@ const Profile = () => {
             <MaterialCommunityIcons name="bell-outline" size={25} color="white" />
           </TouchableOpacity>
           <TouchableOpacity style={styles.iconButton}>
-            <MaterialCommunityIcons name="menu" size={25} color="white" onPress={ handleMenuPress} />
+            <MaterialCommunityIcons name="menu" size={25} color="white" onPress={handleMenuPress} />
           </TouchableOpacity>
         </View>
         <Image source={profileImage} style={styles.headerProfileImage} />
       </View>
       <View style={styles.profileSection}>
-        <Text style={styles.profileName}>John Doe</Text>
+        <Text style={styles.profileName}>{userData?.name || 'User Name'}</Text>
         <View style={styles.profileInfo}>
           <MaterialCommunityIcons name="cake" size={20} color="#fff" />
-          <Text style={styles.profileAge}>{userAge} years old</Text>
+          <Text style={styles.profileAge}>{userData?.age || 'N/A'} years old</Text>
         </View>
         <View style={styles.profileInfo}>
           <MaterialCommunityIcons name="map-marker" size={20} color="#fff" />
-          <Text style={styles.profileLocation}>{userLocation}</Text>
+          <Text style={styles.profileLocation}>{userData?.location || 'N/A'}</Text>
         </View>
         <View style={styles.profileInfo}>
-          <Text style={styles.profileBio}>{userBio}</Text>
+          <Text style={styles.profileBio}>{userData?.bio || 'No bio available'}</Text>
         </View>
         <View style={styles.buttonContainer}>
           <TouchableOpacity style={styles.actionButton}>
@@ -125,25 +145,25 @@ const Profile = () => {
       </View>
       <View style={styles.statisticsSection}>
         <View style={styles.statItem}>
-          <Text style={styles.statNumber}>{friendsCount}</Text>
+          <Text style={styles.statNumber}>{userData?.friendsCount || 0}</Text>
           <Text style={styles.statLabel}>Friends</Text>
         </View>
         <View style={styles.statItem}>
-          <Text style={styles.statNumber}>{campsJoined}</Text>
+          <Text style={styles.statNumber}>{userData?.campsJoined || 0}</Text>
           <Text style={styles.statLabel}>Camps Joined</Text>
         </View>
       </View>
       <View style={styles.interestsSection}>
         <Text style={styles.sectionTitle}>Interests</Text>
         <View style={styles.tickets}>
-          {interests.map((interest) => (
+          {userData?.interests?.map((interest: string) => (
             <View key={interest} style={styles.ticket}>
               <Text style={styles.ticketText}>{interest}</Text>
             </View>
           ))}
         </View>
         <FlatList
-          data={campOffers}
+          data={userData?.camps || []}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
             <TouchableOpacity style={styles.campCard} onPress={() => handleCampPress(item)}>
@@ -163,7 +183,7 @@ const Profile = () => {
           <View style={styles.participantsList}>
             {participants.map((participant) => (
               <View key={participant.id} style={styles.participantCard}>
-                <Image source={participant.image} style={styles.participantImage} />
+                <Image source={profileImage} style={styles.participantImage} />
                 <Text style={styles.participantName}>{participant.name}</Text>
                 <View style={styles.participantButtons}>
                   <TouchableOpacity
@@ -225,7 +245,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginHorizontal: 30,
-    paddingBottom: 20, // Add padding to separate from statistics section
+    paddingBottom: 20,
   },
   profileName: {
     fontSize: 20,
@@ -273,7 +293,7 @@ const styles = StyleSheet.create({
   statisticsSection: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    width: width, // Full width of the screen
+    width: width,
     marginTop: 20,
     backgroundColor: '#014043',
     paddingVertical: 20,
@@ -387,6 +407,16 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
     paddingHorizontal: 10,
     borderRadius: 5,
+  },
+  loadingText: {
+    color: 'white',
+    textAlign: 'center',
+    marginTop: 20,
+  },
+  errorText: {
+    color: 'red',
+    textAlign: 'center',
+    marginTop: 20,
   },
 });
 

@@ -1,9 +1,11 @@
 import React, { useEffect, useRef } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, Animated, Image, Dimensions } from 'react-native';
+import { useRouter } from 'expo-router';
 
 const { width } = Dimensions.get('window');
 
 const Interests = () => {
+  const router = useRouter();
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(-100)).current;
 
@@ -22,6 +24,11 @@ const Interests = () => {
     ]).start();
   }, [fadeAnim, slideAnim]);
 
+  const handleSkip = () => {
+    // Navigate to the login page when the "Skip" button is pressed
+    router.push('/SignIn'); // Adjust this path to your actual login route path
+  };
+
   return (
     <Animated.View style={[styles.container, { opacity: fadeAnim }]}>
       <Animated.Text style={[styles.title, { transform: [{ translateY: slideAnim }] }]}>Tell us</Animated.Text>
@@ -30,7 +37,7 @@ const Interests = () => {
         So we can show you what you like. Come back and change this whenever.
       </Animated.Text>
       <View style={styles.interestContainer}>
-        <TouchableOpacity style={[styles.interestBtn]}>
+        <TouchableOpacity style={styles.interestBtn}>
           <View style={styles.iconContainer}>
             <Image 
               source={{ uri: 'https://cdn.dribbble.com/users/589499/screenshots/3583371/hikeman_01_4x3.gif' }} 
@@ -40,7 +47,7 @@ const Interests = () => {
           </View>
           <Text style={styles.interestText}>Hitchhiking</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={[styles.interestBtn]}>
+        <TouchableOpacity style={styles.interestBtn}>
           <View style={styles.iconContainer}>
             <Image 
               source={{ uri: 'https://cdn.dribbble.com/users/230073/screenshots/3780396/kayak8.gif' }} 
@@ -50,7 +57,7 @@ const Interests = () => {
           </View>
           <Text style={styles.interestText}>Kayaking</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={[styles.interestBtn]}>
+        <TouchableOpacity style={styles.interestBtn}>
           <View style={styles.iconContainer}>
             <Image 
               source={{ uri: 'https://i.pinimg.com/originals/f8/80/28/f88028821915496a4fa2622a6f89e658.gif' }} 
@@ -62,7 +69,7 @@ const Interests = () => {
         </TouchableOpacity>
       </View>
       <View style={styles.interestContainer}>
-        <TouchableOpacity style={[styles.interestBtn]}>
+        <TouchableOpacity style={styles.interestBtn}>
           <View style={styles.iconContainer}>
             <Image 
               source={{ uri: 'https://cdn.dribbble.com/users/422998/screenshots/1282571/dribbblegif.gif' }} 
@@ -72,7 +79,7 @@ const Interests = () => {
           </View>
           <Text style={styles.interestText}>Hiking</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={[styles.interestBtn]}>
+        <TouchableOpacity style={styles.interestBtn}>
           <View style={styles.iconContainer}>
             <Image 
               source={{ uri: 'https://cdn.dribbble.com/users/3683190/screenshots/8631389/media/3862fb67eead2fc355e2351441d87b19.gif' }} 
@@ -82,7 +89,7 @@ const Interests = () => {
           </View>
           <Text style={styles.interestText}>Fishing</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={[styles.interestBtn]}>
+        <TouchableOpacity style={styles.interestBtn}>
           <View style={styles.iconContainer}>
             <Image 
               source={{ uri: 'https://data.textstudio.com/output/sample/animated/8/4/5/5/other-1-5548.gif' }} 
@@ -96,7 +103,7 @@ const Interests = () => {
       <TouchableOpacity style={styles.doneBtn}>
         <Text style={styles.doneText}>Done</Text>
       </TouchableOpacity>
-      <TouchableOpacity style={styles.skipBtn}>
+      <TouchableOpacity style={styles.skipBtn} onPress={handleSkip}>
         <Text style={styles.skipText}>Skip</Text>
       </TouchableOpacity>
     </Animated.View>

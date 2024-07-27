@@ -16,12 +16,8 @@
   "dependencies": {
     "@clerk/clerk-expo": "^1.2.9",
     "@expo/vector-icons": "^14.0.2",
-<<<<<<< HEAD
     "@react-native-async-storage/async-storage": "^1.24.0",
     "@react-navigation/drawer": "^6.7.2",
-=======
-    "@react-native-async-storage/async-storage": "^1.23.1",
->>>>>>> d32390d02c67ae92447e0fa356cace7ce1fe97a9
     "@react-navigation/native": "^6.1.18",
     "@react-navigation/stack": "^6.4.1",
     "axios": "^1.7.2",

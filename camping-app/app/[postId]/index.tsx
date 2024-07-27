@@ -65,7 +65,7 @@ const PostDetailScreen: React.FC = () => {
 
   const joinPost = async (body: JoinCampingPost) => {
     try {
-      const response = await axios.post('http://192.168.10.4:5000/api/joinPosts/add', body);
+      const response = await axios.post('http://172.19.0.185:5000/api/joinPosts/add', body);
       console.log('Success', response.data.data);
       Alert.alert('Success', 'Successfully joined the post');
       setRefresh(prev => !prev); // Trigger data refresh
@@ -77,7 +77,7 @@ const PostDetailScreen: React.FC = () => {
 
   const cancelPost = async (body: JoinCampingPost) => {
     try {
-      const response = await axios.post('http://192.168.10.4:5000/api/joinPosts/cancel', body);
+      const response = await axios.post('http://172.19.0.185:5000/api/joinPosts/cancel', body);
       console.log('Success', response.data);
       Alert.alert('Success', 'Successfully canceled the post');
       setRefresh(prev => !prev); // Trigger data refresh
@@ -91,7 +91,7 @@ const PostDetailScreen: React.FC = () => {
     const fetchPostDetails = async (id: string) => {
       setLoading(true);
       try {
-        const response = await axios.get<ApiResponse>(`http://192.168.10.4:5000/api/camps/${id}`);
+        const response = await axios.get<ApiResponse>(`http://172.19.0.185:5000/api/camps/${id}`);
         setPost(response.data.data);
         console.log(response.data.data);
         // Check if user has joined

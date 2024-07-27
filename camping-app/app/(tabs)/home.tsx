@@ -1,52 +1,60 @@
 // src/components/Home/Home.tsx
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, Image, ScrollView, Dimensions } from 'react-native';
 import { MaterialCommunityIcons, Feather } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { useEffect,useState } from 'react';
-import JWT from 'expo-jwt'
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import JWT from 'expo-jwt';
+import axios from 'axios';
+
 const { width, height } = Dimensions.get('window');
 
 const Home = () => {
   const router = useRouter();
   const profileImage = require('../../assets/images/default-avatar.webp');
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState<any>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const data = await AsyncStorage.getItem('token');
-        if (data) {
-          const token = data.startsWith('Bearer ') ? data.replace('Bearer ', '') : data;
+        const tokenData = await AsyncStorage.getItem('token');
+        if (tokenData) {
+          const token = tokenData.startsWith('Bearer ') ? tokenData.replace('Bearer ', '') : tokenData;
           const key = 'mySuperSecretPrivateKey'; // Ensure this matches the encoding key
 
           try {
             const decodedToken = JWT.decode(token, key);
-            if (decodedToken) {
-              setUser({
-                id: decodedToken.id || '',
-                name: decodedToken.name || '',
-                email: decodedToken.email || '',
-                role: decodedToken.role || '',
-              });
+            if (decodedToken && decodedToken.id) {
+              // Fetch user data based on ID from decoded token
+              const response = await axios.get(`http://your-api-url/api/users/${decodedToken.id}`);
+              setUser(response.data);
+              console.log('Fetched user:', response.data);
             } else {
-              console.error('Failed to decode token');
+              console.error('Failed to decode token or token does not contain ID');
+              setError('Failed to decode token or token does not contain ID');
             }
           } catch (decodeError) {
             console.error('Error decoding token:', decodeError);
+            setError('Failed to decode token');
           }
         } else {
           console.error('Token not found in AsyncStorage');
+          setError('Token not found');
         }
       } catch (storageError) {
         console.error('Failed to fetch token from AsyncStorage:', storageError);
+        setError('Failed to fetch token');
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchUser();
-  }, []); // Refresh to be included as dependency
-  console.log('user',user)
+  }, []); // Empty dependency array to run only once
+
+  console.log('User:', user);
 
   const dummyPosts = [
     {
@@ -73,7 +81,15 @@ const Home = () => {
     },
     // Add more dummy posts as needed
   ];
-  
+
+  if (loading) {
+    return <Text style={styles.loadingText}>Loading...</Text>;
+  }
+
+  if (error) {
+    return <Text style={styles.errorText}>Error: {error}</Text>;
+  }
+
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
@@ -91,7 +107,7 @@ const Home = () => {
         </View>
       </View>
       <View style={styles.actionSection}>
-        <TouchableOpacity onPress={() => router.replace ('/profile/Profile')}>
+        <TouchableOpacity onPress={() => router.replace('/profile/Profile')}>
           <Image source={profileImage} style={styles.profileImage} />
         </TouchableOpacity>
         <TouchableOpacity style={[styles.actionButton, styles.campingPostButton]}>
@@ -223,7 +239,7 @@ const styles = StyleSheet.create({
   },
   overlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0, 0, 0, 0)', // Add an overlay to make text readable
+    backgroundColor: 'rgba(0, 0, 0, 0.3)', // Add an overlay to make text readable
   },
   postInfo: {
     position: 'absolute',
@@ -231,7 +247,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     padding: 15,
-    backgroundColor: 'rgba(0, 89, 94, 0.4)', // Darker background to ensure text readability
+    backgroundColor: 'rgba(0, 89, 94, 0.6)', // Darker background to ensure text readability
   },
   heartButton: {
     position: 'absolute',
@@ -282,6 +298,16 @@ const styles = StyleSheet.create({
   exploreText: {
     color: '#fff',
     fontWeight: 'bold',
+  },
+  loadingText: {
+    color: 'white',
+    textAlign: 'center',
+    marginTop: 20,
+  },
+  errorText: {
+    color: 'red',
+    textAlign: 'center',
+    marginTop: 20,
   },
 });
 
