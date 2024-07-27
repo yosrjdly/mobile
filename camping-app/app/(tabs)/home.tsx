@@ -3,12 +3,50 @@ import React from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, Image, ScrollView, Dimensions } from 'react-native';
 import { MaterialCommunityIcons, Feather } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-
+import { useEffect,useState } from 'react';
+import JWT from 'expo-jwt'
+import AsyncStorage from '@react-native-async-storage/async-storage';
 const { width, height } = Dimensions.get('window');
 
 const Home = () => {
   const router = useRouter();
   const profileImage = require('../../assets/images/default-avatar.webp');
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const data = await AsyncStorage.getItem('token');
+        if (data) {
+          const token = data.startsWith('Bearer ') ? data.replace('Bearer ', '') : data;
+          const key = 'mySuperSecretPrivateKey'; // Ensure this matches the encoding key
+
+          try {
+            const decodedToken = JWT.decode(token, key);
+            if (decodedToken) {
+              setUser({
+                id: decodedToken.id || '',
+                name: decodedToken.name || '',
+                email: decodedToken.email || '',
+                role: decodedToken.role || '',
+              });
+            } else {
+              console.error('Failed to decode token');
+            }
+          } catch (decodeError) {
+            console.error('Error decoding token:', decodeError);
+          }
+        } else {
+          console.error('Token not found in AsyncStorage');
+        }
+      } catch (storageError) {
+        console.error('Failed to fetch token from AsyncStorage:', storageError);
+      }
+    };
+
+    fetchUser();
+  }, []); // Refresh to be included as dependency
+  console.log('user',user)
 
   const dummyPosts = [
     {
