@@ -34,7 +34,7 @@ const Home = () => {
     },
     // Add more dummy posts as needed
   ];
-
+  
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
