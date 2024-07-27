@@ -1,50 +1,90 @@
-import React, { useState, useEffect } from 'react';
+
+import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View, ImageBackground, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, ScrollView, Alert } from 'react-native';
+import { useRouter } from 'expo-router';
 import { AntDesign } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-import { useRouter } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import JWT from 'expo-jwt';
 
-import axios from 'axios';
+interface User {
+  email: string;
+  password: string;
+}
 
-const RegisterScreen = () => {
-  const [name, setName] = useState('');
+const LoginScreen = () => {
+  const router = useRouter();
+  const navigation = useNavigation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const navigation = useNavigation();
-  const router = useRouter();
+  const [error, setError] = useState('');
+  const [user, setUser] = useState<any>(null); // Adjust user state type if needed
+
+  const validateEmail = (email: string): boolean => {
+    const pattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return pattern.test(email);
+  };
+  const handleLogin = async () => {
+    try {
+      // Basic validation
+      if (!email || !password) {
+        throw new Error('Email and password are required');
+      }
+
+      // Validate email format
+      if (!validateEmail(email)) {
+        throw new Error('Please enter a valid email address');
+      }
+
+      const newData: User = {
+        email: email,
+        password: password
+      };
+
+      // Example: Replace with your actual login API endpoint
+      const res = await fetch('http://192.168.10.4:5000/api/users/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+
+        },
+        body: JSON.stringify(newData)
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to login');
+      }
+
+      // Store token and authenticate user
+      await AsyncStorage.setItem('token', data.token);
+      await AsyncStorage.setItem('isAuthenticated', 'true');
+      const token = data.token.replace('Bearer ', '');
+
+      // Decode the JWT token
+      const key = 'mySuperSecretPrivateKey'
+      const decodedToken = JWT.decode(token, key)
+      console.log('Decoded Token:', decodedToken);
+      setUser(decodedToken)
+      console.log('Login successful!', data);
+
+      // Navigate to the Home tab after successful login
+       router.replace('home')
+
+    } catch (err: any) {
+      console.error('Login failed:', err);
+      setError(err.message);
+      Alert.alert('Login Error', err.message);
+    }
+  };
+
+
   useEffect(() => {
     navigation.setOptions({
       headerShown: false
     });
   }, []);
-
-  const handleRegister = async () => {
-    if (password !== confirmPassword) {
-      Alert.alert('Password Mismatch', 'Passwords do not match.');
-      return;
-    }
-
-    setIsSubmitting(true);
-
-    try {
-      const response = await axios.post('http://localhost:5000/api/users/register', {
-        name,
-        email,
-        password,
-        confirmPassword
-      });
-      console.log('Registration Success');
-      Alert.alert('Success', response.data.message);
-      navigation.navigate('SignIn'); // Redirect to the SignIn screen upon successful registration
-    } catch (error) {
-      console.error(error.response?.data || error.message);
-      Alert.alert('Registration Error', 'There was an error with registration.');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
 
   return (
     <ImageBackground
@@ -61,25 +101,19 @@ const RegisterScreen = () => {
           keyboardShouldPersistTaps="handled"
         >
           <View style={styles.formContainer}>
-            <Text style={styles.title}>Register</Text>
-
-            <Text style={styles.label}>Full Name:</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Your Full Name"
-              placeholderTextColor="#ddd"
-              value={name}
-              onChangeText={setName}
-            />
+            <Text style={styles.title}>Login</Text>
 
             <Text style={styles.label}>Email:</Text>
             <TextInput
               style={styles.input}
               placeholder="Your Email"
               placeholderTextColor="#ddd"
+
+              onChangeText={(text) => setEmail(text)}
               value={email}
-              onChangeText={setEmail}
               keyboardType="email-address"
+              autoCapitalize="none"
+
             />
 
             <Text style={styles.label}>Password:</Text>
@@ -88,41 +122,30 @@ const RegisterScreen = () => {
               placeholder="Your Password"
               placeholderTextColor="#ddd"
               secureTextEntry
+              onChangeText={(text) => setPassword(text)}
               value={password}
-              onChangeText={setPassword}
             />
+            {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
-            <Text style={styles.label}>Confirm Password:</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Confirm Your Password"
-              placeholderTextColor="#ddd"
-              secureTextEntry
-              value={confirmPassword}
-              onChangeText={setConfirmPassword}
-            />
+            <TouchableOpacity>
+              <Text style={styles.forgotPassword}>Forgot Password?</Text>
+            </TouchableOpacity>
 
-            <TouchableOpacity
-              style={styles.registerButton}
-              onPress={handleRegister}
-              disabled={isSubmitting}
-            >
-              <Text style={styles.registerButtonText}>
-                {isSubmitting ? 'Registering...' : 'Register'}
-              </Text>
+
+            <TouchableOpacity style={styles.loginButton} onPress={handleLogin} activeOpacity={0.8}>
+
+              <Text style={styles.loginButtonText}>Login</Text>
             </TouchableOpacity>
 
             <Text style={styles.or}>OR</Text>
 
-            <TouchableOpacity style={styles.googleButton}>
+            <TouchableOpacity style={styles.googleButton} activeOpacity={0.8}>
               <AntDesign name="google" size={24} color="black" style={styles.googleIcon} />
               <Text style={styles.googleButtonText}>Join Us With Google</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity onPress={() => router.replace('auth/SignIn')}>
-              <Text style={styles.registerLink}>
-                Already have an account? <Text style={styles.registerLinkBold}>Login</Text>
-              </Text>
+            <TouchableOpacity onPress={() => router.replace("auth/SignUp")}>
+              <Text style={styles.registerLink}>Don't have an account? <Text style={styles.registerLinkBold}>Register</Text></Text>
             </TouchableOpacity>
           </View>
         </ScrollView>
@@ -131,7 +154,10 @@ const RegisterScreen = () => {
   );
 };
 
-export default RegisterScreen;
+export default LoginScreen;
+
+
+
 
 
 const styles = StyleSheet.create({
@@ -180,15 +206,26 @@ const styles = StyleSheet.create({
     width: '100%',
     fontSize: 16,
   },
-  registerButton: {
+  forgotPassword: {
+    color: 'white',
+    textAlign: 'right',
+    width: '100%',
+    marginBottom: 20,
+  },
+  loginButton: {
     backgroundColor: '#B3492D',
     borderRadius: 10,
     paddingVertical: 15,
     paddingHorizontal: 30,
     marginBottom: 20,
     width: '100%',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 5,
   },
-  registerButtonText: {
+  loginButtonText: {
     color: 'white',
     fontSize: 18,
     textAlign: 'center',
@@ -207,6 +244,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     width: '100%',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 5,
   },
   googleButtonText: {
     color: '#000000',
@@ -227,4 +269,11 @@ const styles = StyleSheet.create({
   registerLinkBold: {
     fontWeight: 'bold',
   },
+
+  errorText: {
+    color: 'red',
+    textAlign: 'center',
+    marginBottom: 10,
+  },
+
 });
