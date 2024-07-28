@@ -54,7 +54,7 @@ const Profile = () => {
             const decodedToken = JWT.decode(token, key);
             if (decodedToken && decodedToken.id) {
               // Fetch user data based on ID from decoded token
-              const response = await axios.get(`http://172.19.0.185:5000/api/users/${decodedToken.id}`);
+              const response = await axios.get(` http://192.168.1.112:5000/api/users/${decodedToken.id}`);
               setUser(response.data);
               setUserData({
                 id: response.data.id,

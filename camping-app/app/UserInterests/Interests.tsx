@@ -26,7 +26,7 @@ const Interests = () => {
 
   const handleSkip = () => {
     // Navigate to the login page when the "Skip" button is pressed
-    router.push('/SignIn'); // Adjust this path to your actual login route path
+    router.push('/auth/SignIn'); // Adjust this path to your actual login route path
   };
 
   return (
