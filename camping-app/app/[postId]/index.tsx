@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { StyleSheet, Text, View, Image, Dimensions, ScrollView, TouchableOpacity, Animated, ActivityIndicator, Alert } from 'react-native';
+import { StyleSheet, Text, View, Image, Dimensions, ScrollView, TouchableOpacity, Animated, ActivityIndicator, Alert, Modal, Pressable } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { FontAwesome } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -8,13 +8,14 @@ import axios from 'axios';
 
 const { width } = Dimensions.get('window');
 
-// Define TypeScript interfaces for your data
 interface User {
   id: string;
   name: string;
   email: string;
   role: string;
-  profileImage?: string; // Optional, used for campmates
+  imagesProfile?: string[]; // Optional, used for campmates
+  gender?:string;
+  address?:string;
 }
 
 interface JoinCampingPost {
@@ -55,6 +56,13 @@ const PostDetailScreen: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [refresh, setRefresh] = useState<boolean>(false);
   const [hasJoined, setHasJoined] = useState<boolean>(false); // Track if user has joined
+  const [isModalVisible, setIsModalVisible] = useState<boolean>(false); // Confirmation Modal
+  const [isSuccessModalVisible, setIsSuccessModalVisible] = useState<boolean>(false); // Success Modal
+  const [isCancelModalVisible, setIsCancelModalVisible] = useState<boolean>(false); // Cancellation Confirmation Modal
+  const [isCancelSuccessModalVisible, setIsCancelSuccessModalVisible] = useState<boolean>(false); // Cancellation Success Modal
+  const [actionType, setActionType] = useState<'join' | 'cancel'>('join'); // Track action type
+
+ 
 
   const { postId } = useLocalSearchParams();
   const postIdString = typeof postId === 'string' ? postId : Array.isArray(postId) ? postId[0] : '';
@@ -65,9 +73,11 @@ const PostDetailScreen: React.FC = () => {
 
   const joinPost = async (body: JoinCampingPost) => {
     try {
+
       const response = await axios.post('http://172.19.0.185:5000/api/joinPosts/add', body);
+
       console.log('Success', response.data.data);
-      Alert.alert('Success', 'Successfully joined the post');
+      setIsSuccessModalVisible(true); // Show success modal
       setRefresh(prev => !prev); // Trigger data refresh
     } catch (error) {
       Alert.alert('Error', 'Failed to join the post');
@@ -78,8 +88,9 @@ const PostDetailScreen: React.FC = () => {
   const cancelPost = async (body: JoinCampingPost) => {
     try {
       const response = await axios.post('http://172.19.0.185:5000/api/joinPosts/cancel', body);
+
       console.log('Success', response.data);
-      Alert.alert('Success', 'Successfully canceled the post');
+      setIsCancelSuccessModalVisible(true); // Show cancellation success modal
       setRefresh(prev => !prev); // Trigger data refresh
     } catch (error) {
       Alert.alert('Error', 'Failed to cancel the post');
@@ -91,10 +102,11 @@ const PostDetailScreen: React.FC = () => {
     const fetchPostDetails = async (id: string) => {
       setLoading(true);
       try {
+
         const response = await axios.get<ApiResponse>(`http://172.19.0.185:5000/api/camps/${id}`);
+
         setPost(response.data.data);
         console.log(response.data.data);
-        // Check if user has joined
         if (user.id) {
           const joined = response.data.data.joinCampingPosts.some(post => post.userId === user.id);
           setHasJoined(joined);
@@ -120,7 +132,7 @@ const PostDetailScreen: React.FC = () => {
         useNativeDriver: true,
       }),
     ]).start();
-  }, [fadeAnim, slideAnim, postIdString, refresh, user.id]); // Add refresh and user.id to dependencies
+  }, [fadeAnim, slideAnim, postIdString, refresh, user.id]);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -128,7 +140,7 @@ const PostDetailScreen: React.FC = () => {
         const data = await AsyncStorage.getItem('token');
         if (data) {
           const token = data.startsWith('Bearer ') ? data.replace('Bearer ', '') : data;
-          const key = 'mySuperSecretPrivateKey'; // Ensure this matches the encoding key
+          const key = 'mySuperSecretPrivateKey';
 
           try {
             const decodedToken = JWT.decode(token, key);
@@ -137,6 +149,7 @@ const PostDetailScreen: React.FC = () => {
                 id: decodedToken.id || '',
                 name: decodedToken.name || '',
                 email: decodedToken.email || '',
+                imagesProfile: decodedToken.imagesProfile,
                 role: decodedToken.role || '',
               });
             } else {
@@ -154,8 +167,11 @@ const PostDetailScreen: React.FC = () => {
     };
 
     fetchUser();
-  }, [refresh]); // Refresh to be included as dependency
-  console.log('user',user)
+  }, [refresh]);
+  console.log('user', user)
+
+  // Determine the image URI
+  const postImageUri = post?.images.length ? post.images[0] : 'https://via.placeholder.com/400';
 
   if (loading) {
     return (
@@ -187,17 +203,8 @@ const PostDetailScreen: React.FC = () => {
       return;
     }
 
-    const joinPostData: JoinCampingPost = {
-      userId: user.id,
-      postId: post.id,
-      rating: 5,
-      reviews: 'Great camping experience!',
-      favorite: 'Yes',
-      notification: 'Great camping experience!',
-      user: user,
-    };
-
-    joinPost(joinPostData);
+    setActionType('join');
+    setIsModalVisible(true);
   };
 
   const handleCancelPress = () => {
@@ -206,6 +213,43 @@ const PostDetailScreen: React.FC = () => {
       return;
     }
 
+    setActionType('cancel');
+    setIsCancelModalVisible(true);
+  };
+
+  const confirmAction = async () => {
+    setIsModalVisible(false);
+    if (actionType === 'join') {
+      const joinPostData: JoinCampingPost = {
+        userId: user.id,
+        postId: post.id,
+        rating: 5,
+        reviews: 'Great camping experience!',
+        favorite: 'Yes',
+        notification: 'Great camping experience!',
+        user: user,
+      };
+      await joinPost(joinPostData);
+    } else if (actionType === 'cancel') {
+      const cancelPostData: JoinCampingPost = {
+        userId: user.id,
+        postId: post.id,
+        rating: 5,
+        reviews: 'Great camping experience!',
+        favorite: 'Yes',
+        notification: 'Great camping experience!',
+        user: user,
+      };
+      await cancelPost(cancelPostData);
+    }
+  };
+
+  const cancelAction = () => {
+    setIsModalVisible(false);
+  };
+
+  const confirmCancelAction = async () => {
+    setIsCancelModalVisible(false);
     const cancelPostData: JoinCampingPost = {
       userId: user.id,
       postId: post.id,
@@ -215,8 +259,19 @@ const PostDetailScreen: React.FC = () => {
       notification: 'Great camping experience!',
       user: user,
     };
+    await cancelPost(cancelPostData);
+  };
 
-    cancelPost(cancelPostData);
+  const cancelCancelAction = () => {
+    setIsCancelModalVisible(false);
+  };
+
+  const closeSuccessModal = () => {
+    setIsSuccessModalVisible(false);
+  };
+
+  const closeCancelSuccessModal = () => {
+    setIsCancelSuccessModalVisible(false);
   };
 
   return (
@@ -258,9 +313,10 @@ const PostDetailScreen: React.FC = () => {
               <Text key={index} style={styles.equipmentItem}>- {item}</Text>
             ))}
           </View>
+          
           {post.user && (
             <View style={styles.hostInfo}>
-              <Image source={{ uri: post.user.profileImage || 'https://via.placeholder.com/50' }} style={styles.hostProfileImage} />
+              <Image source={{ uri: post.user.imagesProfile?.[0] || 'https://via.placeholder.com/50' }} style={styles.hostProfileImage} />
               <Text style={styles.hostName}>{post.user.name}</Text>
             </View>
           )}
@@ -269,7 +325,7 @@ const PostDetailScreen: React.FC = () => {
             <View style={styles.campMatesList}>
               {post.joinCampingPosts.map((mate, index) => (
                 <View key={index} style={styles.campMate}>
-                  <Image source={{ uri: mate.user.profileImage || 'https://via.placeholder.com/40' }} style={styles.campMateImage} />
+                  <Image source={{ uri: mate.user.imagesProfile?.[0] || 'https://via.placeholder.com/40' }} style={styles.campMateImage} />
                   <Text style={styles.campMateName}>{mate.user.name}</Text>
                 </View>
               ))}
@@ -286,6 +342,84 @@ const PostDetailScreen: React.FC = () => {
           )}
         </View>
       </Animated.View>
+
+      {/* Confirmation Modal */}
+      <Modal
+        transparent={true}
+        visible={isModalVisible}
+        onRequestClose={() => setIsModalVisible(false)}
+      >
+        <View style={styles.modalBackground}>
+          <View style={styles.modalContainer}>
+            <Text style={styles.modalTitle}>Confirm Action</Text>
+            <Text style={styles.modalMessage}>Are you sure you want to {actionType === 'join' ? 'join' : 'cancel'} this post?</Text>
+            <View style={styles.modalButtons}>
+              <Pressable style={styles.modalButton} onPress={confirmAction}>
+                <Text style={styles.modalButtonText}>Yes</Text>
+              </Pressable>
+              <Pressable style={styles.modalButton} onPress={cancelAction}>
+                <Text style={styles.modalButtonText}>No</Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Cancellation Confirmation Modal */}
+      <Modal
+        transparent={true}
+        visible={isCancelModalVisible}
+        onRequestClose={() => setIsCancelModalVisible(false)}
+      >
+        <View style={styles.modalBackground}>
+          <View style={styles.modalContainer}>
+            <Text style={styles.modalTitle}>Confirm Cancellation</Text>
+            <Text style={styles.modalMessage}>Are you sure you want to cancel your participation?</Text>
+            <View style={styles.modalButtons}>
+              <Pressable style={styles.modalButton} onPress={confirmCancelAction}>
+                <Text style={styles.modalButtonText}>Yes</Text>
+              </Pressable>
+              <Pressable style={styles.modalButton} onPress={cancelCancelAction}>
+                <Text style={styles.modalButtonText}>No</Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Success Modal */}
+      <Modal
+        transparent={true}
+        visible={isSuccessModalVisible}
+        onRequestClose={closeSuccessModal}
+      >
+        <View style={styles.modalBackground}>
+          <View style={styles.modalContainer}>
+            <Text style={styles.modalTitle}>Success</Text>
+            <Text style={styles.modalMessage}>You have successfully joined the post!</Text>
+            <Pressable style={styles.modalButton} onPress={closeSuccessModal}>
+              <Text style={styles.modalButtonText}>OK</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Cancellation Success Modal */}
+      <Modal
+        transparent={true}
+        visible={isCancelSuccessModalVisible}
+        onRequestClose={closeCancelSuccessModal}
+      >
+        <View style={styles.modalBackground}>
+          <View style={styles.modalContainer}>
+            <Text style={styles.modalTitle}>Success</Text>
+            <Text style={styles.modalMessage}>You have successfully canceled your participation!</Text>
+            <Pressable style={styles.modalButton} onPress={closeCancelSuccessModal}>
+              <Text style={styles.modalButtonText}>OK</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
     </ScrollView>
   );
 };
@@ -342,7 +476,7 @@ const styles = StyleSheet.create({
   detailsContainer: {
     width: width - 30,
     marginHorizontal: 15,
-    marginTop: -100, // Position the details container to overlap the image
+    marginTop: -100,
   },
   postInfo: {
     backgroundColor: '#004d49',
@@ -385,10 +519,13 @@ const styles = StyleSheet.create({
     height: 50,
     borderRadius: 25,
     marginRight: 15,
+    borderColor: '#ddd',
+    borderWidth: 1,
+    
   },
   hostName: {
-    color: '#fff',
     fontSize: 18,
+    color: '#fff',
   },
   campMatesSection: {
     marginTop: 20,
@@ -404,19 +541,21 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
   },
   campMate: {
+    flexDirection: 'row',
     alignItems: 'center',
+    marginBottom: 10,
     marginRight: 15,
-    marginBottom: 15,
   },
   campMateImage: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    marginBottom: 5,
+    marginRight: 10,
+    borderColor: '#ddd',
   },
   campMateName: {
     color: '#fff',
-    fontSize: 14,
+    fontSize: 16,
   },
   joinButton: {
     backgroundColor: '#B3492D',
@@ -431,14 +570,56 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
+  modalBackground: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  modalContainer: {
+    width: '80%',
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    padding: 20,
+    alignItems: 'center',
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  modalMessage: {
+    fontSize: 16,
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+  },
+  modalButton: {
+    backgroundColor: '#00796b',
+    padding: 10,
+    borderRadius: 5,
+    width: '48%',
+    alignItems: 'center',
+  },
+  modalButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
   errorText: {
     color: '#fff',
     textAlign: 'center',
     marginTop: 20,
+    fontSize: 18,
   },
 });
 
 export default PostDetailScreen;
+
 
 
 
