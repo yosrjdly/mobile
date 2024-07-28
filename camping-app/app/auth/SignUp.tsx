@@ -27,11 +27,13 @@ const RegisterScreen = () => {
       Alert.alert('Password Mismatch', 'Passwords do not match.');
       return;
     }
-
+    
     setIsSubmitting(true);
 
     try {
+
       const response = await axios.post('http://172.19.3.206:5000/api/users/register', {
+
         name,
         email,
         password,
