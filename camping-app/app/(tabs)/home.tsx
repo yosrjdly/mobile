@@ -1,7 +1,7 @@
 import React from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, Image, ScrollView, Dimensions } from 'react-native';
 import { MaterialCommunityIcons, Feather } from '@expo/vector-icons';
-import { Link, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router'; // Import useRouter from expo-router
 
 const { width, height } = Dimensions.get('window');
 
@@ -34,7 +34,7 @@ const Home = () => {
     },
     // Add more dummy posts as needed
   ];
-  
+
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
@@ -53,7 +53,10 @@ const Home = () => {
       </View>
       <View style={styles.actionSection}>
         <Image source={profileImage} style={styles.profileImage} />
-        <TouchableOpacity style={[styles.actionButton, styles.campingPostButton]}>
+        <TouchableOpacity
+          style={[styles.actionButton, styles.campingPostButton]}
+          onPress={() => router.push('/creatCamp/CreateCamPost')} // Update route path
+        >
           <MaterialCommunityIcons name="tent" size={24} color="white" />
           <Text style={styles.actionButtonText}>Add a Camp</Text>
         </TouchableOpacity>

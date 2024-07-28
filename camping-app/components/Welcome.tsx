@@ -46,7 +46,7 @@ const Welcome = () => {
         </TouchableOpacity>
         <TouchableOpacity 
           style={[styles.button, styles.homeButton]} 
-          onPress={() => router.push("/home")} // Ensure correct path
+          onPress={() => router.push("/home")} 
           activeOpacity={0.8}
         >
           <Text style={styles.buttonText}>Home</Text>
