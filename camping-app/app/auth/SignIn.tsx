@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View, ImageBackground, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, ScrollView, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
@@ -10,7 +9,6 @@ interface User {
   email: string;
   password: string;
 }
-
 
 const LoginScreen = () => {
   const router = useRouter();
@@ -35,7 +33,12 @@ const LoginScreen = () => {
 
       const newData: User = { email, password };
 
-      const res = await fetch('http://192.168.10.21:5000/api/users/login', {
+
+      // Example: Replace with your actual login API endpoint
+    
+
+      const res = await fetch('http://192.168.1.109:5000/api/users/login', {
+
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newData)
@@ -58,7 +61,9 @@ const LoginScreen = () => {
       console.log('Login successful!', data);
 
       // Navigate to the Home tab after successful login
+
       router.replace('home');
+
 
     } catch (err: any) {
       console.error('Login failed:', err);
