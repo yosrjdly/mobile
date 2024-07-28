@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View, ImageBackground, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, ScrollView, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
@@ -41,7 +40,7 @@ const LoginScreen = () => {
         headers: {
           'Content-Type': 'application/json',
 
-      const res = await fetch('http://192.168.10.21:5000/api/users/login', {
+      const res = await fetch('http://192.168.1.112:5000/api/users/login', {
 
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
