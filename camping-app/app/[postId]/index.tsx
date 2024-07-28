@@ -13,7 +13,9 @@ interface User {
   name: string;
   email: string;
   role: string;
-  profileImage?: string; // Optional, used for campmates
+  imagesProfile?: string[]; // Optional, used for campmates
+  gender?:string;
+  address?:string;
 }
 
 interface JoinCampingPost {
@@ -60,6 +62,8 @@ const PostDetailScreen: React.FC = () => {
   const [isCancelSuccessModalVisible, setIsCancelSuccessModalVisible] = useState<boolean>(false); // Cancellation Success Modal
   const [actionType, setActionType] = useState<'join' | 'cancel'>('join'); // Track action type
 
+ 
+
   const { postId } = useLocalSearchParams();
   const postIdString = typeof postId === 'string' ? postId : Array.isArray(postId) ? postId[0] : '';
 
@@ -69,7 +73,7 @@ const PostDetailScreen: React.FC = () => {
 
   const joinPost = async (body: JoinCampingPost) => {
     try {
-      const response = await axios.post('http://192.168.10.4:5000/api/joinPosts/add', body);
+      const response = await axios.post('http://192.168.1.103:5000/api/joinPosts/add', body);
       console.log('Success', response.data.data);
       setIsSuccessModalVisible(true); // Show success modal
       setRefresh(prev => !prev); // Trigger data refresh
@@ -81,7 +85,7 @@ const PostDetailScreen: React.FC = () => {
 
   const cancelPost = async (body: JoinCampingPost) => {
     try {
-      const response = await axios.post('http://192.168.10.4:5000/api/joinPosts/cancel', body);
+      const response = await axios.post('http://192.168.1.103:5000/api/joinPosts/cancel', body);
       console.log('Success', response.data);
       setIsCancelSuccessModalVisible(true); // Show cancellation success modal
       setRefresh(prev => !prev); // Trigger data refresh
@@ -95,7 +99,7 @@ const PostDetailScreen: React.FC = () => {
     const fetchPostDetails = async (id: string) => {
       setLoading(true);
       try {
-        const response = await axios.get<ApiResponse>(`http://192.168.10.4:5000/api/camps/${id}`);
+        const response = await axios.get<ApiResponse>(`http://192.168.1.103:5000/api/camps/${id}`);
         setPost(response.data.data);
         console.log(response.data.data);
         if (user.id) {
@@ -140,6 +144,7 @@ const PostDetailScreen: React.FC = () => {
                 id: decodedToken.id || '',
                 name: decodedToken.name || '',
                 email: decodedToken.email || '',
+                imagesProfile: decodedToken.imagesProfile,
                 role: decodedToken.role || '',
               });
             } else {
@@ -158,7 +163,10 @@ const PostDetailScreen: React.FC = () => {
 
     fetchUser();
   }, [refresh]);
-  console.log('user',user)
+  console.log('user', user)
+
+  // Determine the image URI
+  const postImageUri = post?.images.length ? post.images[0] : 'https://via.placeholder.com/400';
 
   if (loading) {
     return (
@@ -300,9 +308,10 @@ const PostDetailScreen: React.FC = () => {
               <Text key={index} style={styles.equipmentItem}>- {item}</Text>
             ))}
           </View>
+          
           {post.user && (
             <View style={styles.hostInfo}>
-              <Image source={{ uri: post.user.profileImage || 'https://via.placeholder.com/50' }} style={styles.hostProfileImage} />
+              <Image source={{ uri: post.user.imagesProfile?.[0] || 'https://via.placeholder.com/50' }} style={styles.hostProfileImage} />
               <Text style={styles.hostName}>{post.user.name}</Text>
             </View>
           )}
@@ -311,7 +320,7 @@ const PostDetailScreen: React.FC = () => {
             <View style={styles.campMatesList}>
               {post.joinCampingPosts.map((mate, index) => (
                 <View key={index} style={styles.campMate}>
-                  <Image source={{ uri: mate.user.profileImage || 'https://via.placeholder.com/40' }} style={styles.campMateImage} />
+                  <Image source={{ uri: mate.user.imagesProfile?.[0] || 'https://via.placeholder.com/40' }} style={styles.campMateImage} />
                   <Text style={styles.campMateName}>{mate.user.name}</Text>
                 </View>
               ))}
@@ -505,6 +514,9 @@ const styles = StyleSheet.create({
     height: 50,
     borderRadius: 25,
     marginRight: 15,
+    borderColor: '#ddd',
+    borderWidth: 1,
+    
   },
   hostName: {
     fontSize: 18,
@@ -534,6 +546,7 @@ const styles = StyleSheet.create({
     height: 40,
     borderRadius: 20,
     marginRight: 10,
+    borderColor: '#ddd',
   },
   campMateName: {
     color: '#fff',
