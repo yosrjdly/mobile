@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View, ImageBackground, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, ScrollView, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
@@ -35,8 +34,12 @@ const LoginScreen = () => {
       const newData: User = { email, password };
 
 
+      // Example: Replace with your actual login API endpoint
+    
 
-      const res = await fetch('http://192.168.1.106:5000/api/users/login', {
+
+      const res = await fetch('http://192.168.1.109:5000/api/users/login', {
+
 
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

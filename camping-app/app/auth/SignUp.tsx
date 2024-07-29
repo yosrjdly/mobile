@@ -1,55 +1,67 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { StyleSheet, Text, View, ImageBackground, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, ScrollView, Alert } from 'react-native';
 import { AntDesign } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
 import axios from 'axios';
 
+interface User {
+  name: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+}
 
 const RegisterScreen = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const navigation = useNavigation();
-
   const router = useRouter();
 
-  useEffect(() => {
-    navigation.setOptions({
-      headerShown: false
-    });
-  }, []);
+  const validateEmail = (email: string): boolean => {
+    const pattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return pattern.test(email);
+  };
+
+  const validatePassword = (password: string): boolean => {
+    const pattern = /^(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])(?=.*[!@#$%^&*(),.?":{}|<>]).{7,}$/;
+    return pattern.test(password);
+  };
 
   const handleRegister = async () => {
-    if (password !== confirmPassword) {
-      Alert.alert('Password Mismatch', 'Passwords do not match.');
-      return;
-    }
-    
-    setIsSubmitting(true);
-
     try {
+      if (!name || !email || !password || !confirmPassword) {
+        throw new Error('All fields are required');
+      }
 
-      const response = await axios.post('http://192.168.1.106:5000/api/users/register', {
 
-        name,
-        email,
-        password,
-        confirmPassword
-      });
-      console.log("success")
+      if (!validateEmail(email)) {
+        throw new Error('Please enter a valid email address');
+      }
+
+      if (!validatePassword(password)) {
+        throw new Error('Password must be at least 7 characters long, and include uppercase, lowercase, digit, and special character');
+      }
+
+      if (password !== confirmPassword) {
+        throw new Error('Passwords do not match');
+      }
+
+      setIsSubmitting(true);
+
+      const userData: User = { name, email, password, confirmPassword };
+
+      const response = await axios.post('http://192.168.1.109:5000/api/users/register', userData);
+
+
       Alert.alert('Success', response.data.message);
       router.replace('UserInterests/Interests');
-    } catch (error: unknown) {
-      if (axios.isAxiosError(error)) {
-        console.error(error.response?.data || error.message);
-        Alert.alert('Registration Error', error.response?.data?.message || 'There was an error with registration.');
-      } else {
-        console.error((error as Error).message);
-        Alert.alert('Registration Error', 'There was an error with registration.');
-      }
+    } catch (err: any) {
+      console.error('Registration failed:', err);
+      setError(err.message);
+      Alert.alert('Registration Error', err.message);
     } finally {
       setIsSubmitting(false);
     }
@@ -110,6 +122,8 @@ const RegisterScreen = () => {
               value={confirmPassword}
               onChangeText={setConfirmPassword}
             />
+            
+            {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
             <TouchableOpacity
               style={styles.registerButton}
@@ -129,7 +143,6 @@ const RegisterScreen = () => {
             </TouchableOpacity>
 
             <TouchableOpacity onPress={() => router.replace('auth/SignIn')}>
-
               <Text style={styles.registerLink}>
                 Already have an account? <Text style={styles.registerLinkBold}>Login</Text>
               </Text>
@@ -230,5 +243,10 @@ const styles = StyleSheet.create({
   },
   registerLinkBold: {
     fontWeight: 'bold',
+  },
+  errorText: {
+    color: 'red',
+    textAlign: 'center',
+    marginBottom: 10,
   },
 });
