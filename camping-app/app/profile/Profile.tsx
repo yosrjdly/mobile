@@ -54,7 +54,7 @@ const Profile = () => {
             const decodedToken = JWT.decode(token, key);
             if (decodedToken && decodedToken.id) {
               // Fetch user data based on ID from decoded token
-              const response = await axios.get(` http://192.168.1.112:5000/api/users/${decodedToken.id}`);
+              const response = await axios.get(` http://172.19.3.206:5000/api/users/${decodedToken.id}`);
               setUser(response.data);
               setUserData({
                 id: response.data.id,
@@ -93,7 +93,7 @@ const Profile = () => {
 
   const fetchParticipants = async (campId) => {
     try {
-      const response = await axios.get(`http:// 172.19.0.185:5000/api/camps/${campId}/participants`);
+      const response = await axios.get(`http:// 172.19.3.206:5000/api/camps/${campId}/participants`);
       setParticipants(response.data);
     } catch (error) {
       console.error('Error fetching participants:', error);
