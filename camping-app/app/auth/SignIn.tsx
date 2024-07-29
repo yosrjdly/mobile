@@ -39,7 +39,7 @@ const LoginScreen = () => {
 
 
 
-      const res = await fetch('http://192.168.10.9:5000/api/users/login', {
+      const res = await fetch('http://172.19.0.185:5000/api/users/login', {
 
 
 

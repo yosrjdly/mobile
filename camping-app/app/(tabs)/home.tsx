@@ -29,7 +29,7 @@ const Home = () => {
             const decodedToken = JWT.decode(token, key);
             if (decodedToken && decodedToken.id) {
               // Fetch user data based on ID from decoded token
-              const userResponse = await axios.get(`http://192.168.10.9:5000/api/users/${decodedToken.id}`);
+              const userResponse = await axios.get(`http://172.19.0.185:5000/api/users/${decodedToken.id}`);
               setUser(userResponse.data);
               console.log('Fetched user:', userResponse.data);
             } else {
@@ -42,7 +42,7 @@ const Home = () => {
           }
 
           // Fetch camps data
-          const campsResponse = await axios.get('http://192.168.10.9:5000/api/camps/getAll');
+          const campsResponse = await axios.get('http://172.19.0.185:5000/api/camps/getAll');
           setCamps(campsResponse.data.data);
           console.log('Fetched camps:', campsResponse.data.data);
         } else {
