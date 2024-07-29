@@ -55,7 +55,7 @@ const Home = () => {
         <Image source={profileImage} style={styles.profileImage} />
         <TouchableOpacity
           style={[styles.actionButton, styles.campingPostButton]}
-          onPress={() => router.push('/creatCamp/CreateCamPost')} // Update route path
+          onPress={() => router.push('/creatCamp/CreateCamPost')} 
         >
           <MaterialCommunityIcons name="tent" size={24} color="white" />
           <Text style={styles.actionButtonText}>Add a Camp</Text>
