@@ -2,12 +2,10 @@
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, Image, ScrollView, Dimensions } from 'react-native';
 import { MaterialCommunityIcons, Feather } from '@expo/vector-icons';
-
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import JWT from 'expo-jwt';
 import axios from 'axios';
-
 
 const { width, height } = Dimensions.get('window');
 
@@ -31,7 +29,7 @@ const Home = () => {
             const decodedToken = JWT.decode(token, key);
             if (decodedToken && decodedToken.id) {
               // Fetch user data based on ID from decoded token
-              const userResponse = await axios.get(`http://172.19.3.206:5000/api/users/${decodedToken.id}`);
+              const userResponse = await axios.get(`http://192.168.10.9:5000/api/users/${decodedToken.id}`);
               setUser(userResponse.data);
               console.log('Fetched user:', userResponse.data);
             } else {
@@ -44,7 +42,7 @@ const Home = () => {
           }
 
           // Fetch camps data
-          const campsResponse = await axios.get('http://172.19.3.206:5000/api/camps/getAll');
+          const campsResponse = await axios.get('http://192.168.10.9:5000/api/camps/getAll');
           setCamps(campsResponse.data.data);
           console.log('Fetched camps:', campsResponse.data.data);
         } else {
@@ -73,7 +71,6 @@ const Home = () => {
     return <Text style={styles.errorText}>Error: {error}</Text>;
   }
 
-
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
@@ -91,18 +88,10 @@ const Home = () => {
         </View>
       </View>
       <View style={styles.actionSection}>
-
-        <Image source={profileImage} style={styles.profileImage} />
-        <TouchableOpacity
-          style={[styles.actionButton, styles.campingPostButton]}
-          onPress={() => router.push('/creatCamp/CreateCamPost')} // Update route path
-        >
-
         <TouchableOpacity onPress={() => router.replace('/profile/Profile')}>
           <Image source={profileImage} style={styles.profileImage} />
         </TouchableOpacity>
-        <TouchableOpacity style={[styles.actionButton, styles.campingPostButton]}>
-
+        <TouchableOpacity onPress={() => router.replace('/creatCamp/CreateCamPost')} style={[styles.actionButton, styles.campingPostButton]}>
           <MaterialCommunityIcons name="tent" size={24} color="white" />
           <Text style={styles.actionButtonText}>Add a Camp</Text>
         </TouchableOpacity>

@@ -2,48 +2,73 @@
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View, Image, TouchableOpacity, ScrollView, Dimensions, FlatList } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useRouter, useNavigation } from 'expo-router';
-import JWT from 'expo-jwt';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import JWT from 'expo-jwt';
 
 const { width } = Dimensions.get('window');
 
 const Profile = () => {
-  const router = useRouter();
-  const navigation = useNavigation();
   const profileImage = require('../../assets/images/default-avatar.webp'); // Default profile image
-  
-  const [user, setUser] = useState<any>(null);
+
   const [userData, setUserData] = useState<any>(null);
   const [selectedCamp, setSelectedCamp] = useState<any>(null);
-  const [camps, setCamps] = useState<any[]>([]);
   const [participants, setParticipants] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  // const handleMenuPress = () => {
-  //   navigation.openDrawer(); // Open drawer on button press
-  // };
-
   const handleCampPress = (camp: any) => {
     setSelectedCamp(camp);
-    // Fetch participants for the selected camp
     fetchParticipants(camp.id);
   };
 
-  const handleAccept = (participantId: string) => {
-    console.log(`Accepted: ${participantId}`);
-    // Add your accept logic here
+  const handleAccept = async (participantId: string) => {
+    try {
+      const response = await axios.post(`http://192.168.10.9:5000/api/acceptAndReject/${participantId}/accept`);
+      console.log(`Accepted: ${participantId}`, response.data);
+      fetchParticipants(selectedCamp.id);
+    } catch (error) {
+      console.error('Error accepting participant:', error);
+    }
   };
 
-  const handleReject = (participantId: string) => {
-    console.log(`Rejected: ${participantId}`);
-    // Add your reject logic here
+  const handleReject = async (participantId: string) => {
+    try {
+      const response = await axios.post(`http://192.168.10.9:5000/api/acceptAndReject/${participantId}/reject`);
+      console.log(`Rejected: ${participantId}`, response.data);
+      fetchParticipants(selectedCamp.id);
+    } catch (error) {
+      console.error('Error rejecting participant:', error);
+    }
   };
 
   useEffect(() => {
-    const fetchUser = async () => {
+    const fetchUserData = async (userId: string) => {
+      try {
+        const response = await axios.get(`http://192.168.10.9:5000/api/users/${userId}`);
+        console.log('posts organized',response.data.posts);
+        setUserData({
+          id: response.data.user.id,
+          name: response.data.user.name,
+          email: response.data.user.email,
+          age: response.data.user.age,
+          location: response.data.user.location,
+          bio: response.data.user.bio,
+          friendsCount: response.data.user.friendsCount,
+          joinedUsers: response.data.posts,
+          interests: response.data.user.interests,
+          posts: response.data.posts
+          ,
+        });
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+        setError('Failed to fetch user data');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const decodeToken = async () => {
       try {
         const tokenData = await AsyncStorage.getItem('token');
         if (tokenData) {
@@ -53,47 +78,35 @@ const Profile = () => {
           try {
             const decodedToken = JWT.decode(token, key);
             if (decodedToken && decodedToken.id) {
-              // Fetch user data based on ID from decoded token
-              const response = await axios.get(` http://172.19.3.206:5000/api/users/${decodedToken.id}`);
-              setUser(response.data);
-              setUserData({
-                id: response.data.user.id,
-                name: response.data.user.name,
-                email: response.data.user.email,
-                age: response.data.user.age,
-                location: response.data.user.location,
-                bio: response.data.user.bio,
-                friendsCount: response.data.user.friendsCount,
-                campsJoined: response.data.user.campsJoined,
-                interests: response.data.user.interests,
-                camps: response.data.user.camps,
-              });
+              fetchUserData(decodedToken.id);
             } else {
               console.error('Failed to decode token or token does not contain ID');
               setError('Failed to decode token or token does not contain ID');
+              setLoading(false);
             }
           } catch (decodeError) {
             console.error('Error decoding token:', decodeError);
             setError('Failed to decode token');
+            setLoading(false);
           }
         } else {
           console.error('Token not found in AsyncStorage');
           setError('Token not found');
+          setLoading(false);
         }
       } catch (storageError) {
         console.error('Failed to fetch token from AsyncStorage:', storageError);
         setError('Failed to fetch token');
-      } finally {
         setLoading(false);
       }
     };
 
-    fetchUser();
+    decodeToken();
   }, []);
 
-  const fetchParticipants = async (campId : String) => {
+  const fetchParticipants = async (campId: string) => {
     try {
-      const response = await axios.get(`http:// 172.19.3.206:5000/api/camps/${campId}/participants`);
+      const response = await axios.get(`http://192.168.10.9:5000/api/camps/${campId}`);
       setParticipants(response.data);
     } catch (error) {
       console.error('Error fetching participants:', error);
@@ -107,7 +120,7 @@ const Profile = () => {
   if (error) {
     return <Text style={styles.errorText}>Error: {error}</Text>;
   }
-console.log(userData ,'user')
+console.log('userdata',userData)
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
@@ -163,13 +176,13 @@ console.log(userData ,'user')
           ))}
         </View>
         <FlatList
-          data={userData?.camps || []}
+          data={userData?.posts || []}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
             <TouchableOpacity style={styles.campCard} onPress={() => handleCampPress(item)}>
-              <Text style={styles.campTitle}>{item.title}</Text>
-              <Text style={styles.campDetails}>{item.location}</Text>
-              <Text style={styles.campDetails}>{item.date}</Text>
+              <Text style={styles.campTitle}>{item.post.title}</Text>
+              <Text style={styles.campDetails}>{item.post.location}</Text>
+              <Text style={styles.campDetails}>{item.post.date}</Text>
             </TouchableOpacity>
           )}
           horizontal
@@ -181,7 +194,8 @@ console.log(userData ,'user')
         <View style={styles.campDetailsSection}>
           <Text style={styles.campDetailTitle}>{selectedCamp.title}</Text>
           <View style={styles.participantsList}>
-            {participants.map((participant) => (
+            {userData.joinedUsers.map((participant:any) => (
+              
               <View key={participant.id} style={styles.participantCard}>
                 <Image source={profileImage} style={styles.participantImage} />
                 <Text style={styles.participantName}>{participant.name}</Text>
@@ -221,66 +235,53 @@ const styles = StyleSheet.create({
     padding: 20,
     backgroundColor: '#014043',
   },
+  headerProfileImage: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+  },
   iconGroup: {
     position: 'absolute',
-    right: 0,
-    top: 0,
+    right: 20,
     flexDirection: 'row',
-    alignItems: 'center',
   },
   iconButton: {
-    padding: 10,
-  },
-  headerProfileImage: {
-    top: 50,
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    borderWidth: 2,
-    borderColor: '#fff',
+    marginHorizontal: 5,
   },
   profileSection: {
-    top: 50,
-    flex: 1,
     alignItems: 'center',
-    justifyContent: 'center',
-    marginHorizontal: 30,
-    paddingBottom: 20,
+    marginVertical: 20,
   },
   profileName: {
-    fontSize: 20,
-    color: '#fff',
+    color: 'white',
+    fontSize: 28,
     fontWeight: 'bold',
     marginBottom: 10,
   },
   profileInfo: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: 5,
   },
   profileAge: {
-    fontSize: 12,
     color: '#fff',
-    marginLeft: 10,
+    marginLeft: 5,
   },
   profileLocation: {
-    fontSize: 12,
     color: '#fff',
-    marginLeft: 10,
+    marginLeft: 5,
   },
   profileBio: {
-    fontSize: 14,
     color: '#fff',
+    marginTop: 10,
     textAlign: 'center',
-    paddingHorizontal: 20,
-    marginLeft: 10,
   },
   buttonContainer: {
     flexDirection: 'row',
     marginVertical: 20,
   },
   actionButton: {
-    backgroundColor: '#B3492D',
+    backgroundColor: '#0D9B9E',
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 5,
@@ -288,135 +289,129 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: '#fff',
-    fontSize: 14,
+    fontWeight: 'bold',
   },
   statisticsSection: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    width: width,
-    marginTop: 20,
-    backgroundColor: '#014043',
     paddingVertical: 20,
-    borderRadius: 0,
+    borderBottomWidth: 1,
+    borderBottomColor: '#0D9B9E',
   },
   statItem: {
     alignItems: 'center',
   },
   statNumber: {
-    fontSize: 18,
     color: '#fff',
+    fontSize: 22,
     fontWeight: 'bold',
   },
   statLabel: {
-    fontSize: 14,
     color: '#fff',
+    marginTop: 5,
   },
   interestsSection: {
-    marginTop: 20,
-    paddingHorizontal: 20,
+    paddingVertical: 20,
+    paddingHorizontal: 10,
   },
   sectionTitle: {
-    fontSize: 18,
     color: '#fff',
+    fontSize: 22,
     fontWeight: 'bold',
     marginBottom: 10,
   },
   tickets: {
     flexDirection: 'row',
-    marginBottom: 20,
+    flexWrap: 'wrap',
   },
   ticket: {
-    backgroundColor: '#014043',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
+    backgroundColor: '#0D9B9E',
     borderRadius: 5,
-    marginRight: 10,
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    margin: 5,
   },
   ticketText: {
     color: '#fff',
-    fontSize: 14,
+    fontWeight: 'bold',
   },
   campList: {
-    paddingVertical: 10,
+    paddingLeft: 10,
+    paddingRight: 20,
   },
   campCard: {
     backgroundColor: '#014043',
-    padding: 10,
-    borderRadius: 5,
+    borderRadius: 10,
+    padding: 20,
     marginRight: 10,
-    width: 200,
   },
   campTitle: {
-    fontSize: 16,
     color: '#fff',
+    fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: 5,
+    marginBottom: 10,
   },
   campDetails: {
-    fontSize: 12,
     color: '#fff',
+    marginBottom: 5,
   },
   campDetailsSection: {
-    marginTop: 20,
-    paddingHorizontal: 20,
+    padding: 20,
   },
   campDetailTitle: {
-    fontSize: 16,
     color: '#fff',
+    fontSize: 22,
     fontWeight: 'bold',
     marginBottom: 10,
   },
   participantsList: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
+    marginTop: 10,
   },
   participantCard: {
-    backgroundColor: '#014043',
-    padding: 10,
-    borderRadius: 5,
-    width: '48%',
-    marginBottom: 10,
+    flexDirection: 'row',
     alignItems: 'center',
+    marginBottom: 10,
   },
   participantImage: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    marginBottom: 10,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    marginRight: 10,
   },
   participantName: {
-    fontSize: 14,
     color: '#fff',
     fontWeight: 'bold',
-    marginBottom: 5,
+    flex: 1,
   },
   participantButtons: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '100%',
   },
   acceptButton: {
-    backgroundColor: '#4CAF50',
+    backgroundColor: '#0D9B9E',
     paddingVertical: 5,
     paddingHorizontal: 10,
     borderRadius: 5,
+    marginRight: 5,
   },
   rejectButton: {
-    backgroundColor: '#F44336',
+    backgroundColor: '#B33A3A',
     paddingVertical: 5,
     paddingHorizontal: 10,
     borderRadius: 5,
   },
   loadingText: {
-    color: 'white',
-    textAlign: 'center',
-    marginTop: 20,
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    fontSize: 20,
+    color: '#fff',
   },
   errorText: {
-    color: 'red',
-    textAlign: 'center',
-    marginTop: 20,
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    fontSize: 20,
+    color: '#B33A3A',
   },
 });
 

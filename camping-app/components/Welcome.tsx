@@ -44,13 +44,6 @@ const Welcome = () => {
         >
           <Text style={styles.buttonText}>Let's Get Started</Text>
         </TouchableOpacity>
-        <TouchableOpacity 
-          style={[styles.button, styles.homeButton]} 
-          onPress={() => router.push("/home")} 
-          activeOpacity={0.8}
-        >
-          <Text style={styles.buttonText}>Home</Text>
-        </TouchableOpacity>
       </Animatable.View>
     </View>
   );
