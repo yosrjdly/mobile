@@ -74,7 +74,7 @@ const PostDetailScreen: React.FC = () => {
   const joinPost = async (body: JoinCampingPost) => {
     try {
 
-      const response = await axios.post('http://192.168.1.109:5000/api/joinPosts/add', body);
+      const response = await axios.post('http://172.19.3.206:5000/api/joinPosts/add', body);
 
       console.log('Success', response.data.data);
       setIsSuccessModalVisible(true); // Show success modal
@@ -87,7 +87,7 @@ const PostDetailScreen: React.FC = () => {
 
   const cancelPost = async (body: JoinCampingPost) => {
     try {
-      const response = await axios.post('http://192.168.1.109:5000/api/joinPosts/cancel', body);
+      const response = await axios.post('http://172.19.3.206:5000/api/joinPosts/cancel', body);
 
       console.log('Success', response.data);
       setIsCancelSuccessModalVisible(true); // Show cancellation success modal
@@ -103,7 +103,7 @@ const PostDetailScreen: React.FC = () => {
       setLoading(true);
       try {
 
-        const response = await axios.get<ApiResponse>(`http://192.168.1.109:5000/api/camps/${id}`);
+        const response = await axios.get<ApiResponse>(`http://172.19.3.206:5000/api/camps/${id}`);
 
         setPost(response.data.data);
         console.log(response.data.data);
