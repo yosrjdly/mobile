@@ -25,6 +25,7 @@ interface JoinCampingPost {
   reviews: string;
   favorite: string;
   notification: string;
+  status: string;
   user: User;
 }
 
@@ -222,6 +223,7 @@ const PostDetailScreen: React.FC = () => {
         reviews: 'Great camping experience!',
         favorite: 'Yes',
         notification: 'Great camping experience!',
+        status:'PENDING',
         user: user,
       };
       await joinPost(joinPostData);

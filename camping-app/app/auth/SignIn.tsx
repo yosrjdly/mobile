@@ -1,11 +1,9 @@
-
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View, ImageBackground, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, ScrollView, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
-import { AntDesign } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import JWT from 'expo-jwt';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { AntDesign } from '@expo/vector-icons';
 
 interface User {
   email: string;
@@ -14,40 +12,32 @@ interface User {
 
 const LoginScreen = () => {
   const router = useRouter();
-  const navigation = useNavigation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const [user, setUser] = useState<any>(null); // Adjust user state type if needed
 
   const validateEmail = (email: string): boolean => {
     const pattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return pattern.test(email);
   };
+
   const handleLogin = async () => {
     try {
-      // Basic validation
       if (!email || !password) {
         throw new Error('Email and password are required');
       }
 
-      // Validate email format
       if (!validateEmail(email)) {
         throw new Error('Please enter a valid email address');
       }
 
-      const newData: User = {
-        email: email,
-        password: password
-      };
+      const newData: User = { email, password };
+
 
       // Example: Replace with your actual login API endpoint
       const res = await fetch('http://192.168.10.18:5000/api/users/login', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newData)
       });
 
@@ -57,20 +47,20 @@ const LoginScreen = () => {
         throw new Error(data.error || 'Failed to login');
       }
 
-      // Store token and authenticate user
       await AsyncStorage.setItem('token', data.token);
       await AsyncStorage.setItem('isAuthenticated', 'true');
       const token = data.token.replace('Bearer ', '');
 
-      // Decode the JWT token
-      const key = 'mySuperSecretPrivateKey'
-      const decodedToken = JWT.decode(token, key)
+      const key = 'mySuperSecretPrivateKey';
+      const decodedToken = JWT.decode(token, key);
       console.log('Decoded Token:', decodedToken);
-      setUser(decodedToken)
+
       console.log('Login successful!', data);
 
       // Navigate to the Home tab after successful login
-       router.replace('home')
+
+      router.replace('home');
+
 
     } catch (err: any) {
       console.error('Login failed:', err);
@@ -81,10 +71,8 @@ const LoginScreen = () => {
 
 
   useEffect(() => {
-    navigation.setOptions({
-      headerShown: false
-    });
-  }, []);
+    // Optionally hide the header or set other navigation options here
+  },);
 
   return (
     <ImageBackground
@@ -153,6 +141,7 @@ const LoginScreen = () => {
     </ImageBackground>
   );
 };
+
 
 export default LoginScreen;
 

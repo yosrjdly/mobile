@@ -1,40 +1,76 @@
-import React from 'react';
+// src/components/Home/Home.tsx
+import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, Image, ScrollView, Dimensions } from 'react-native';
 import { MaterialCommunityIcons, Feather } from '@expo/vector-icons';
-import { Link, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import JWT from 'expo-jwt';
+import axios from 'axios';
 
 const { width, height } = Dimensions.get('window');
 
 const Home = () => {
   const router = useRouter();
   const profileImage = require('../../assets/images/default-avatar.webp');
+  const [user, setUser] = useState<any>(null);
+  const [camps, setCamps] = useState<any[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const dummyPosts = [
-    {
-      id: 1,
-      imageUrl: 'https://www.goodnet.org/photos/281x197/30805_hd.jpg',
-      title: 'Camping by the Lake',
-      location: 'Yosemite National Park, CA',
-      description: 'A relaxing weekend getaway in the heart of nature.',
-      host: {
-        profileImage: 'https://parrotprint.com/wp/wp-content/uploads/2017/04/pexels-photo-27411.jpg',
-        name: 'John Doe',
-      },
-    },
-    {
-      id: 2,
-      imageUrl: 'https://placeimg.com/640/480/arch',
-      title: 'Hiking in Arches National Park',
-      location: 'Moab, UT',
-      description: 'Explore stunning rock formations and desert landscapes.',
-      host: {
-        profileImage: 'https://parrotprint.com/wp/wp-content/uploads/2017/04/pexels-photo-27411.jpg',
-        name: 'Jane Smith',
-      },
-    },
-    // Add more dummy posts as needed
-  ];
-  
+  useEffect(() => {
+    const fetchUserAndCamps = async () => {
+      try {
+        const tokenData = await AsyncStorage.getItem('token');
+        if (tokenData) {
+          const token = tokenData.startsWith('Bearer ') ? tokenData.replace('Bearer ', '') : tokenData;
+          const key = 'mySuperSecretPrivateKey'; // Ensure this matches the encoding key
+
+          try {
+            const decodedToken = JWT.decode(token, key);
+            if (decodedToken && decodedToken.id) {
+              // Fetch user data based on ID from decoded token
+              const userResponse = await axios.get(`http://192.168.10.9:5000/api/users/${decodedToken.id}`);
+              setUser(userResponse.data);
+              console.log('Fetched user:', userResponse.data);
+            } else {
+              console.error('Failed to decode token or token does not contain ID');
+              setError('Failed to decode token or token does not contain ID');
+            }
+          } catch (decodeError) {
+            console.error('Error decoding token:', decodeError);
+            setError('Failed to decode token');
+          }
+
+          // Fetch camps data
+          const campsResponse = await axios.get('http://192.168.10.9:5000/api/camps/getAll');
+          setCamps(campsResponse.data.data);
+          console.log('Fetched camps:', campsResponse.data.data);
+        } else {
+          console.error('Token not found in AsyncStorage');
+          setError('Token not found');
+        }
+      } catch (storageError) {
+        console.error('Failed to fetch token from AsyncStorage:', storageError);
+        setError('Failed to fetch token');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserAndCamps();
+  }, []); // Empty dependency array to run only once
+
+  console.log('User:', user);
+  console.log('Camps12:', camps);
+
+  if (loading) {
+    return <Text style={styles.loadingText}>Loading...</Text>;
+  }
+
+  if (error) {
+    return <Text style={styles.errorText}>Error: {error}</Text>;
+  }
+
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
@@ -52,8 +88,10 @@ const Home = () => {
         </View>
       </View>
       <View style={styles.actionSection}>
-        <Image source={profileImage} style={styles.profileImage} />
-        <TouchableOpacity style={[styles.actionButton, styles.campingPostButton]}>
+        <TouchableOpacity onPress={() => router.replace('/profile/Profile')}>
+          <Image source={profileImage} style={styles.profileImage} />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => router.replace('/creatCamp/CreateCamPost')} style={[styles.actionButton, styles.campingPostButton]}>
           <MaterialCommunityIcons name="tent" size={24} color="white" />
           <Text style={styles.actionButtonText}>Add a Camp</Text>
         </TouchableOpacity>
@@ -63,26 +101,26 @@ const Home = () => {
         </TouchableOpacity>
       </View>
       <View style={styles.postList}>
-        {dummyPosts.map((post) => (
-          <View style={styles.postContainer} key={post.id}>
-            <Image source={{ uri: post.imageUrl }} style={styles.postImage} />
+        {camps.map((camp) => (
+          <View style={styles.postContainer} key={camp.id}>
+            <Image source={{ uri: camp.images[0] }} style={styles.postImage} />
             <View style={styles.overlay} />
             <View style={styles.postInfo}>
               <TouchableOpacity style={styles.heartButton}>
                 <MaterialCommunityIcons name="heart-outline" size={24} color="white" />
               </TouchableOpacity>
-              <Text style={styles.postTitle}>{post.title}</Text>
+              <Text style={styles.postTitle}>{camp.title}</Text>
               <Text style={styles.postLocation}>
-                <MaterialCommunityIcons name="map-marker-outline" size={18} color="#fff" /> {post.location}
+                <MaterialCommunityIcons name="map-marker-outline" size={18} color="#fff" /> {camp.location}
               </Text>
-              {post.host && (
+              {camp.user && (
                 <View style={styles.hostInfo}>
-                  <Image source={{ uri: post.host.profileImage }} style={styles.hostProfileImage} />
-                  <Text style={styles.hostName}>{post.host.name}</Text>
+                  <Image source={{ uri: camp.user.imagesProfile[0] || profileImage }} style={styles.hostProfileImage} />
+                  <Text style={styles.hostName}>{camp.user.name}</Text>
                 </View>
               )}
               <View style={styles.postActions}>
-                <TouchableOpacity onPress={() => router.push(`/${post.id}`)} style={styles.exploreButton}>
+                <TouchableOpacity onPress={() => router.push(`/${camp.id}`)} style={styles.exploreButton}>
                   <Text style={styles.exploreText}>Explore</Text>
                 </TouchableOpacity>
               </View>
@@ -182,7 +220,7 @@ const styles = StyleSheet.create({
   },
   overlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0, 0, 0, 0)', // Add an overlay to make text readable
+    backgroundColor: 'rgba(0, 0, 0, 0.3)', // Add an overlay to make text readable
   },
   postInfo: {
     position: 'absolute',
@@ -190,7 +228,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     padding: 15,
-    backgroundColor: 'rgba(0, 89, 94, 0.4)', // Darker background to ensure text readability
+    backgroundColor: 'rgba(0, 89, 94, 0.6)', // Darker background to ensure text readability
   },
   heartButton: {
     position: 'absolute',
@@ -214,8 +252,7 @@ const styles = StyleSheet.create({
   hostInfo: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 10,
+    marginTop: 10,
   },
   hostProfileImage: {
     width: 30,
@@ -225,22 +262,36 @@ const styles = StyleSheet.create({
   },
   hostName: {
     color: '#fff',
-    fontSize: 14,
+    fontWeight: 'bold',
   },
   postActions: {
+    marginTop: 15,
     flexDirection: 'row',
     justifyContent: 'center',
-    alignItems: 'center',
   },
   exploreButton: {
     backgroundColor: '#B3492D',
     paddingVertical: 8,
     paddingHorizontal: 20,
-    borderRadius: 50,
+    borderRadius: 20,
   },
   exploreText: {
-    color: '#fff',
+    color: 'white',
     fontWeight: 'bold',
+  },
+  loadingText: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    fontSize: 20,
+    color: '#fff',
+  },
+  errorText: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    fontSize: 20,
+    color: 'red',
   },
 });
 
