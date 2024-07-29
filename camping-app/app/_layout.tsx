@@ -10,8 +10,6 @@ export default function RootLayout() {
       <Stack.Screen name="auth/SignUp" options={{ title: 'Sign Up' , headerShown: false}} />
       <Stack.Screen name="UserInterests/Interests" options={{title: "Interests", headerShown: false}} />
       <Stack.Screen name="creatCamp/CreateCamPost" options={{title: "Interests", headerShown: false}} />
-
-
     </Stack>
   );
 }
