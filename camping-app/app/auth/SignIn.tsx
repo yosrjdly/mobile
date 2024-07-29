@@ -36,7 +36,9 @@ const LoginScreen = () => {
 
       // Example: Replace with your actual login API endpoint
     
-      const res = await fetch('http://192.168.1.112:5000/api/users/login', {
+
+
+      const res = await fetch('http://192.168.1.109:5000/api/users/login', {
 
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
