@@ -25,6 +25,7 @@ interface JoinCampingPost {
   reviews: string;
   favorite: string;
   notification: string;
+  status:string,
   user: User;
 }
 
@@ -74,8 +75,7 @@ const PostDetailScreen: React.FC = () => {
   const joinPost = async (body: JoinCampingPost) => {
     try {
 
-      const response = await axios.post('http://192.168.10.21:5000/api/joinPosts/add', body);
-
+      const response = await axios.post('http://192.168.10.18:5000/api/joinPosts/add', body);
       console.log('Success', response.data.data);
       setIsSuccessModalVisible(true); // Show success modal
       setRefresh(prev => !prev); // Trigger data refresh
@@ -87,8 +87,7 @@ const PostDetailScreen: React.FC = () => {
 
   const cancelPost = async (body: JoinCampingPost) => {
     try {
-      const response = await axios.post('http://192.168.10.21:5000/api/joinPosts/cancel', body);
-
+      const response = await axios.post('http://192.168.10.18:5000/api/joinPosts/cancel', body);
       console.log('Success', response.data);
       setIsCancelSuccessModalVisible(true); // Show cancellation success modal
       setRefresh(prev => !prev); // Trigger data refresh
@@ -102,13 +101,11 @@ const PostDetailScreen: React.FC = () => {
     const fetchPostDetails = async (id: string) => {
       setLoading(true);
       try {
-
         const response = await axios.get<ApiResponse>(`http://192.168.10.21:5000/api/camps/${id}`);
-
         setPost(response.data.data);
         console.log(response.data.data);
         if (user.id) {
-          const joined = response.data.data.joinCampingPosts.some(post => post.userId === user.id);
+          const joined = response.data.data.joinCampingPosts.some(post => post.userId === user.id && post);
           setHasJoined(joined);
         }
       } catch (error) {
@@ -226,6 +223,7 @@ const PostDetailScreen: React.FC = () => {
         rating: 5,
         reviews: 'Great camping experience!',
         favorite: 'Yes',
+        status:'PENDING',
         notification: 'Great camping experience!',
         user: user,
       };
@@ -238,6 +236,7 @@ const PostDetailScreen: React.FC = () => {
         reviews: 'Great camping experience!',
         favorite: 'Yes',
         notification: 'Great camping experience!',
+        status:"PENDING",
         user: user,
       };
       await cancelPost(cancelPostData);
@@ -257,6 +256,7 @@ const PostDetailScreen: React.FC = () => {
       reviews: 'Great camping experience!',
       favorite: 'Yes',
       notification: 'Great camping experience!',
+      status:'PENDING',
       user: user,
     };
     await cancelPost(cancelPostData);
@@ -619,7 +619,6 @@ const styles = StyleSheet.create({
 });
 
 export default PostDetailScreen;
-
 
 
 
