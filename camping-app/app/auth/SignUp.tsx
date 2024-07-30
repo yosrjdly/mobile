@@ -36,7 +36,6 @@ const RegisterScreen = () => {
         throw new Error('All fields are required');
       }
 
-
       if (!validateEmail(email)) {
         throw new Error('Please enter a valid email address');
       }

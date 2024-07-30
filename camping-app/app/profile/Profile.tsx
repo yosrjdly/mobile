@@ -66,7 +66,7 @@ const Profile = () => {
       console.error("Error rejecting participant:", error);
     }
   };
-
+console.log("hhhh")
   useEffect(() => {
     const fetchUserData = async (userId: string) => {
       try {
@@ -137,7 +137,7 @@ const Profile = () => {
   const fetchParticipants = async (campId: string) => {
     try {
       const response = await axios.get(
-        `http://192.168.10.7:5000/api/camps/${campId}`
+        `http://192.168.10.7:5000/api/camps/participants/${campId}`
       );
       setParticipants(response.data.data.joinCampingPosts); // Assuming the endpoint returns an array of participants
     } catch (error) {

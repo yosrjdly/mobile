@@ -49,8 +49,6 @@ const Welcome = () => {
   );
 };
 
-export default Welcome;
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -93,12 +91,12 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   buttonWrapper: {
-    position: 'absolute',
-    bottom: 20,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
+    alignItems: 'center',
     width: '100%',
-    paddingHorizontal: 20,
+    paddingVertical: 20,
+    position: 'absolute',
+    bottom: 0, 
   },
   button: {
     backgroundColor: '#B3492D',
@@ -111,12 +109,11 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
     elevation: 5,
   },
-  homeButton: {
-    backgroundColor: '#014043', // Different color for the Home button
-  },
   buttonText: {
     fontSize: 18,
     color: '#FFFFFF',
     fontWeight: 'bold',
   },
 });
+
+export default Welcome;
