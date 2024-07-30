@@ -53,7 +53,7 @@ const RegisterScreen = () => {
 
       const userData: User = { name, email, password, confirmPassword };
 
-      const response = await axios.post('http://172.19.3.206:5000/api/users/register', userData);
+      const response = await axios.post('http://192.168.10.21:5000/api/users/register', userData);
 
 
       Alert.alert('Success', response.data.message);
