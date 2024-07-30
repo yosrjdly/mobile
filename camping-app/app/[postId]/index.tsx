@@ -101,7 +101,9 @@ const PostDetailScreen: React.FC = () => {
     const fetchPostDetails = async (id: string) => {
       setLoading(true);
       try {
-        const response = await axios.get<ApiResponse>(`http://192.168.10.21:5000/api/camps/${id}`);
+
+        const response = await axios.get<ApiResponse>(`http://192.168.10.7:5000/api/camps/${id}`);
+
         setPost(response.data.data);
         console.log(response.data.data);
         if (user.id) {
