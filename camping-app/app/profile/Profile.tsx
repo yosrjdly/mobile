@@ -22,9 +22,9 @@ const Profile = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  const handleMenuPress = () => {
-    navigation.openDrawer(); // Open drawer on button press
-  };
+  // const handleMenuPress = () => {
+  //   navigation.openDrawer(); // Open drawer on button press
+  // };
 
   const handleCampPress = (camp: any) => {
     setSelectedCamp(camp);
@@ -57,16 +57,16 @@ const Profile = () => {
               const response = await axios.get(` http://192.168.10.21:5000/api/users/${decodedToken.id}`);
               setUser(response.data);
               setUserData({
-                id: response.data.id,
-                name: response.data.name,
-                email: response.data.email,
-                age: response.data.age,
-                location: response.data.location,
-                bio: response.data.bio,
-                friendsCount: response.data.friendsCount,
-                campsJoined: response.data.campsJoined,
-                interests: response.data.interests,
-                camps: response.data.camps,
+                id: response.data.user.id,
+                name: response.data.user.name,
+                email: response.data.user.email,
+                age: response.data.user.age,
+                location: response.data.user.location,
+                bio: response.data.user.bio,
+                friendsCount: response.data.user.friendsCount,
+                campsJoined: response.data.user.campsJoined,
+                interests: response.data.user.interests,
+                camps: response.data.user.camps,
               });
             } else {
               console.error('Failed to decode token or token does not contain ID');
@@ -91,7 +91,7 @@ const Profile = () => {
     fetchUser();
   }, []);
 
-  const fetchParticipants = async (campId) => {
+  const fetchParticipants = async (campId : String) => {
     try {
       const response = await axios.get(`http://192.168.10.21:5000/api/camps/${campId}/participants`);
       setParticipants(response.data);
@@ -107,7 +107,7 @@ const Profile = () => {
   if (error) {
     return <Text style={styles.errorText}>Error: {error}</Text>;
   }
-
+console.log(userData ,'user')
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
@@ -116,7 +116,7 @@ const Profile = () => {
             <MaterialCommunityIcons name="bell-outline" size={25} color="white" />
           </TouchableOpacity>
           <TouchableOpacity style={styles.iconButton}>
-            <MaterialCommunityIcons name="menu" size={25} color="white" onPress={handleMenuPress} />
+            <MaterialCommunityIcons name="menu" size={25} color="white" />
           </TouchableOpacity>
         </View>
         <Image source={profileImage} style={styles.headerProfileImage} />
