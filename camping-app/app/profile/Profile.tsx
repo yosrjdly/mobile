@@ -106,7 +106,7 @@ const Profile = () => {
 
   const fetchParticipants = async (campId: string) => {
     try {
-      const response = await axios.get(`http://192.168.10.9:5000/api/camps/${campId}`);
+      const response = await axios.get(`http://192.168.10.18:5000/api/camps/${campId}`);
       setParticipants(response.data);
     } catch (error) {
       console.error('Error fetching participants:', error);

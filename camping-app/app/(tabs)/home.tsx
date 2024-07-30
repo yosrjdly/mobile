@@ -60,8 +60,9 @@ const Home = () => {
     fetchUserAndCamps();
   }, []); // Empty dependency array to run only once
 
+
   console.log('User:', user);
-  console.log('Camps12:', camps);
+  console.log('Camps:', camps);
 
   if (loading) {
     return <Text style={styles.loadingText}>Loading...</Text>;
@@ -89,7 +90,7 @@ const Home = () => {
       </View>
       <View style={styles.actionSection}>
         <TouchableOpacity onPress={() => router.replace('/profile/Profile')}>
-          <Image source={profileImage} style={styles.profileImage} />
+          <Image source={{ uri: user.imagesProfile || profileImage }}style={styles.profileImage} />
         </TouchableOpacity>
         <TouchableOpacity onPress={() => router.replace('/creatCamp/CreateCamPost')} style={[styles.actionButton, styles.campingPostButton]}>
           <MaterialCommunityIcons name="tent" size={24} color="white" />
