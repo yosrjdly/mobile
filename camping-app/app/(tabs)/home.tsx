@@ -1,4 +1,3 @@
-// src/components/Home/Home.tsx
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, Image, ScrollView, Dimensions } from 'react-native';
 import { MaterialCommunityIcons, Feather } from '@expo/vector-icons';
@@ -17,6 +16,21 @@ const Home = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Track liked camps
+  const [likedCamps, setLikedCamps] = useState<Set<number>>(new Set());
+
+  const handleHeartPress = (campId: number) => {
+    setLikedCamps(prevLikedCamps => {
+      const newLikedCamps = new Set(prevLikedCamps);
+      if (newLikedCamps.has(campId)) {
+        newLikedCamps.delete(campId);
+      } else {
+        newLikedCamps.add(campId);
+      }
+      return newLikedCamps;
+    });
+  };
+
   useEffect(() => {
     const fetchUserAndCamps = async () => {
       try {
@@ -29,9 +43,12 @@ const Home = () => {
             const decodedToken = JWT.decode(token, key);
             if (decodedToken && decodedToken.id) {
               // Fetch user data based on ID from decoded token
+
+              
+
               const userResponse = await axios.get(`http://192.168.10.18:5000/api/users/${decodedToken.id}`);
+
               setUser(userResponse.data);
-              console.log('Fetched user:', userResponse.data);
             } else {
               console.error('Failed to decode token or token does not contain ID');
               setError('Failed to decode token or token does not contain ID');
@@ -42,9 +59,12 @@ const Home = () => {
           }
 
           // Fetch camps data
-          const campsResponse = await axios.get('http://192.168.10.18:5000/api/camps/getAll');
+
+          const campsResponse = await axios.get('http://192.168.10.21:5000/api/camps/getAll');
+
+          
+
           setCamps(campsResponse.data.data);
-          console.log('Fetched camps:', campsResponse.data.data);
         } else {
           console.error('Token not found in AsyncStorage');
           setError('Token not found');
@@ -59,9 +79,6 @@ const Home = () => {
 
     fetchUserAndCamps();
   }, []); // Empty dependency array to run only once
-
-  console.log('User:', user);
-  console.log('Camps12:', camps);
 
   if (loading) {
     return <Text style={styles.loadingText}>Loading...</Text>;
@@ -91,12 +108,13 @@ const Home = () => {
         <TouchableOpacity onPress={() => router.replace('/profile/Profile')}>
           <Image source={profileImage} style={styles.profileImage} />
         </TouchableOpacity>
+        <TouchableOpacity style={[styles.actionButton, styles.campingPostButton]}>
         <TouchableOpacity onPress={() => router.replace('/creatCamp/CreateCamPost')} style={[styles.actionButton, styles.campingPostButton]}>
           <MaterialCommunityIcons name="tent" size={24} color="white" />
+
           <Text style={styles.actionButtonText}>Add a Camp</Text>
         </TouchableOpacity>
         <TouchableOpacity style={[styles.actionButton, styles.experiencesButton]}>
-          <Feather name="book" size={24} color="white" />
           <Text style={styles.actionButtonText}>Experiences</Text>
         </TouchableOpacity>
       </View>
@@ -104,11 +122,17 @@ const Home = () => {
         {camps.map((camp) => (
           <View style={styles.postContainer} key={camp.id}>
             <Image source={{ uri: camp.images[0] }} style={styles.postImage} />
-            <View style={styles.overlay} />
+            <TouchableOpacity
+              style={styles.heartButton}
+              onPress={() => handleHeartPress(camp.id)}
+            >
+              <MaterialCommunityIcons
+                name={likedCamps.has(camp.id) ? 'heart' : 'heart-outline'}
+                size={30}
+                color={likedCamps.has(camp.id) ? 'red' : 'white'}
+              />
+            </TouchableOpacity>
             <View style={styles.postInfo}>
-              <TouchableOpacity style={styles.heartButton}>
-                <MaterialCommunityIcons name="heart-outline" size={24} color="white" />
-              </TouchableOpacity>
               <Text style={styles.postTitle}>{camp.title}</Text>
               <Text style={styles.postLocation}>
                 <MaterialCommunityIcons name="map-marker-outline" size={18} color="#fff" /> {camp.location}
@@ -135,19 +159,26 @@ const Home = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#00595E',
+    backgroundColor: '#00595E', // Keep this color
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     padding: 20,
-    backgroundColor: '#014043',
+    backgroundColor: '#014043', // Updated color
+    borderBottomLeftRadius: 30,
+    borderBottomRightRadius: 30,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 5,
   },
   campSkoutText: {
     fontWeight: 'bold',
     color: 'white',
-    fontSize: 24,
+    fontSize: 26, // Keep this font size
   },
   iconGroup: {
     flexDirection: 'row',
@@ -159,95 +190,96 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 20,
+    paddingVertical: 10, // Adjusted padding
     paddingHorizontal: 10,
-    backgroundColor: '#014043',
+    backgroundColor: '#014043', // Updated color
     marginHorizontal: 10,
     marginVertical: 20,
-    borderRadius: 10,
+    borderRadius: 15,
     shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
     elevation: 5,
   },
   profileImage: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
     marginRight: 15,
   },
   actionButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#B3492D',
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 30,
+    backgroundColor: '#B3492D', // Updated color
+    paddingVertical: 8, // Reduced vertical padding
+    paddingHorizontal: 15, // Reduced horizontal padding
+    borderRadius: 20, // Rounded corners
     flex: 1,
     justifyContent: 'center',
+    marginHorizontal: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 5,
   },
   campingPostButton: {
-    marginRight: 10,
+    backgroundColor: '#B3492D', // Updated color
   },
   experiencesButton: {
-    marginLeft: 10,
+    backgroundColor: '#B3492D', // Updated color
   },
   actionButtonText: {
     color: 'white',
     fontWeight: 'bold',
-    marginLeft: 8,
-    fontSize: 10,
+    fontSize: 14, // Reduced font size
   },
   postList: {
     padding: 20,
   },
   postContainer: {
     position: 'relative',
-    backgroundColor: 'transparent',
-    borderRadius: 10,
+    borderRadius: 15,
     marginBottom: 20,
     overflow: 'hidden',
-    height: height * 0.4, // Adjust the height as needed
+    height: height * 0.4,
+    backgroundColor: '#014043', // Updated color
+    borderColor: '#00796B', // Keep this color
+    borderWidth: 1,
   },
   postImage: {
     width: '100%',
     height: '100%',
-    resizeMode: 'cover',
+    borderRadius: 15,
   },
-  overlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0, 0, 0, 0.3)', // Add an overlay to make text readable
+  heartButton: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    backgroundColor: 'rgba(255, 255, 255, 0.6)',
+    borderRadius: 20,
+    padding: 5,
   },
   postInfo: {
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
-    padding: 15,
-    backgroundColor: 'rgba(0, 89, 94, 0.6)', // Darker background to ensure text readability
-  },
-  heartButton: {
-    position: 'absolute',
-    top: 10,
-    right: 10,
-    zIndex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    padding: 10,
+    borderTopLeftRadius: 15,
+    borderTopRightRadius: 15,
   },
   postTitle: {
-    fontSize: 20,
+    color: 'white',
+    fontSize: 18, // Keep this font size
     fontWeight: 'bold',
-    color: '#fff',
-    marginBottom: 5,
-    textAlign: 'center',
   },
   postLocation: {
-    color: '#fff',
-    marginBottom: 10,
-    fontSize: 16,
-    textAlign: 'center',
+    color: 'white',
+    fontSize: 14,
+    marginTop: 5,
   },
   hostInfo: {
     flexDirection: 'row',
@@ -255,36 +287,42 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   hostProfileImage: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     marginRight: 10,
   },
   hostName: {
-    color: '#fff',
-    fontWeight: 'bold',
+    color: 'white',
+    fontSize: 14,
   },
   postActions: {
-    marginTop: 15,
     flexDirection: 'row',
-    justifyContent: 'center',
+    justifyContent: 'flex-end',
+    marginTop: 10,
   },
   exploreButton: {
-    backgroundColor: '#B3492D',
-    paddingVertical: 8,
+    backgroundColor: '#B3492D', // Updated color
+    paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 5,
   },
   exploreText: {
     color: 'white',
     fontWeight: 'bold',
+    fontSize: 16,
   },
   loadingText: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     fontSize: 20,
-    color: '#fff',
+    color: 'white',
   },
   errorText: {
     flex: 1,

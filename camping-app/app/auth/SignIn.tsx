@@ -34,7 +34,11 @@ const LoginScreen = () => {
       const newData: User = { email, password };
 
 
-      // Example: Replace with your actual login API endpoint
+
+
+
+
+
       const res = await fetch('http://192.168.10.18:5000/api/users/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

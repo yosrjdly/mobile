@@ -74,6 +74,7 @@ const PostDetailScreen: React.FC = () => {
 
   const joinPost = async (body: JoinCampingPost) => {
     try {
+
       const response = await axios.post('http://192.168.10.18:5000/api/joinPosts/add', body);
       console.log('Success', response.data.data);
       setIsSuccessModalVisible(true); // Show success modal
@@ -100,7 +101,7 @@ const PostDetailScreen: React.FC = () => {
     const fetchPostDetails = async (id: string) => {
       setLoading(true);
       try {
-        const response = await axios.get<ApiResponse>(`http://192.168.10.18:5000/api/camps/${id}`);
+        const response = await axios.get<ApiResponse>(`http://192.168.10.21:5000/api/camps/${id}`);
         setPost(response.data.data);
         console.log(response.data.data);
         if (user.id) {
