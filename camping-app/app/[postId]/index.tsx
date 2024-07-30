@@ -25,7 +25,7 @@ interface JoinCampingPost {
   reviews: string;
   favorite: string;
   notification: string;
-  status: string;
+  status:string,
   user: User;
 }
 
@@ -104,7 +104,7 @@ const PostDetailScreen: React.FC = () => {
         setPost(response.data.data);
         console.log(response.data.data);
         if (user.id) {
-          const joined = response.data.data.joinCampingPosts.some(post => post.userId === user.id);
+          const joined = response.data.data.joinCampingPosts.some(post => post.userId === user.id && post);
           setHasJoined(joined);
         }
       } catch (error) {
@@ -222,8 +222,8 @@ const PostDetailScreen: React.FC = () => {
         rating: 5,
         reviews: 'Great camping experience!',
         favorite: 'Yes',
-        notification: 'Great camping experience!',
         status:'PENDING',
+        notification: 'Great camping experience!',
         user: user,
       };
       await joinPost(joinPostData);
@@ -235,6 +235,7 @@ const PostDetailScreen: React.FC = () => {
         reviews: 'Great camping experience!',
         favorite: 'Yes',
         notification: 'Great camping experience!',
+        status:"PENDING",
         user: user,
       };
       await cancelPost(cancelPostData);
@@ -254,6 +255,7 @@ const PostDetailScreen: React.FC = () => {
       reviews: 'Great camping experience!',
       favorite: 'Yes',
       notification: 'Great camping experience!',
+      status:'PENDING',
       user: user,
     };
     await cancelPost(cancelPostData);
@@ -616,7 +618,6 @@ const styles = StyleSheet.create({
 });
 
 export default PostDetailScreen;
-
 
 
 

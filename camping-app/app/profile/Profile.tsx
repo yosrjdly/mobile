@@ -24,7 +24,7 @@ const Profile = () => {
 
   const handleAccept = async (participantId: string) => {
     try {
-      const response = await axios.post(`http://192.168.10.9:5000/api/acceptAndReject/${participantId}/accept`);
+      const response = await axios.post(`http://192.168.10.18:5000/api/acceptAndReject/${participantId}/accept`);
       console.log(`Accepted: ${participantId}`, response.data);
       fetchParticipants(selectedCamp.id);
     } catch (error) {
@@ -34,7 +34,7 @@ const Profile = () => {
 
   const handleReject = async (participantId: string) => {
     try {
-      const response = await axios.post(`http://192.168.10.9:5000/api/acceptAndReject/${participantId}/reject`);
+      const response = await axios.post(`http://192.168.10.18:5000/api/acceptAndReject/${participantId}/reject`);
       console.log(`Rejected: ${participantId}`, response.data);
       fetchParticipants(selectedCamp.id);
     } catch (error) {
@@ -45,7 +45,7 @@ const Profile = () => {
   useEffect(() => {
     const fetchUserData = async (userId: string) => {
       try {
-        const response = await axios.get(`http://192.168.10.9:5000/api/users/${userId}`);
+        const response = await axios.get(`http://192.168.10.18:5000/api/users/${userId}`);
         console.log('posts organized',response.data.posts);
         setUserData({
           id: response.data.user.id,
