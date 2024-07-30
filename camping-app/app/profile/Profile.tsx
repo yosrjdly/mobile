@@ -1,4 +1,3 @@
-// src/components/Profile/Profile.tsx
 import React, { useEffect, useState } from "react";
 import {
   StyleSheet,
@@ -9,8 +8,9 @@ import {
   ScrollView,
   Dimensions,
   FlatList,
+  ActivityIndicator,
 } from "react-native";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { MaterialCommunityIcons, FontAwesome } from "@expo/vector-icons";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import JWT from "expo-jwt";
@@ -34,10 +34,16 @@ const Profile = () => {
   const handleAccept = async (userId, postId) => {
     try {
       const response = await axios.post(
-        `http://172.19.0.185:5000/api/acceptAndReject/${userId}/${postId}`
+        `http://192.168.10.7:5000/api/acceptAndReject/${userId}/${postId}`
       );
       console.log(`Accepted: ${userId}`, response.data);
-      fetchParticipants(selectedCamp.id);
+      setParticipants((prevParticipants) =>
+        prevParticipants.map((participant) =>
+          participant.userId === userId && participant.postId === postId
+            ? { ...participant, status: "accepted" }
+            : participant
+        )
+      );
     } catch (error) {
       console.error("Error accepting participant:", error);
     }
@@ -46,10 +52,16 @@ const Profile = () => {
   const handleReject = async (userId, postId) => {
     try {
       const response = await axios.post(
-        `http://172.19.0.185:5000/api/acceptAndReject/${userId}/${postId}`
+        `http://192.168.10.7:5000/api/acceptAndReject/reject/${userId}/${postId}`
       );
       console.log(`Rejected: ${userId}`, response.data);
-      fetchParticipants(selectedCamp.id);
+      setParticipants((prevParticipants) =>
+        prevParticipants.map((participant) =>
+          participant.userId === userId && participant.postId === postId
+            ? { ...participant, status: "rejected" }
+            : participant
+        )
+      );
     } catch (error) {
       console.error("Error rejecting participant:", error);
     }
@@ -59,7 +71,7 @@ const Profile = () => {
     const fetchUserData = async (userId: string) => {
       try {
         const response = await axios.get(
-          `http://172.19.0.185:5000/api/users/${userId}`
+          `http://192.168.10.7:5000/api/users/${userId}`
         );
         console.log("User data fetched:", response.data);
         setUserData({
@@ -125,27 +137,33 @@ const Profile = () => {
   const fetchParticipants = async (campId: string) => {
     try {
       const response = await axios.get(
-        `http://172.19.0.185:5000/api/camps/${campId}`
+        `http://192.168.10.7:5000/api/camps/${campId}`
       );
-      setParticipants( response.data.data.joinCampingPosts); // Assuming the endpoint returns an array of participants
+      setParticipants(response.data.data.joinCampingPosts); // Assuming the endpoint returns an array of participants
     } catch (error) {
       console.error("Error fetching participants:", error);
     }
   };
 
   if (loading) {
-    return <Text style={styles.loadingText}>Loading...</Text>;
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#42a5f5" />
+      </View>
+    );
   }
 
   if (error) {
     return <Text style={styles.errorText}>Error: {error}</Text>;
   }
 
-  //console.log(camp)
-
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
+        <Image
+          source={require("../../assets/images/default-avatar.webp")}
+          style={styles.headerBackground}
+        />
         <View style={styles.iconGroup}>
           <TouchableOpacity style={styles.iconButton}>
             <MaterialCommunityIcons
@@ -163,7 +181,7 @@ const Profile = () => {
       <View style={styles.profileSection}>
         <Text style={styles.profileName}>{userData?.name || "User Name"}</Text>
         <View style={styles.profileInfo}>
-          <MaterialCommunityIcons name="cake" size={20} color="#fff" />
+          <FontAwesome name="birthday-cake" size={20} color="#fff" />
           <Text style={styles.profileAge}>
             {userData?.age || "N/A"} years old
           </Text>
@@ -175,6 +193,7 @@ const Profile = () => {
           </Text>
         </View>
         <View style={styles.profileInfo}>
+          <FontAwesome name="info-circle" size={20} color="#fff" />
           <Text style={styles.profileBio}>
             {userData?.bio || "No bio available"}
           </Text>
@@ -190,10 +209,12 @@ const Profile = () => {
       </View>
       <View style={styles.statisticsSection}>
         <View style={styles.statItem}>
+          <MaterialCommunityIcons name="account-multiple" size={20} color="#fff" />
           <Text style={styles.statNumber}>{userData?.friendsCount || 0}</Text>
           <Text style={styles.statLabel}>Friends</Text>
         </View>
         <View style={styles.statItem}>
+          <MaterialCommunityIcons name="campfire" size={20} color="#fff" />
           <Text style={styles.statNumber}>{userData?.campsJoined || 0}</Text>
           <Text style={styles.statLabel}>Camps Joined</Text>
         </View>
@@ -203,6 +224,7 @@ const Profile = () => {
         <View style={styles.tickets}>
           {userData?.interests?.map((interest: string) => (
             <View key={interest} style={styles.ticket}>
+              <FontAwesome name="star" size={15} color="#fff" />
               <Text style={styles.ticketText}>{interest}</Text>
             </View>
           ))}
@@ -216,88 +238,101 @@ const Profile = () => {
               onPress={() => handleCampPress(item.post)}
             >
               <Text style={styles.campTitle}>{item.post.title}</Text>
-              <Text style={styles.campDetails}>{item.post.location}</Text>
-              <Text style={styles.campDetails}>{item.post.date}</Text>
+              <Text style={styles.campDescription}>{item.post.description}</Text>
+              <MaterialCommunityIcons name="arrow-right" size={20} color="#42a5f5" />
             </TouchableOpacity>
           )}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.campList}
         />
       </View>
       {selectedCamp && (
-        <View style={styles.campDetailsSection}>
-          <Text style={styles.campDetailTitle}>{selectedCamp.title}</Text>
-          <View style={styles.participantsList}>
-            {participants.map((participant: any) => {
-              console.log("Participant:", participant); // Logging participant details
-              return (
-                <View key={participant.id} style={styles.participantCard}>
-                  <Image
-                    source={profileImage}
-                    style={styles.participantImage}
+  <View style={styles.participantsSection}>
+    <Text style={styles.sectionTitle}>Participants</Text>
+    {participants.length > 0 ? (
+      participants.map((participant) => {
+        console.log('Participant:', participant);
+        return (
+          <View key={participant.id} style={styles.participantCard}>
+              <Image
+                    source={{ uri: participant.user.imagesProfile ||profileImage
+                    }}
+                    style={styles.profileImage}
                   />
-                  <Text style={styles.participantName}>{participant.user.name}</Text>
-                  <View style={styles.participantButtons}>
-                    <TouchableOpacity
-                      style={styles.acceptButton}
-                      onPress={() => handleAccept(participant.userId,participant.postId)}
-                    >
-                      <Text style={styles.buttonText}>Accept</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      style={styles.rejectButton}
-                      onPress={() => handleReject(participant.userId,participant.postId)}
-                    >
-                      <Text style={styles.buttonText}>Reject</Text>
-                    </TouchableOpacity>
-                  </View>
-                </View>
-              );
-            })}
+            <Text style={styles.participantName}>{participant.user.name}</Text>
+            <View style={styles.participantActions}>
+              <TouchableOpacity
+                style={styles.acceptButton}
+                onPress={() => handleAccept(participant.userId, selectedCamp.id)}
+              >
+                <Text style={styles.buttonText}>Accept</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.rejectButton}
+                onPress={() => handleReject(participant.userId, selectedCamp.id)}
+              >
+                <Text style={styles.buttonText}>Reject</Text>
+              </TouchableOpacity>
+            </View>
           </View>
-        </View>
-      )}
-    </ScrollView>
+        );
+      })
+    ) : (
+      <Text>No participants found</Text>
+    )}
+  </View>
+)}
+</ScrollView>
+
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#00595E",
-  },
-  header: {
-    height: 100,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 20,
     backgroundColor: "#014043",
   },
-  headerProfileImage: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    borderWidth: 2,
-    borderColor: "white",
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#014043",
   },
-  iconGroup: {
+  errorText: {
+    textAlign: "center",
+    marginTop: 20,
+    fontSize: 18,
+    color: "#B3492D",
+  },
+  header: {
+    position: "relative",
+    height: 250,
+    backgroundColor: "#00595E",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  headerBackground: {
+    width: "100%",
+    height: "100%",
+    resizeMode: "cover",
+    opacity: 0.3,
     position: "absolute",
-    right: 20,
-    flexDirection: "row",
   },
-  iconButton: {
-    marginHorizontal: 5,
+  headerProfileImage: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    borderWidth: 3,
+    borderColor: "#fff",
+    marginTop: 30,
   },
   profileSection: {
-    padding: 20,
+    paddingHorizontal: 20,
     alignItems: "center",
   },
   profileName: {
-    fontSize: 24,
-    color: "white",
+    fontSize: 28,
     fontWeight: "bold",
+    color: "#fff",
+    marginTop: 10,
   },
   profileInfo: {
     flexDirection: "row",
@@ -305,157 +340,128 @@ const styles = StyleSheet.create({
     marginVertical: 5,
   },
   profileAge: {
-    fontSize: 16,
-    color: "white",
-    marginLeft: 5,
+    fontSize: 18,
+    color: "#fff",
+    marginLeft: 10,
   },
   profileLocation: {
-    fontSize: 16,
-    color: "white",
-    marginLeft: 5,
+    fontSize: 18,
+    color: "#fff",
+    marginLeft: 10,
   },
   profileBio: {
-    fontSize: 16,
-    color: "white",
-    marginTop: 10,
-    textAlign: "center",
+    fontSize: 18,
+    color: "#fff",
+    marginLeft: 10,
   },
   buttonContainer: {
     flexDirection: "row",
-    marginTop: 20,
+    marginVertical: 20,
   },
   actionButton: {
-    backgroundColor: "#FFC107",
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 5,
+    backgroundColor: "#B3492D",
+    padding: 10,
+    borderRadius: 20,
     marginHorizontal: 10,
   },
   buttonText: {
-    color: "#014043",
+    color: "#fff",
     fontSize: 16,
-    fontWeight: "bold",
   },
   statisticsSection: {
     flexDirection: "row",
     justifyContent: "space-around",
-    padding: 20,
+    backgroundColor: "#00595E",
+    paddingVertical: 20,
   },
   statItem: {
     alignItems: "center",
   },
   statNumber: {
     fontSize: 20,
-    color: "white",
     fontWeight: "bold",
+    color: "#fff",
   },
   statLabel: {
     fontSize: 16,
-    color: "white",
+    color: "#fff",
   },
   interestsSection: {
-    padding: 20,
+    paddingHorizontal: 20,
   },
   sectionTitle: {
-    fontSize: 20,
-    color: "white",
+    fontSize: 24,
     fontWeight: "bold",
+    color: "#fff",
+    marginVertical: 10,
   },
   tickets: {
     flexDirection: "row",
     flexWrap: "wrap",
-    marginTop: 10,
   },
   ticket: {
-    backgroundColor: "#014043",
-    borderRadius: 5,
-    paddingVertical: 5,
-    paddingHorizontal: 10,
+    backgroundColor: "#00595E",
+    padding: 10,
+    borderRadius: 10,
+    flexDirection: "row",
+    alignItems: "center",
     margin: 5,
   },
   ticketText: {
-    color: "white",
-  },
-  campList: {
-    marginTop: 20,
+    color: "#fff",
+    marginLeft: 5,
   },
   campCard: {
-    backgroundColor: "#014043",
-    padding: 15,
-    borderRadius: 5,
-    marginHorizontal: 10,
+    backgroundColor: "#00595E",
+    padding: 20,
+    borderRadius: 10,
+    marginVertical: 10,
   },
   campTitle: {
     fontSize: 18,
-    color: "white",
     fontWeight: "bold",
+    color: "#fff",
   },
-  campDetails: {
+  campDescription: {
     fontSize: 16,
-    color: "white",
-    marginTop: 5,
+    color: "#fff",
+    marginVertical: 5,
   },
-  campDetailsSection: {
-    padding: 20,
-  },
-  campDetailTitle: {
-    fontSize: 24,
-    color: "white",
-    fontWeight: "bold",
-  },
-  participantsList: {
-    marginTop: 20,
+  participantsSection: {
+    paddingHorizontal: 20,
   },
   participantCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#014043",
-    padding: 15,
-    borderRadius: 5,
+    backgroundColor: "#00595E",
+    padding: 20,
+    borderRadius: 10,
     marginVertical: 10,
-  },
-  participantImage: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    borderWidth: 2,
-    borderColor: "white",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   participantName: {
     fontSize: 16,
-    color: "white",
-    marginLeft: 10,
-    flex: 1,
+    color: "#fff",
   },
-  participantButtons: {
+  participantActions: {
     flexDirection: "row",
   },
   acceptButton: {
-    backgroundColor: "#28a745",
-    paddingVertical: 5,
-    paddingHorizontal: 10,
-    borderRadius: 5,
-    marginLeft: 10,
+    backgroundColor: "#7CBB00",
+    padding: 10,
+    borderRadius: 20,
+    marginHorizontal: 5,
   },
   rejectButton: {
-    backgroundColor: "#dc3545",
-    paddingVertical: 5,
-    paddingHorizontal: 10,
-    borderRadius: 5,
-    marginLeft: 10,
-  },
-  loadingText: {
-    flex: 1,
-    fontSize: 18,
-    textAlign: "center",
-    marginTop: 20,
-  },
-  errorText: {
-    flex: 1,
-    fontSize: 18,
-    textAlign: "center",
-    marginTop: 20,
-    color: "red",
+    backgroundColor: "#B3492D",
+    padding: 10,
+    borderRadius: 20,
+    marginHorizontal: 5,
+  },  profileImage: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    marginRight: 16,
   },
 });
 
