@@ -2,16 +2,25 @@
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View, Image, TouchableOpacity, ScrollView, Dimensions, FlatList } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useRouter, useNavigation } from 'expo-router';
+import { useRouter } from 'expo-router';
 import JWT from 'expo-jwt';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
+import { DrawerNavigationProp } from '@react-navigation/drawer';
+import { useNavigation } from '@react-navigation/native';
+
+// Define your navigation types if necessary
+type RootStackParamList = {
+  Profile: undefined; // Define other screens as needed
+};
+
+type ProfileScreenNavigationProp = DrawerNavigationProp<RootStackParamList, 'Profile'>;
 
 const { width } = Dimensions.get('window');
 
 const Profile = () => {
   const router = useRouter();
-  const navigation = useNavigation();
+  const navigation = useNavigation<ProfileScreenNavigationProp>();
   const profileImage = require('../../assets/images/default-avatar.webp'); // Default profile image
   
   const [user, setUser] = useState<any>(null);
@@ -48,13 +57,13 @@ const Profile = () => {
         const tokenData = await AsyncStorage.getItem('token');
         if (tokenData) {
           const token = tokenData.startsWith('Bearer ') ? tokenData.replace('Bearer ', '') : tokenData;
-          const key = 'mySuperSecretPrivateKey'; // Ensure this matches the encoding key
+          const key = 'mySuperSecretPrivateKey'; 
 
           try {
             const decodedToken = JWT.decode(token, key);
             if (decodedToken && decodedToken.id) {
               // Fetch user data based on ID from decoded token
-              const response = await axios.get(` http://192.168.10.21:5000/api/users/${decodedToken.id}`);
+              const response = await axios.get(`http://192.168.10.21:5000/api/users/${decodedToken.id}`);
               setUser(response.data);
               setUserData({
                 id: response.data.id,
@@ -91,7 +100,7 @@ const Profile = () => {
     fetchUser();
   }, []);
 
-  const fetchParticipants = async (campId) => {
+  const fetchParticipants = async (campId: string) => {
     try {
       const response = await axios.get(`http://192.168.10.21:5000/api/camps/${campId}/participants`);
       setParticipants(response.data);
@@ -233,179 +242,155 @@ const styles = StyleSheet.create({
   },
   headerProfileImage: {
     top: 50,
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    borderWidth: 2,
-    borderColor: '#fff',
+    width: 80,
+    height: 80,
+    borderRadius: 40,
   },
   profileSection: {
-    top: 50,
-    flex: 1,
     alignItems: 'center',
-    justifyContent: 'center',
-    marginHorizontal: 30,
-    paddingBottom: 20,
+    padding: 20,
+    backgroundColor: '#014043',
+    borderBottomWidth: 1,
+    borderBottomColor: '#00595E',
   },
   profileName: {
-    fontSize: 20,
-    color: '#fff',
+    fontSize: 24,
+    color: 'white',
     fontWeight: 'bold',
-    marginBottom: 10,
   },
   profileInfo: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 10,
+    marginVertical: 5,
   },
   profileAge: {
-    fontSize: 12,
-    color: '#fff',
+    color: 'white',
     marginLeft: 10,
   },
   profileLocation: {
-    fontSize: 12,
-    color: '#fff',
+    color: 'white',
     marginLeft: 10,
   },
   profileBio: {
-    fontSize: 14,
-    color: '#fff',
+    color: 'white',
     textAlign: 'center',
-    paddingHorizontal: 20,
-    marginLeft: 10,
+    marginVertical: 10,
   },
   buttonContainer: {
     flexDirection: 'row',
-    marginVertical: 20,
+    marginTop: 20,
   },
   actionButton: {
-    backgroundColor: '#B3492D',
+    backgroundColor: '#0277BD',
+    borderRadius: 5,
     paddingVertical: 10,
     paddingHorizontal: 20,
-    borderRadius: 5,
-    marginHorizontal: 10,
+    marginHorizontal: 5,
   },
   buttonText: {
-    color: '#fff',
-    fontSize: 14,
+    color: 'white',
+    fontSize: 16,
   },
   statisticsSection: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    width: width,
-    marginTop: 20,
-    backgroundColor: '#014043',
     paddingVertical: 20,
-    borderRadius: 0,
+    backgroundColor: '#00363A',
   },
   statItem: {
     alignItems: 'center',
   },
   statNumber: {
-    fontSize: 18,
-    color: '#fff',
+    fontSize: 24,
+    color: 'white',
     fontWeight: 'bold',
   },
   statLabel: {
-    fontSize: 14,
-    color: '#fff',
+    color: 'white',
+    fontSize: 16,
   },
   interestsSection: {
-    marginTop: 20,
-    paddingHorizontal: 20,
+    padding: 20,
+    backgroundColor: '#014043',
   },
   sectionTitle: {
-    fontSize: 18,
-    color: '#fff',
-    fontWeight: 'bold',
+    fontSize: 20,
+    color: 'white',
     marginBottom: 10,
   },
   tickets: {
     flexDirection: 'row',
-    marginBottom: 20,
+    flexWrap: 'wrap',
   },
   ticket: {
-    backgroundColor: '#014043',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
+    backgroundColor: '#0277BD',
+    padding: 10,
+    borderRadius: 5,
+    margin: 5,
+  },
+  ticketText: {
+    color: 'white',
+  },
+  campCard: {
+    backgroundColor: '#00595E',
+    padding: 15,
     borderRadius: 5,
     marginRight: 10,
   },
-  ticketText: {
-    color: '#fff',
-    fontSize: 14,
+  campTitle: {
+    color: 'white',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  campDetails: {
+    color: 'white',
   },
   campList: {
     paddingVertical: 10,
   },
-  campCard: {
-    backgroundColor: '#014043',
-    padding: 10,
-    borderRadius: 5,
-    marginRight: 10,
-    width: 200,
-  },
-  campTitle: {
-    fontSize: 16,
-    color: '#fff',
-    fontWeight: 'bold',
-    marginBottom: 5,
-  },
-  campDetails: {
-    fontSize: 12,
-    color: '#fff',
-  },
   campDetailsSection: {
-    marginTop: 20,
-    paddingHorizontal: 20,
+    padding: 20,
+    backgroundColor: '#00363A',
   },
   campDetailTitle: {
-    fontSize: 16,
-    color: '#fff',
-    fontWeight: 'bold',
+    fontSize: 20,
+    color: 'white',
     marginBottom: 10,
   },
   participantsList: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
+    marginTop: 10,
   },
   participantCard: {
-    backgroundColor: '#014043',
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+    backgroundColor: '#0277BD',
     padding: 10,
     borderRadius: 5,
-    width: '48%',
-    marginBottom: 10,
-    alignItems: 'center',
   },
   participantImage: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    marginBottom: 10,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    marginRight: 10,
   },
   participantName: {
-    fontSize: 14,
-    color: '#fff',
-    fontWeight: 'bold',
-    marginBottom: 5,
+    color: 'white',
+    fontSize: 16,
+    flex: 1,
   },
   participantButtons: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '100%',
   },
   acceptButton: {
     backgroundColor: '#4CAF50',
-    paddingVertical: 5,
-    paddingHorizontal: 10,
+    padding: 5,
     borderRadius: 5,
+    marginRight: 5,
   },
   rejectButton: {
     backgroundColor: '#F44336',
-    paddingVertical: 5,
-    paddingHorizontal: 10,
+    padding: 5,
     borderRadius: 5,
   },
   loadingText: {
@@ -414,7 +399,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   errorText: {
-    color: 'red',
+    color: 'white',
     textAlign: 'center',
     marginTop: 20,
   },
