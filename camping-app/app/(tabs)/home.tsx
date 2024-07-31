@@ -60,7 +60,7 @@ const Home = () => {
           }
 
           // Fetch camps data
-          const campsResponse = await axios.get('http://192.168.10.7:5000/api/camps/getAll');
+          const campsResponse = await axios.get('http://192.168.10.21:5000/api/camps/getAll');
           setCamps(campsResponse.data.data);
         } else {
           console.error('Token not found in AsyncStorage');
@@ -102,17 +102,25 @@ const Home = () => {
         </View>
       </View>
       <View style={styles.actionSection}>
+
+        <Image source={profileImage} style={styles.profileImage} />
+        <TouchableOpacity
+          style={[styles.actionButton, styles.campingPostButton]}
+          onPress={() => router.push('/creatCamp/CreateCamPost')} 
+        >
+
         <TouchableOpacity onPress={() => router.replace('/profile/Profile')}>
           <Image source={profileImage} style={styles.profileImage} />
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => router.replace('/creatCamp/CreateCamPost')} style={[styles.actionButton, styles.campingPostButton]}>
-          <MaterialCommunityIcons name="tent" size={24} color="white" />
-
-          <Text style={styles.actionButtonText}>Add a Camp</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={[styles.actionButton, styles.experiencesButton]}>
-          <Text onPress={() => router.replace('/experience/experience')}style={styles.actionButtonText}>Experiences</Text>
-        </TouchableOpacity>
+        <View style={styles.actionButtonsContainer}>
+          <TouchableOpacity onPress={() => router.replace('/creatCamp/CreateCamPost')} style={[styles.actionButton, styles.campingPostButton]}>
+            <MaterialCommunityIcons name="tent" size={24} color="white" />
+            <Text style={styles.actionButtonText}>Add a Camp</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={[styles.actionButton, styles.experiencesButton]}>
+            <Text style={styles.actionButtonText}>Experiences</Text>
+          </TouchableOpacity>
+        </View>
       </View>
       <View style={styles.postList}>
         {camps.map((camp) => (
@@ -204,6 +212,9 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     marginRight: 15,
   },
+  actionButtonsContainer: {
+    flexDirection: 'row',
+  },
   actionButton: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -241,8 +252,8 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     height: height * 0.4,
     backgroundColor: '#014043', // Updated color
-    borderColor: '#00796B', // Keep this color
-    borderWidth: 1,
+    borderColor: '#00796B', // Updated color
+    borderWidth: 2,
   },
   postImage: {
     width: '100%',
@@ -253,79 +264,64 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 10,
     right: 10,
-    backgroundColor: 'rgba(255, 255, 255, 0.6)',
-    borderRadius: 20,
-    padding: 5,
   },
   postInfo: {
     position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    bottom: 10,
+    left: 10,
+    right: 10,
+    backgroundColor: '#00595E',
     padding: 10,
-    borderTopLeftRadius: 15,
-    borderTopRightRadius: 15,
+    borderRadius: 10,
   },
   postTitle: {
-    color: 'white',
-    fontSize: 18, // Keep this font size
+    fontSize: 18,
     fontWeight: 'bold',
+    color: 'white',
   },
   postLocation: {
-    color: 'white',
     fontSize: 14,
-    marginTop: 5,
+    color: 'white',
   },
   hostInfo: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 10,
+    marginVertical: 5,
   },
   hostProfileImage: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 30,
+    height: 30,
+    borderRadius: 15,
     marginRight: 10,
   },
   hostName: {
-    color: 'white',
     fontSize: 14,
+    color: 'white',
   },
   postActions: {
     flexDirection: 'row',
-    justifyContent: 'flex-end',
     marginTop: 10,
   },
   exploreButton: {
     backgroundColor: '#B3492D', // Updated color
-    paddingVertical: 10,
-    paddingHorizontal: 20,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
     borderRadius: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 6,
-    elevation: 5,
+    marginTop: 5,
   },
   exploreText: {
     color: 'white',
     fontWeight: 'bold',
-    fontSize: 16,
   },
   loadingText: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    fontSize: 20,
     color: 'white',
+    textAlign: 'center',
+    marginTop: 50,
   },
   errorText: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    fontSize: 20,
     color: 'red',
+    textAlign: 'center',
+    marginTop: 50,
   },
 });
 

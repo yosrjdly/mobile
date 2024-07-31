@@ -1,3 +1,20 @@
+// src/components/Profile/Profile.tsx
+import React, { useEffect, useState } from 'react';
+import { StyleSheet, Text, View, Image, TouchableOpacity, ScrollView, Dimensions, FlatList } from 'react-native';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import JWT from 'expo-jwt';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
+import { DrawerNavigationProp } from '@react-navigation/drawer';
+import { useNavigation } from '@react-navigation/native';
+
+// Define your navigation types if necessary
+type RootStackParamList = {
+  Profile: undefined; // Define other screens as needed
+};
+
+type ProfileScreenNavigationProp = DrawerNavigationProp<RootStackParamList, 'Profile'>;
 import React, { useEffect, useState } from "react";
 import {
   StyleSheet,
@@ -18,6 +35,11 @@ import JWT from "expo-jwt";
 const { width } = Dimensions.get("window");
 
 const Profile = () => {
+  const router = useRouter();
+  const navigation = useNavigation<ProfileScreenNavigationProp>();
+  const profileImage = require('../../assets/images/default-avatar.webp'); // Default profile image
+  
+  const [user, setUser] = useState<any>(null);
   const profileImage = require("../../assets/images/default-avatar.webp"); // Default profile image
 
   const [userData, setUserData] = useState<any>(null);
@@ -97,6 +119,8 @@ const Profile = () => {
       try {
         const tokenData = await AsyncStorage.getItem("token");
         if (tokenData) {
+          const token = tokenData.startsWith('Bearer ') ? tokenData.replace('Bearer ', '') : tokenData;
+          const key = 'mySuperSecretPrivateKey'; 
           const token = tokenData.startsWith("Bearer ")
             ? tokenData.replace("Bearer ", "")
             : tokenData;
@@ -105,6 +129,21 @@ const Profile = () => {
           try {
             const decodedToken = JWT.decode(token, key);
             if (decodedToken && decodedToken.id) {
+              // Fetch user data based on ID from decoded token
+              const response = await axios.get(`http://192.168.10.21:5000/api/users/${decodedToken.id}`);
+              setUser(response.data);
+              setUserData({
+                id: response.data.id,
+                name: response.data.name,
+                email: response.data.email,
+                age: response.data.age,
+                location: response.data.location,
+                bio: response.data.bio,
+                friendsCount: response.data.friendsCount,
+                campsJoined: response.data.campsJoined,
+                interests: response.data.interests,
+                camps: response.data.camps,
+              });
               fetchUserData(decodedToken.id);
             } else {
               console.error(
@@ -133,6 +172,7 @@ const Profile = () => {
     decodeToken();
   }, []);
 
+  const fetchParticipants = async (campId: string) => {
   const fetchParticipants = async (campId: string) => {
     try {
       const response = await axios.get(
