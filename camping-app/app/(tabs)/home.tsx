@@ -108,7 +108,7 @@ const Home = () => {
         </TouchableOpacity>
         </TouchableOpacity>
         <TouchableOpacity style={[styles.actionButton, styles.experiencesButton]}>
-          <Text style={styles.actionButtonText}>Experiences</Text>
+          <Text onPress={() => router.replace('/experience/experience')}style={styles.actionButtonText}>Experiences</Text>
         </TouchableOpacity>
       </View>
       <View style={styles.postList}>
