@@ -34,7 +34,7 @@ const Profile = () => {
   const handleAccept = async (userId, postId) => {
     try {
       const response = await axios.post(
-        `http://192.168.10.7:5000/api/acceptAndReject/${userId}/${postId}`
+        `http://192.168.10.18:5000/api/acceptAndReject/${userId}/${postId}`
       );
       console.log(`Accepted: ${userId}`, response.data);
       setParticipants((prevParticipants) =>
@@ -52,7 +52,7 @@ const Profile = () => {
   const handleReject = async (userId, postId) => {
     try {
       const response = await axios.post(
-        `http://192.168.10.7:5000/api/acceptAndReject/reject/${userId}/${postId}`
+        `http://192.168.10.18:5000/api/acceptAndReject/reject/${userId}/${postId}`
       );
       console.log(`Rejected: ${userId}`, response.data);
       setParticipants((prevParticipants) =>
@@ -71,7 +71,7 @@ console.log("hhhh")
     const fetchUserData = async (userId: string) => {
       try {
         const response = await axios.get(
-          `http://192.168.10.7:5000/api/users/${userId}`
+          `http://192.168.10.18:5000/api/users/${userId}`
         );
         console.log("User data fetched:", response.data);
         setUserData({
@@ -136,8 +136,10 @@ console.log("hhhh")
 
   const fetchParticipants = async (campId: string) => {
     try {
-      const response = await axios.get(`http://192.168.10.18:5000/api/camps/${campId}`);
-      setParticipants(response.data);
+      const response = await axios.get(
+        `http://192.168.10.18:5000/api/camps/participants/${campId}`
+      );
+      setParticipants(response.data.data.joinCampingPosts); // Assuming the endpoint returns an array of participants
     } catch (error) {
       console.error("Error fetching participants:", error);
     }
