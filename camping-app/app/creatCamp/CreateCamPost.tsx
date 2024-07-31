@@ -6,118 +6,115 @@ import axios from 'axios';
 import { storage } from '../../firebaseConfig'; // Import storage from the separate Firebase config file
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
-const CampingPost = () => {
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [location, setLocation] = useState('');
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
-  const [equipment, setEquipment] = useState('');
-  const [places, setPlaces] = useState('');
-  const [ageCategory, setAgeCategory] = useState('');
-  const [images, setImages] = useState([]);
-  const [selectedImage, setSelectedImage] = useState(null);
+// Define the types for state variables
+type State = {
+  title: string;
+  description: string;
+  location: string;
+  startDate: string;
+  endDate: string;
+  equipment: string;
+  places: string;
+  ageCategory: string;
+  images: string[];
+  selectedImage: string | null;
+};
 
+const CampingPost: React.FC = () => {
+  const [state, setState] = useState<State>({
+    title: '',
+    description: '',
+    location: '',
+    startDate: '',
+    endDate: '',
+    equipment: '',
+    places: '',
+    ageCategory: '',
+    images: [],
+    selectedImage: null,
+  });
 
-const handleImagePick = async () => {
-  try {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== 'granted') {
-      alert('Sorry, we need camera roll  permissions to choose an image.');
-      return;
-    }
+  const handleImagePick = async () => {
+    try {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== 'granted') {
+        alert('Sorry, we need camera roll permissions to choose an image.');
+        return;
+      }
 
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1,
-    });
+      let result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 1,
+      });
 
-    if (!result.cancelled) {
-      console.log('Image picker result:', result); // Log the entire result object for debugging
-
-      if (result.assets && result.assets.length > 0 && result.assets[0].uri) {
+      if (!result.canceled && result.assets && result.assets.length > 0 && result.assets[0].uri) {
         const selectedImageUri = result.assets[0].uri;
-        setSelectedImage(selectedImageUri);
+        setState(prevState => ({ ...prevState, selectedImage: selectedImageUri }));
         uploadImage(selectedImageUri);
       } else {
         console.error('Image selection failed: No valid URI found');
         alert('There was an error selecting the image. Please try again.');
       }
+    } catch (error) {
+      console.error('Error picking image:', error);
+      alert('An unexpected error occurred while picking the image. Please try again.');
     }
-  } catch (error) {
-    console.error('Error picking image:', error);
-    alert('An unexpected error occurred while picking the image. Please try again.');
-  }
-};
-const uploadImage = async (uri) => {
-  
+  };
 
-  if (!uri) {
-    console.error('No image selected');
-    return;
-  }
+  const uploadImage = async (uri: string) => {
+    if (!uri) {
+      console.error('No image selected');
+      return;
+    }
 
-  try {
-    const response = await fetch(uri);
-    const blob = await response.blob();
-    const filename = uri.split('/').pop();
-    const ref = storage.ref().child(`images/${filename}`);
-
-    const uploadTask = await ref.put(blob);
-
-    // Handle upload progress if needed
-    uploadTask.on('state_changed',
-      (snapshot) => {
-        // Handle progress
-      },
-      (error) => {
-        // Handle unsuccessful uploads
-        console.error('Error uploading image:', error);
-      },
-      () => {
-        // Handle successful uploads on completion   
-
-        uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
-          setImages(prevImages => [...prevImages, downloadURL]);
-        });
+    try {
+      const response = await fetch(uri);
+      const blob = await response.blob();
+      const filename = uri.split('/').pop();
+      if (!filename) {
+        throw new Error('Filename is not found');
       }
-    );
-  } catch (error) {
-    console.error('Error uploading image:', error);
-    console.log('Error uploading image:', error.message, error.code, error.stack);
-  }
-};
 
+      const imageRef = ref(storage, `images/${filename}`);
+      const uploadTask = await uploadBytes(imageRef, blob);
 
+      // Handle successful uploads on completion
+      const downloadURL = await getDownloadURL(uploadTask.ref);
+      setState(prevState => ({ ...prevState, images: [...prevState.images, downloadURL] }));
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      alert('An error occurred while uploading the image. Please try again.');
+    }
+  };
 
   const handlePost = async () => {
     try {
-      const formattedStartDate = new Date(startDate).toISOString();
-      const formattedEndDate = new Date(endDate).toISOString();
-  
-      const equipmentList = equipment ? equipment.split(',').map(item => item.trim()) : [];
-      const imageUrls = images.length > 0 ? images.map(image => image.trim()) : []; // Assuming images is an array of image URLs
-  
-      const response = await axios.post('http://192.168.10.9:5000/api/camps/add', {
+      const formattedStartDate = new Date(state.startDate).toISOString();
+      const formattedEndDate = new Date(state.endDate).toISOString();
+
+      const equipmentList = state.equipment ? state.equipment.split(',').map(item => item.trim()) : [];
+      const imageUrls = state.images.length > 0 ? state.images.map(image => image.trim()) : [];
+
+      const response = await axios.post('http://192.168.10.21:5000/api/camps/add', {
         organizerId: 1,
-        title,
-        description,
-        location,
+        title: state.title,
+        description: state.description,
+        location: state.location,
         startDate: formattedStartDate,
         endDate: formattedEndDate,
         equipment: equipmentList,
-        places: parseInt(places, 10),
-        ageCategory,
+        places: parseInt(state.places, 10),
+        ageCategory: state.ageCategory,
         images: imageUrls,
       });
-  
+
       if (response.data.status === 200) {
-              alert('Post created successfully');
-            } else {
-              alert('Error creating post');
-            }
+        alert('Post created successfully');
+      } else {
+        alert('Error creating post');
+      }
     } catch (error) {
       console.error(error);
       alert('An error occurred while creating the post');
@@ -141,8 +138,8 @@ const uploadImage = async (uri) => {
         style={styles.input}
         placeholder="your title ..."
         placeholderTextColor="#aaa"
-        value={title}
-        onChangeText={setTitle}
+        value={state.title}
+        onChangeText={(text) => setState(prevState => ({ ...prevState, title: text }))}
       />
 
       <Text style={styles.label}>Description :</Text>
@@ -151,8 +148,8 @@ const uploadImage = async (uri) => {
         placeholder="more details ..."
         placeholderTextColor="#aaa"
         multiline
-        value={description}
-        onChangeText={setDescription}
+        value={state.description}
+        onChangeText={(text) => setState(prevState => ({ ...prevState, description: text }))}
       />
 
       <View style={styles.row}>
@@ -162,8 +159,8 @@ const uploadImage = async (uri) => {
             style={styles.input}
             placeholder="month/day/year"
             placeholderTextColor="#aaa"
-            value={startDate}
-            onChangeText={setStartDate}
+            value={state.startDate}
+            onChangeText={(text) => setState(prevState => ({ ...prevState, startDate: text }))}
           />
         </View>
         <View style={styles.column}>
@@ -172,8 +169,8 @@ const uploadImage = async (uri) => {
             style={styles.input}
             placeholder="month/day/year"
             placeholderTextColor="#aaa"
-            value={endDate}
-            onChangeText={setEndDate}
+            value={state.endDate}
+            onChangeText={(text) => setState(prevState => ({ ...prevState, endDate: text }))}
           />
         </View>
       </View>
@@ -183,16 +180,16 @@ const uploadImage = async (uri) => {
         style={styles.input}
         placeholder="Tent, Sleeping Bag, Flashlight ..."
         placeholderTextColor="#aaa"
-        value={equipment}
-        onChangeText={setEquipment}
+        value={state.equipment}
+        onChangeText={(text) => setState(prevState => ({ ...prevState, equipment: text }))}
       />
 
       <Text style={styles.label}>Image Picker:</Text>
       <Button title="Pick an Image" onPress={handleImagePick} />
-      {selectedImage && <Image source={{ uri: selectedImage }} style={styles.selectedImage} />}
+      {state.selectedImage && <Image source={{ uri: state.selectedImage }} style={styles.selectedImage} />}
 
       <Text style={styles.label}>Image URLs:</Text>
-      {images.map((url, index) => (
+      {state.images.map((url, index) => (
         <Text key={index} style={styles.imageUrl}>{url}</Text>
       ))}
 
@@ -201,8 +198,8 @@ const uploadImage = async (uri) => {
         style={styles.input}
         placeholder="age . . ."
         placeholderTextColor="#aaa"
-        value={ageCategory}
-        onChangeText={setAgeCategory}
+        value={state.ageCategory}
+        onChangeText={(text) => setState(prevState => ({ ...prevState, ageCategory: text }))}
       />
 
       <View style={styles.row}>
@@ -212,8 +209,8 @@ const uploadImage = async (uri) => {
             style={styles.input}
             placeholder=". . ."
             placeholderTextColor="#aaa"
-            value={places}
-            onChangeText={setPlaces}
+            value={state.places}
+            onChangeText={(text) => setState(prevState => ({ ...prevState, places: text }))}
           />
         </View>
       </View>
@@ -223,8 +220,8 @@ const uploadImage = async (uri) => {
         style={styles.input}
         placeholder="location . . ."
         placeholderTextColor="#aaa"
-        value={location}
-        onChangeText={setLocation}
+        value={state.location}
+        onChangeText={(text) => setState(prevState => ({ ...prevState, location: text }))}
       />
 
       <TouchableOpacity style={styles.postButton} onPress={handlePost}>
@@ -254,33 +251,26 @@ const styles = StyleSheet.create({
   },
   label: {
     color: 'white',
+    fontSize: 16,
     marginBottom: 5,
   },
   input: {
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    borderRadius: 10,
-    padding: 10,
+    height: 40,
+    borderColor: 'gray',
+    borderWidth: 1,
+    borderRadius: 5,
+    paddingHorizontal: 10,
+    marginBottom: 20,
     color: 'white',
-    marginBottom: 15,
   },
   row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    marginBottom: 20,
   },
   column: {
     flex: 1,
-    marginRight: 10,
-  },
-  postButton: {
-    backgroundColor: '#B3492D', // Updated color
-    borderRadius: 10,
-    paddingVertical: 10,
-    alignItems: 'center',
-    marginTop: 20,
-  },
-  postButtonText: {
-    color: 'white',
-    fontWeight: 'bold',
+    marginHorizontal: 5,
   },
   selectedImage: {
     width: 100,
@@ -291,6 +281,17 @@ const styles = StyleSheet.create({
   imageUrl: {
     color: 'white',
     marginBottom: 5,
+  },
+  postButton: {
+    backgroundColor: '#004D40',
+    padding: 15,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  postButtonText: {
+    color: 'white',
+    fontSize: 18,
+    fontWeight: 'bold',
   },
 });
 
