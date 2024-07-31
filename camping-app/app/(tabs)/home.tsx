@@ -97,6 +97,13 @@ const Home = () => {
         </View>
       </View>
       <View style={styles.actionSection}>
+
+        <Image source={profileImage} style={styles.profileImage} />
+        <TouchableOpacity
+          style={[styles.actionButton, styles.campingPostButton]}
+          onPress={() => router.push('/creatCamp/CreateCamPost')} 
+        >
+
         <TouchableOpacity onPress={() => router.replace('/profile/Profile')}>
           <Image source={profileImage} style={styles.profileImage} />
         </TouchableOpacity>
