@@ -35,14 +35,19 @@ const Home = () => {
     const fetchUserAndCamps = async () => {
       try {
         const tokenData = await AsyncStorage.getItem('token');
+        console.log("token:",tokenData)
+
         if (tokenData) {
           const token = tokenData.startsWith('Bearer ') ? tokenData.replace('Bearer ', '') : tokenData;
           const key = 'mySuperSecretPrivateKey'; // Ensure this matches the encoding key
 
           try {
             const decodedToken = JWT.decode(token, key);
+            console.log("decoded token:",decodedToken)
             if (decodedToken && decodedToken.id) {
               // Fetch user data based on ID from decoded token
+            console.log("decoded token id:",decodedToken.id)
+
               const userResponse = await axios.get(`http://192.168.10.7:5000/api/users/${decodedToken.id}`);
               setUser(userResponse.data);
             } else {
@@ -100,12 +105,10 @@ const Home = () => {
         <TouchableOpacity onPress={() => router.replace('/profile/Profile')}>
           <Image source={profileImage} style={styles.profileImage} />
         </TouchableOpacity>
-        <TouchableOpacity style={[styles.actionButton, styles.campingPostButton]}>
         <TouchableOpacity onPress={() => router.replace('/creatCamp/CreateCamPost')} style={[styles.actionButton, styles.campingPostButton]}>
           <MaterialCommunityIcons name="tent" size={24} color="white" />
 
           <Text style={styles.actionButtonText}>Add a Camp</Text>
-        </TouchableOpacity>
         </TouchableOpacity>
         <TouchableOpacity style={[styles.actionButton, styles.experiencesButton]}>
           <Text onPress={() => router.replace('/experience/experience')}style={styles.actionButtonText}>Experiences</Text>
