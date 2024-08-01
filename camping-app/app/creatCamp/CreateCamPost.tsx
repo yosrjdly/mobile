@@ -1,5 +1,5 @@
-import React, {useEffect, useState } from 'react';
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, ScrollView, Button, Image, Platform } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, ScrollView, Button, Image, Platform, Modal } from 'react-native';
 import { AntDesign, FontAwesome } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import axios from 'axios';
@@ -15,10 +15,12 @@ interface User {
   email: string;
   role: string;
   imagesProfile?: string[]; // Optional, used for campmates
-  gender?:string;
-  address?:string;
+  gender?: string;
+  address?: string;
 }
 const CampingPost = () => {
+  const [skip, setSkip] = useState<boolean>(true)
+  const [currentStep, setCurrentStep] = useState<number>(3);
   const [user, setUser] = useState<User>({ id: "", name: "", email: "", role: "" });
   const [refresh, setRefresh] = useState<boolean>(false);
   const [title, setTitle] = useState<string>('');
@@ -78,10 +80,10 @@ const CampingPost = () => {
       formData.append('endDate', formattedEndDate);
       formData.append('equipment', JSON.stringify(equipmentList));
       formData.append('places', parseInt(places, 10));
-      formData.append('ageCategory', ageCategory);  
-      formData.append('category', category);  
-      formData.append('status', status);  
-      formData.append('organizerId', user.id);  
+      formData.append('ageCategory', ageCategory);
+      formData.append('category', category);
+      formData.append('status', status);
+      formData.append('organizerId', user.id);
 
 
       images.forEach((imageUri) => {
@@ -173,6 +175,74 @@ const CampingPost = () => {
     fetchUser();
   }, [refresh]);
 
+// const defaulImg=()=>{
+//   if(category==='Hiking'){
+//     setImages('')
+//   }
+//   if(category==='Kayaking'){
+//     setImages('')
+//   } if(category==='Fishing'){
+//     setImages('')
+//   } if(category==='Climbing'){
+//     setImages('')
+//   }if(category==='Hitchhiking'){
+//     setImages('')
+//   }
+// }
+
+  const handleNext = () => {
+    //first Popup
+
+    if (currentStep === 1 && !title) {
+      alert("Please enter a title.");
+      return;
+    }
+    if (currentStep === 1 && !description) {
+      alert("Please enter a description for the post.");
+      return;
+    }
+    if (currentStep === 1 && !location) {
+      alert("Please enter a location for the post.");
+      return;
+    }
+    if (currentStep === 1 && !ageCategory) {
+      alert("Please enter an age category for the post.");
+      return;
+    }
+    if (currentStep === 1 && !category) {
+      alert("Please enter a category for the post.");
+      return;
+    }
+    // second Popup
+    if (currentStep === 2 && !images ) {
+      alert("Please enter your images.");
+      return;
+    }
+    console.log(images,'rrrrrrrrrrrrrrrr');
+    if(currentStep===2&&skip!=true){
+      currentStep+1
+    }
+
+    //third Popup
+
+    if (currentStep === 3 && !places) {
+      alert("Please enter the place of the camp.");
+      return;
+    } if (currentStep === 3 && !equipment) {
+      alert("Please enter equipment neded for the camp .");
+      return;
+    } if (currentStep === 3 && !startDate) {
+      alert("Please enter a startDate.");
+      return;
+    } if (currentStep === 3 && !endDate) {
+      alert("Please enter a endDate.");
+      return;
+    }
+    setCurrentStep(currentStep + 1);
+  };
+
+  
+
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
@@ -184,17 +254,18 @@ const CampingPost = () => {
           <FontAwesome name="clipboard" size={24} color="white" style={styles.clipboardIcon} />
         </View>
       </View>
-
-      <Text style={styles.label}>Title :</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="your title ..."
-        placeholderTextColor="#aaa"
-        value={title}
-        onChangeText={setTitle}
-      />
-
-      <Text style={styles.label}>Description :</Text>
+      <Modal visible={currentStep === 1} transparent={true} animationType="slide">
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+          <Text style={styles.label}>Step 1:</Text>
+            <Text style={styles.label}> Enter Name</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Name"
+              value={title}
+              onChangeText={setTitle}
+            />
+             <Text style={styles.label}>Description :</Text>
       <TextInput
         style={[styles.input, { height: 100 }]}
         placeholder="more details ..."
@@ -203,45 +274,6 @@ const CampingPost = () => {
         value={description}
         onChangeText={setDescription}
       />
-
-      <View style={styles.row}>
-        <View style={styles.column}>
-          <Text style={styles.label}>First day:</Text>
-          <Button title="Select Start Date" onPress={showStartDatePicker} />
-          <Text>Selected Start Date: {startDate.toLocaleDateString()} {startDate.toLocaleTimeString()}</Text>
-          <DateTimePickerModal
-            isVisible={isStartDatePickerVisible}
-            mode="datetime"
-            onConfirm={handleStartDateConfirm}
-            onCancel={hideStartDatePicker}
-          />
-        </View>
-        <View style={styles.column}>
-          <Text style={styles.label}>End day:</Text>
-          <Button title="Select End Date" onPress={showEndDatePicker} />
-          <Text>Selected End Date: {endDate.toLocaleDateString()} {endDate.toLocaleTimeString()}</Text>
-          <DateTimePickerModal
-            isVisible={isEndDatePickerVisible}
-            mode="datetime"
-            onConfirm={handleEndDateConfirm}
-            onCancel={hideEndDatePicker}
-          />
-        </View>
-      </View>
-
-      <Text style={styles.label}>Equipment (comma separated):</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Tent, Sleeping Bag, Flashlight ..."
-        placeholderTextColor="#aaa"
-        value={equipment}
-        onChangeText={setEquipment}
-      />
-
-      <Text style={styles.label}>Image Picker:</Text>
-      <Button title="Pick an Image" onPress={handleImagePick} />
-      {selectedImage && <Image source={{ uri: selectedImage }} style={styles.selectedImage} />}
-
       <Text style={styles.label}>Minimum Age:</Text>
       <RNPickerSelect
         onValueChange={(value) => setAgeCategory(value)}
@@ -272,8 +304,7 @@ const CampingPost = () => {
           return <View style={pickerSelectStyles.icon} />;
         }}
       />
-
- <Text style={styles.label}>Camp Category:</Text>
+      <Text style={styles.label}>Camp Category:</Text>
       <RNPickerSelect
         onValueChange={(value) => setCategory(value)}
         placeholder={{
@@ -286,7 +317,7 @@ const CampingPost = () => {
           { label: 'Kayaking', value: 'Kayaking' },
           { label: 'Fishing', value: 'Fishing' },
           { label: 'Climbing', value: 'Climbing' },
-          { label: 'Hitchhiking', value: 'Hitchhiking'},
+          { label: 'Hitchhiking', value: 'Hitchhiking' },
 
         ]}
         style={{
@@ -300,13 +331,58 @@ const CampingPost = () => {
             fontSize: 16,
           },
         }}
-        value={ageCategory}
+        value={category}
         useNativeAndroidPickerStyle={false}
         Icon={() => {
           return <View style={pickerSelectStyles.icon} />;
         }}
       />
-      <View style={styles.row}>
+
+<Text style={styles.label}>Destination :</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="location . . ."
+        placeholderTextColor="#aaa"
+        value={location}
+        onChangeText={setLocation}
+      />
+
+            <TouchableOpacity style={styles.postButton} onPress={handleNext}>
+              <Text style={styles.postButtonText}>Next</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      <Modal visible={currentStep === 2} transparent={true} animationType="slide">
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+          <Text style={styles.label}>Image Picker:</Text>
+      <Button title="Pick an Image" onPress={handleImagePick} />
+      {selectedImage && <Image source={{ uri: selectedImage }} style={styles.selectedImage} />}
+            <TouchableOpacity style={styles.postButton} onPress={handleNext}>
+              <Text style={styles.postButtonText}>Next</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.postButton} onPress={handleNext}>
+              <Text style={styles.postButtonText}>skip</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      <Modal visible={currentStep === 3} transparent={true} animationType="slide">
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+          
+          <Text style={styles.label}>Equipment (comma separated):</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="Tent, Sleeping Bag, Flashlight ..."
+        placeholderTextColor="#aaa"
+        value={equipment}
+        onChangeText={setEquipment}
+      />
+          <View style={styles.row}>
         <View style={styles.column}>
           <Text style={styles.label}>Seats :</Text>
           <TextInput
@@ -318,19 +394,34 @@ const CampingPost = () => {
           />
         </View>
       </View>
-
-      <Text style={styles.label}>Destination :</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="location . . ."
-        placeholderTextColor="#aaa"
-        value={location}
-        onChangeText={setLocation}
-      />
-
+          <View style={styles.row}>
+        <View style={styles.column}>
+          <Text style={styles.label}>First day:</Text>
+          <Button title="Select Start Date" onPress={showStartDatePicker} />
+          <DateTimePickerModal
+            isVisible={isStartDatePickerVisible}
+            mode="datetime"
+            onConfirm={handleStartDateConfirm}
+            onCancel={hideStartDatePicker}
+          />
+        </View>
+        <View style={styles.column}>
+          <Text style={styles.label}>End day:</Text>
+          <Button title="Select End Date" onPress={showEndDatePicker} />
+          <DateTimePickerModal
+            isVisible={isEndDatePickerVisible}
+            mode="datetime"
+            onConfirm={handleEndDateConfirm}
+            onCancel={hideEndDatePicker}
+          />
+        </View>
+      </View>
       <TouchableOpacity style={styles.postButton} onPress={handlePost}>
         <Text style={styles.postButtonText}>Post</Text>
       </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </ScrollView>
   );
 };
@@ -358,6 +449,19 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginBottom: 5,
   },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    width: 300,
+    backgroundColor: '#00595E',
+    borderRadius: 10,
+    padding: 20,
+    alignItems: 'center',
+  },
   input: {
     height: 40,
     borderColor: '#fff',
@@ -382,7 +486,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   postButton: {
-    backgroundColor: '#4CAF50',
+    backgroundColor: '#B3492D',
     padding: 15,
     borderRadius: 5,
     alignItems: 'center',
