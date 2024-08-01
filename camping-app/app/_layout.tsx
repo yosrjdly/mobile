@@ -12,10 +12,11 @@ export default function RootLayout() {
       <Stack.Screen name="profile/Profile" options={{title: "Profile", headerShown: false}} />
       <Stack.Screen name="creatCamp/CreateCamPost" options={{title: "Interests", headerShown: false}} />
       <Stack.Screen name="[postId]/index" options={{title: "Interests", headerShown: false}} />
+      <Stack.Screen name="experience/experience" options={{title: "experience", headerShown: false}} />
+
 
 
 
     </Stack>
   );
 }
-

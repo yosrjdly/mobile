@@ -1,5 +1,5 @@
 import { StyleSheet, View } from "react-native";
-import Welcome from "@/components/Welcome";
+import Welcome from "../components/Welcome";
 
 export default function Index() {
   return (
