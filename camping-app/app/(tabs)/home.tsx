@@ -35,15 +35,20 @@ const Home = () => {
     const fetchUserAndCamps = async () => {
       try {
         const tokenData = await AsyncStorage.getItem('token');
+        console.log("token:",tokenData)
+
         if (tokenData) {
           const token = tokenData.startsWith('Bearer ') ? tokenData.replace('Bearer ', '') : tokenData;
           const key = 'mySuperSecretPrivateKey'; // Ensure this matches the encoding key
 
           try {
             const decodedToken = JWT.decode(token, key);
+            console.log("decoded token:",decodedToken)
             if (decodedToken && decodedToken.id) {
               // Fetch user data based on ID from decoded token
-              const userResponse = await axios.get(`http://192.168.10.21:5000/api/users/${decodedToken.id}`);
+            console.log("decoded token id:",decodedToken.id)
+
+              const userResponse = await axios.get(`http://192.168.10.7:5000/api/users/${decodedToken.id}`);
               setUser(userResponse.data);
             } else {
               console.error('Failed to decode token or token does not contain ID');
@@ -55,7 +60,7 @@ const Home = () => {
           }
 
           // Fetch camps data
-          const campsResponse = await axios.get('http://192.168.10.21:5000/api/camps/getAll');
+          const campsResponse = await axios.get('http://192.168.10.7:5000/api/camps/getAll');
           setCamps(campsResponse.data.data);
         } else {
           console.error('Token not found in AsyncStorage');
@@ -98,12 +103,8 @@ const Home = () => {
       </View>
       <View style={styles.actionSection}>
 
-        <Image source={profileImage} style={styles.profileImage} />
-        <TouchableOpacity
-          style={[styles.actionButton, styles.campingPostButton]}
-          onPress={() => router.push('/creatCamp/CreateCamPost')} 
-        >
-
+       
+          
         <TouchableOpacity onPress={() => router.replace('/profile/Profile')}>
           <Image source={profileImage} style={styles.profileImage} />
         </TouchableOpacity>
@@ -113,7 +114,7 @@ const Home = () => {
             <Text style={styles.actionButtonText}>Add a Camp</Text>
           </TouchableOpacity>
           <TouchableOpacity style={[styles.actionButton, styles.experiencesButton]}>
-            <Text style={styles.actionButtonText}>Experiences</Text>
+            <Text onPress={()=>router.replace('/experience/experience')} style={styles.actionButtonText}>Experiences</Text>
           </TouchableOpacity>
         </View>
       </View>
