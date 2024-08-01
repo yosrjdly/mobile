@@ -61,7 +61,7 @@ const Home = () => {
               // Fetch user data based on ID from decoded token
             console.log("decoded token id:",decodedToken.id)
 
-              const userResponse = await axios.get(`http://192.168.10.7:5000/api/users/${decodedToken.id}`);
+              const userResponse = await axios.get(`http://192.168.10.4:5000/api/users/${decodedToken.id}`);
 
               setUser(userResponse.data);
             } else {
@@ -75,7 +75,7 @@ const Home = () => {
 
 
           // Fetch camps data
-          const campsResponse = await axios.get('http://192.168.10.7:5000/api/camps/getAll');
+          const campsResponse = await axios.get('http://192.168.10.4:5000/api/camps/getAll');
           setCamps(campsResponse.data.data);
           setFilteredCamps(campsResponse.data.data);
         } else {

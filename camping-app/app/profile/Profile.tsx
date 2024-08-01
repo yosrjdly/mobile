@@ -1,33 +1,42 @@
-
 // src/components/Profile/Profile.tsx
-import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, View, Image, TouchableOpacity, ScrollView, Dimensions, FlatList,ActivityIndicator, } from 'react-native';
-import { MaterialCommunityIcons , FontAwesome} from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
-import JWT from 'expo-jwt';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import axios from 'axios';
-import { DrawerNavigationProp } from '@react-navigation/drawer';
-import { useNavigation } from '@react-navigation/native';
-import SharedExp from '../../components/SharedExp';
+import React, { useEffect, useState } from "react";
+import {
+  StyleSheet,
+  Text,
+  View,
+  Image,
+  TouchableOpacity,
+  ScrollView,
+  Dimensions,
+  FlatList,
+  ActivityIndicator,
+} from "react-native";
+import { MaterialCommunityIcons, FontAwesome } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
+import JWT from "expo-jwt";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios from "axios";
+import { DrawerNavigationProp } from "@react-navigation/drawer";
+import { useNavigation } from "@react-navigation/native";
+import SharedExp from "../../components/SharedExp";
+import profileImage from "../../assets/images/default-avatar.webp"; // Default profile image
 
 // Define your navigation types if necessary
 type RootStackParamList = {
   Profile: undefined; // Define other screens as needed
 };
 
-type ProfileScreenNavigationProp = DrawerNavigationProp<RootStackParamList, 'Profile'>;
-
+type ProfileScreenNavigationProp = DrawerNavigationProp<
+  RootStackParamList,
+  "Profile"
+>;
 
 const { width } = Dimensions.get("window");
 
 const Profile = () => {
-
   const router = useRouter();
   const navigation = useNavigation<ProfileScreenNavigationProp>();
-  const profileImage = require('../../assets/images/default-avatar.webp'); // Default profile image
   const [user, setUser] = useState<any>(null);
-
 
   const [userData, setUserData] = useState<any>(null);
   const [selectedCamp, setSelectedCamp] = useState<any>(null);
@@ -43,7 +52,7 @@ const Profile = () => {
   const handleAccept = async (userId, postId) => {
     try {
       const response = await axios.post(
-        `http:// 192.168.10.4:5000/api/acceptAndReject/${userId}/${postId}`
+        `http://192.168.10.4:5000/api/acceptAndReject/${userId}/${postId}`
       );
       console.log(`Accepted: ${userId}`, response.data);
       setParticipants((prevParticipants) =>
@@ -61,7 +70,7 @@ const Profile = () => {
   const handleReject = async (userId, postId) => {
     try {
       const response = await axios.post(
-        `http:// 192.168.10.4:5000/api/acceptAndReject/reject/${userId}/${postId}`
+        `http://192.168.10.4:5000/api/acceptAndReject/reject/${userId}/${postId}`
       );
       console.log(`Rejected: ${userId}`, response.data);
       setParticipants((prevParticipants) =>
@@ -79,7 +88,7 @@ const Profile = () => {
     const fetchUserData = async (userId: string) => {
       try {
         const response = await axios.get(
-          `http:// 192.168.10.4:5000/api/users/${userId}`
+          `http://192.168.10.4:5000/api/users/${userId}`
         );
         console.log("User data fetched:", response.data);
         setUserData({
@@ -106,15 +115,18 @@ const Profile = () => {
       try {
         const tokenData = await AsyncStorage.getItem("token");
         if (tokenData) {
-          const token = tokenData.startsWith('Bearer ') ? tokenData.replace('Bearer ', '') : tokenData;
-          const key = 'mySuperSecretPrivateKey';
+          const token = tokenData.startsWith("Bearer ")
+            ? tokenData.replace("Bearer ", "")
+            : tokenData;
+          const key = "mySuperSecretPrivateKey";
 
           try {
             const decodedToken = JWT.decode(token, key);
             if (decodedToken && decodedToken.id) {
-
               // Fetch user data based on ID from decoded token
-              const response = await axios.get(`http://192.168.10.7:5000/api/users/${decodedToken.id}`);
+              const response = await axios.get(
+                `http://192.168.10.4:5000/api/users/${decodedToken.id}`
+              );
               setUser(response.data);
               setUserData({
                 id: response.data.id,
@@ -157,11 +169,10 @@ const Profile = () => {
     decodeToken();
   }, []);
 
-
   const fetchParticipants = async (campId: string) => {
     try {
       const response = await axios.get(
-        `http:// 192.168.10.4:5000/api/camps/participants/${campId}`
+        `http://192.168.10.4:5000/api/camps/participants/${campId}`
       );
       setParticipants(response.data.data.joinCampingPosts); // Assuming the endpoint returns an array of participants
     } catch (error) {
@@ -182,6 +193,7 @@ const Profile = () => {
   }
 
   return (
+    
     <ScrollView style={styles.container}>
       <View style={styles.header}>
         <Image
@@ -273,6 +285,7 @@ const Profile = () => {
                 name="arrow-right"
                 size={20}
                 color="#42a5f5"
+                
               />
             </TouchableOpacity>
           )}
@@ -284,42 +297,47 @@ const Profile = () => {
           {participants.length > 0 ? (
             participants.map((participant) => {
               console.log("Participant:", participant);
+              const image =  participant.user.imagesProfile[0] ? { uri: participant.user.imagesProfile[0]} : profileImage
               return (
                 <View key={participant.id} style={styles.participantCard}>
                   <Image
-                    source={{
-                      uri: participant.user.imagesProfile || profileImage,
-                    }}
+                    source={image}
                     style={styles.profileImage}
                   />
-            <Text style={styles.participantName}>{participant.user.name}</Text>
-            <View style={styles.participantActions}>
-              <TouchableOpacity
-                style={styles.acceptButton}
-                onPress={() => handleAccept(participant.userId, selectedCamp.id)}
-              >
-                <Text style={styles.buttonText}>Accept</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.rejectButton}
-                onPress={() => handleReject(participant.userId, selectedCamp.id)}
-              >
-                <Text style={styles.buttonText}>Reject</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        );
-      })
-    ) : (
-      <Text>No participants found</Text>
-    )}
-  </View>
-  
-)}
- <View style={styles.sharedExperienceSection}>
-        <SharedExp userId={userData?.id} /> {/* Integrate the SharedExp component */}
+                  <Text style={styles.participantName}>
+                    {participant.user.name}
+                  </Text>
+                  <View style={styles.participantActions}>
+                    <TouchableOpacity
+                      style={styles.acceptButton}
+                      onPress={() =>
+                        handleAccept(participant.userId, selectedCamp.id)
+                      }
+                    >
+                      <Text style={styles.buttonText}>Accept</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={styles.rejectButton}
+                      onPress={() =>
+                        handleReject(participant.userId, selectedCamp.id)
+                      }
+                    >
+                      <Text style={styles.buttonText}>Reject</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              );
+            })
+          ) : (
+            <Text>No participants found</Text>
+          )}
+        </View>
+      )}
+      <View style={styles.sharedExperienceSection}>
+        <SharedExp userId={userData?.id} />
+        {/* Integrate the SharedExp component */}
       </View>
-</ScrollView>
+    </ScrollView>
   );
 };
 
