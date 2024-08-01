@@ -43,7 +43,7 @@ const Profile = () => {
   const handleAccept = async (userId, postId) => {
     try {
       const response = await axios.post(
-        `http:// 192.168.10.4:5000/api/acceptAndReject/${userId}/${postId}`
+        `http://192.168.10.20:5000/api/acceptAndReject/${userId}/${postId}`
       );
       console.log(`Accepted: ${userId}`, response.data);
       setParticipants((prevParticipants) =>
@@ -61,7 +61,7 @@ const Profile = () => {
   const handleReject = async (userId, postId) => {
     try {
       const response = await axios.post(
-        `http:// 192.168.10.4:5000/api/acceptAndReject/reject/${userId}/${postId}`
+        `http://192.168.10.20:5000/api/acceptAndReject/reject/${userId}/${postId}`
       );
       console.log(`Rejected: ${userId}`, response.data);
       setParticipants((prevParticipants) =>
@@ -79,7 +79,7 @@ const Profile = () => {
     const fetchUserData = async (userId: string) => {
       try {
         const response = await axios.get(
-          `http:// 192.168.10.4:5000/api/users/${userId}`
+          `http://192.168.10.20:5000/api/users/${userId}`
         );
         console.log("User data fetched:", response.data);
         setUserData({
@@ -87,6 +87,7 @@ const Profile = () => {
           name: response.data.user.name,
           email: response.data.user.email,
           age: response.data.user.age,
+          imagesProfile:response.data.user.imagesProfile,
           location: response.data.user.location,
           bio: response.data.user.bio,
           friendsCount: response.data.user.friendsCount,
@@ -114,7 +115,7 @@ const Profile = () => {
             if (decodedToken && decodedToken.id) {
 
               // Fetch user data based on ID from decoded token
-              const response = await axios.get(`http://192.168.10.7:5000/api/users/${decodedToken.id}`);
+              const response = await axios.get(`http://192.168.10.20:5000/api/users/${decodedToken.id}`);
               setUser(response.data);
               setUserData({
                 id: response.data.id,
@@ -161,7 +162,7 @@ const Profile = () => {
   const fetchParticipants = async (campId: string) => {
     try {
       const response = await axios.get(
-        `http:// 192.168.10.4:5000/api/camps/participants/${campId}`
+        `http://192.168.10.20:5000/api/camps/participants/${campId}`
       );
       setParticipants(response.data.data.joinCampingPosts); // Assuming the endpoint returns an array of participants
     } catch (error) {
@@ -200,7 +201,7 @@ const Profile = () => {
             <MaterialCommunityIcons name="menu" size={25} color="white" />
           </TouchableOpacity>
         </View>
-        <Image source={profileImage} style={styles.headerProfileImage} />
+        <Image source={{ uri: userData?.imagesProfile?.[0]  || profileImage}} style={styles.headerProfileImage} />
       </View>
       <View style={styles.profileSection}>
         <Text style={styles.profileName}>{userData?.name || "User Name"}</Text>
@@ -288,7 +289,7 @@ const Profile = () => {
                 <View key={participant.id} style={styles.participantCard}>
                   <Image
                     source={{
-                      uri: participant.user.imagesProfile || profileImage,
+                      uri: participant.user.imagesProfile?.[0] || profileImage,
                     }}
                     style={styles.profileImage}
                   />
