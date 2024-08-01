@@ -97,7 +97,7 @@ const CampingPost: React.FC = () => {
       const equipmentList = state.equipment ? state.equipment.split(',').map(item => item.trim()) : [];
       const imageUrls = state.images.length > 0 ? state.images.map(image => image.trim()) : [];
 
-      const response = await axios.post('http://192.168.10.21:5000/api/camps/add', {
+      const response = await axios.post('http:// 192.168.10.4:5000/api/camps/add', {
         organizerId: 1,
         title: state.title,
         description: state.description,

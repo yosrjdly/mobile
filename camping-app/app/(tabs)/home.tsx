@@ -8,15 +8,17 @@ import axios from 'axios';
 
 const { width, height } = Dimensions.get('window');
 
+const categories = ['Kayaking', 'Climbing', 'Fishing', 'Hiking', 'Hitchhiking'];
+
 const Home = () => {
   const router = useRouter();
   const profileImage = require('../../assets/images/default-avatar.webp');
   const [user, setUser] = useState<any>(null);
   const [camps, setCamps] = useState<any[]>([]);
+  const [filteredCamps, setFilteredCamps] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-
-  // Track liked camps
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [likedCamps, setLikedCamps] = useState<Set<number>>(new Set());
 
   const handleHeartPress = (campId: number) => {
@@ -31,6 +33,15 @@ const Home = () => {
     });
   };
 
+  const handleCategoryChange = (category: string) => {
+    setSelectedCategory(category);
+    if (category === 'All') {
+      setFilteredCamps(camps);
+    } else {
+      setFilteredCamps(camps.filter(camp => camp.category === category));
+    }
+  };
+
   useEffect(() => {
     const fetchUserAndCamps = async () => {
       try {
@@ -42,8 +53,7 @@ const Home = () => {
           try {
             const decodedToken = JWT.decode(token, key);
             if (decodedToken && decodedToken.id) {
-              // Fetch user data based on ID from decoded token
-              const userResponse = await axios.get(`http://192.168.10.21:5000/api/users/${decodedToken.id}`);
+              const userResponse = await axios.get(`http://192.168.10.4:5000/api/users/${decodedToken.id}`);
               setUser(userResponse.data);
             } else {
               console.error('Failed to decode token or token does not contain ID');
@@ -54,9 +64,9 @@ const Home = () => {
             setError('Failed to decode token');
           }
 
-          // Fetch camps data
-          const campsResponse = await axios.get('http://192.168.10.21:5000/api/camps/getAll');
+          const campsResponse = await axios.get('http://192.168.10.4:5000/api/camps/getAll');
           setCamps(campsResponse.data.data);
+          setFilteredCamps(campsResponse.data.data);
         } else {
           console.error('Token not found in AsyncStorage');
           setError('Token not found');
@@ -100,45 +110,58 @@ const Home = () => {
         <TouchableOpacity onPress={() => router.replace('/profile/Profile')}>
           <Image source={profileImage} style={styles.profileImage} />
         </TouchableOpacity>
-        <View style={styles.actionButtonsContainer}>
-          <TouchableOpacity onPress={() => router.replace('/creatCamp/CreateCamPost')} style={[styles.actionButton, styles.campingPostButton]}>
-            <MaterialCommunityIcons name="tent" size={24} color="white" />
-            <Text style={styles.actionButtonText}>Add a Camp</Text>
+        <TouchableOpacity style={[styles.actionButton, styles.campingPostButton]}>
+          <Text style={styles.actionButtonText}>Add a Camp</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={[styles.actionButton, styles.experiencesButton]}>
+          <Text style={styles.actionButtonText}>Experiences</Text>
+        </TouchableOpacity>
+      </View>
+      <View style={styles.categorySection}>
+        {['All', ...categories].map(category => (
+          <TouchableOpacity
+            key={category}
+            style={[styles.categoryButton, selectedCategory === category && styles.selectedCategoryButton]}
+            onPress={() => handleCategoryChange(category)}
+          >
+            <Text style={styles.categoryButtonText}>{category}</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.actionButton, styles.experiencesButton]}>
-            <Text style={styles.actionButtonText}>Experiences</Text>
-          </TouchableOpacity>
-        </View>
+        ))}
       </View>
       <View style={styles.postList}>
-        {camps.map((camp) => (
+        {filteredCamps.map((camp) => (
           <View style={styles.postContainer} key={camp.id}>
             <Image source={{ uri: camp.images[0] }} style={styles.postImage} />
-            <TouchableOpacity
-              style={styles.heartButton}
-              onPress={() => handleHeartPress(camp.id)}
-            >
-              <MaterialCommunityIcons
-                name={likedCamps.has(camp.id) ? 'heart' : 'heart-outline'}
-                size={30}
-                color={likedCamps.has(camp.id) ? 'red' : 'white'}
-              />
-            </TouchableOpacity>
-            <View style={styles.postInfo}>
-              <Text style={styles.postTitle}>{camp.title}</Text>
-              <Text style={styles.postLocation}>
-                <MaterialCommunityIcons name="map-marker-outline" size={18} color="#fff" /> {camp.location}
-              </Text>
-              {camp.user && (
-                <View style={styles.hostInfo}>
-                  <Image source={{ uri: camp.user.imagesProfile[0] || profileImage }} style={styles.hostProfileImage} />
-                  <Text style={styles.hostName}>{camp.user.name}</Text>
+            <View style={styles.postOverlay}>
+              <TouchableOpacity
+                style={styles.heartButton}
+                onPress={() => handleHeartPress(camp.id)}
+              >
+                <MaterialCommunityIcons
+                  name={likedCamps.has(camp.id) ? 'heart' : 'heart-outline'}
+                  size={30}
+                  color={likedCamps.has(camp.id) ? 'red' : 'white'}
+                />
+              </TouchableOpacity>
+              <View style={styles.textOverlay}>
+                <Text style={styles.postTitle}>{camp.title}</Text>
+                <Text style={styles.postLocation}>
+                  <MaterialCommunityIcons name="map-marker-outline" size={18} color="#fff" /> {camp.location}
+                </Text>
+                <Text style={styles.postCategory}>
+                  <MaterialCommunityIcons name="tag-outline" size={18} color="#fff" /> {camp.category}
+                </Text>
+                {camp.user && (
+                  <View style={styles.hostInfo}>
+                    <Image source={{ uri: camp.user.imagesProfile[0] || profileImage }} style={styles.hostProfileImage} />
+                    <Text style={styles.hostName}>{camp.user.name}</Text>
+                  </View>
+                )}
+                <View style={styles.postActions}>
+                  <TouchableOpacity onPress={() => router.push(`/${camp.id}`)} style={styles.exploreButton}>
+                    <Text style={styles.exploreText}>Explore</Text>
+                  </TouchableOpacity>
                 </View>
-              )}
-              <View style={styles.postActions}>
-                <TouchableOpacity onPress={() => router.push(`/${camp.id}`)} style={styles.exploreButton}>
-                  <Text style={styles.exploreText}>Explore</Text>
-                </TouchableOpacity>
               </View>
             </View>
           </View>
@@ -151,14 +174,14 @@ const Home = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#00595E', // Keep this color
+    backgroundColor: '#00595E',
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     padding: 20,
-    backgroundColor: '#014043', // Updated color
+    backgroundColor: '#014043',
     borderBottomLeftRadius: 30,
     borderBottomRightRadius: 30,
     shadowColor: '#000',
@@ -170,7 +193,7 @@ const styles = StyleSheet.create({
   campSkoutText: {
     fontWeight: 'bold',
     color: 'white',
-    fontSize: 26, // Keep this font size
+    fontSize: 26,
   },
   iconGroup: {
     flexDirection: 'row',
@@ -182,9 +205,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 10, // Adjusted padding
+    paddingVertical: 10,
     paddingHorizontal: 10,
-    backgroundColor: '#014043', // Updated color
+    backgroundColor: '#014043',
     marginHorizontal: 10,
     marginVertical: 20,
     borderRadius: 15,
@@ -200,76 +223,84 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     marginRight: 15,
   },
-  actionButtonsContainer: {
-    flexDirection: 'row',
-  },
   actionButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#B3492D', // Updated color
-    paddingVertical: 8, // Reduced vertical padding
-    paddingHorizontal: 15, // Reduced horizontal padding
-    borderRadius: 20, // Rounded corners
+    paddingVertical: 8,
+    paddingHorizontal: 15,
+    borderRadius: 20,
     flex: 1,
-    justifyContent: 'center',
     marginHorizontal: 5,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 6,
-    elevation: 5,
   },
   campingPostButton: {
-    backgroundColor: '#B3492D', // Updated color
+    backgroundColor: '#B3492D',
   },
   experiencesButton: {
-    backgroundColor: '#B3492D', // Updated color
+    backgroundColor: '#B3492D',
   },
   actionButtonText: {
     color: 'white',
     fontWeight: 'bold',
-    fontSize: 14, // Reduced font size
+  },
+  categorySection: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    marginVertical: 10,
+  },
+  categoryButton: {
+    backgroundColor: '#00595E',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 20,
+    margin: 5,
+  },
+  selectedCategoryButton: {
+    backgroundColor: '#004d4d',
+  },
+  categoryButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold'
   },
   postList: {
-    padding: 20,
+    paddingHorizontal: 10,
   },
   postContainer: {
-    position: 'relative',
-    borderRadius: 15,
-    marginBottom: 20,
+    marginBottom: 15,
+    borderRadius: 10,
     overflow: 'hidden',
-    height: height * 0.4,
-    backgroundColor: '#014043', // Updated color
-    borderColor: '#00796B', // Updated color
-    borderWidth: 2,
   },
   postImage: {
-    width: '100%',
-    height: '100%',
-    borderRadius: 15,
+    width: width - 20,
+    height: 200,
   },
-  heartButton: {
-    position: 'absolute',
-    top: 10,
-    right: 10,
+  postOverlay: {
+    position: 'relative',
+    height: 100,
   },
-  postInfo: {
+  textOverlay: {
     position: 'absolute',
-    bottom: 10,
-    left: 10,
-    right: 10,
-    backgroundColor: '#00595E',
+    bottom: 0,
+    left: 0,
+    right: 0,
     padding: 10,
-    borderRadius: 10,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)', // semi-transparent background
   },
   postTitle: {
-    fontSize: 18,
     fontWeight: 'bold',
     color: 'white',
+    fontSize: 18,
   },
   postLocation: {
-    fontSize: 14,
     color: 'white',
+    fontSize: 14,
+    marginVertical: 2,
+  },
+  postCategory: {
+    color: 'white',
+    fontSize: 14,
+    marginVertical: 2,
   },
   hostInfo: {
     flexDirection: 'row',
@@ -277,39 +308,48 @@ const styles = StyleSheet.create({
     marginVertical: 5,
   },
   hostProfileImage: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     marginRight: 10,
   },
   hostName: {
-    fontSize: 14,
     color: 'white',
+    fontSize: 14,
   },
   postActions: {
     flexDirection: 'row',
-    marginTop: 10,
+    justifyContent: 'center',
   },
   exploreButton: {
-    backgroundColor: '#B3492D', // Updated color
-    paddingVertical: 6,
-    paddingHorizontal: 12,
+    backgroundColor: '#B3492D',
+    paddingVertical: 8,
+    paddingHorizontal: 15,
     borderRadius: 20,
-    marginTop: 5,
+    marginVertical: 10,
   },
   exploreText: {
     color: 'white',
+    fontSize: 16,
     fontWeight: 'bold',
   },
+  heartButton: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    zIndex: 1, // Ensure it appears above other elements
+  },
   loadingText: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
     color: 'white',
-    textAlign: 'center',
-    marginTop: 50,
   },
   errorText: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
     color: 'red',
-    textAlign: 'center',
-    marginTop: 50,
   },
 });
 
