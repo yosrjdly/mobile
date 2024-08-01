@@ -84,6 +84,31 @@ const ExperienceList = () => {
     }
   };
 
+  const handleShare = async (experienceId) => {
+    try {
+      if (userId === null) {
+        console.error('User ID not found');
+        return;
+      }
+
+      await axios.post('http://192.168.10.7:5000/api/share/add', {
+        userId,
+        experienceId,
+      });
+
+      // Update state with new share count
+      setExperiences(prevExperiences =>
+        prevExperiences.map(exp =>
+          exp.id === experienceId
+            ? { ...exp, shareCounter: exp.shareCounter + 1 }
+            : exp
+        )
+      );
+    } catch (error) {
+      console.error('Error sharing experience:', error);
+    }
+  };
+
   const toggleComments = (experienceId) => {
     setSelectedExperienceId(experienceId);
     setExpandedComments(prevState => ({
@@ -158,10 +183,10 @@ const ExperienceList = () => {
             <FontAwesome name={isLiked ? "thumbs-up" : "thumbs-o-up"} size={20} color="#B3492D" />
             <Text style={styles.reactionText}>{item.likeCounter}</Text>
           </TouchableOpacity>
-          <View style={styles.reactionItem}>
+          <TouchableOpacity onPress={() => handleShare(item.id)} style={styles.reactionItem}>
             <FontAwesome name="share" size={20} color="#B3492D" />
             <Text style={styles.reactionText}>{item.shareCounter}</Text>
-          </View>
+          </TouchableOpacity>
           <TouchableOpacity onPress={() => toggleComments(item.id)} style={styles.commentButton}>
             <AntDesign name="message1" size={20} color="#B3492D" />
             <Text style={styles.commentButtonText}>{item.comments.length}</Text>
@@ -224,19 +249,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   experienceCard: {
-    backgroundColor: '#073436',
-    padding: 16,
-    marginBottom: 16,
-    borderRadius: 8,
+    backgroundColor: '#E6D5B8',
+    borderRadius: 10,
+    padding: 10,
+    marginBottom: 10,
     shadowColor: '#000',
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 2,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.3,
+    shadowRadius: 1,
+    elevation: 3,
   },
   userSection: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 10,
   },
   profileImage: {
     width: 40,
@@ -245,98 +271,93 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   userName: {
-    fontSize: 16,
-    color: '#FFFFFF',
+    fontWeight: 'bold',
+    color: '#333',
   },
   title: {
-    fontSize: 18,
     fontWeight: 'bold',
-    color: '#E7E5E5',
-    marginBottom: 8,
+    fontSize: 18,
+    marginBottom: 5,
+    color: '#333',
   },
   content: {
     fontSize: 14,
-    color: '#E7E5E5',
-    marginBottom: 12,
+    marginBottom: 5,
+    color: '#555',
   },
   imageSlider: {
-    marginBottom: 12,
+    marginBottom: 10,
   },
   image: {
-    width: 300,
-    height: 200,
-    borderRadius: 8,
-    marginRight: 8,
+    width: 100,
+    height: 100,
+    borderRadius: 10,
+    marginRight: 5,
   },
   location: {
-    fontSize: 14,
-    color: '#B3492D',
-    marginBottom: 4,
+    fontSize: 12,
+    color: '#888',
   },
   category: {
-    fontSize: 14,
-    color: '#B3492D',
-    marginBottom: 4,
+    fontSize: 12,
+    color: '#888',
   },
   filterCategory: {
-    fontSize: 14,
-    color: '#B3492D',
-    marginBottom: 12,
+    fontSize: 12,
+    color: '#888',
+    marginBottom: 5,
   },
   reactions: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 12,
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    marginVertical: 5,
   },
   reactionItem: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   reactionText: {
-    fontSize: 14,
+    marginLeft: 5,
     color: '#B3492D',
-    marginLeft: 4,
   },
   commentButton: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   commentButtonText: {
-    fontSize: 14,
+    marginLeft: 5,
     color: '#B3492D',
-    marginLeft: 4,
   },
   commentsSection: {
-    marginTop: 12,
+    marginTop: 10,
   },
   commentsTitle: {
-    fontSize: 16,
     fontWeight: 'bold',
-    color: '#E7E5E5',
-    marginBottom: 8,
+    marginBottom: 5,
+    color: '#333',
   },
   commentContainer: {
-    marginBottom: 8,
+    marginBottom: 10,
   },
   commentUserSection: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 4,
+    marginBottom: 5,
   },
   commentProfileImage: {
     width: 30,
     height: 30,
     borderRadius: 15,
-    marginRight: 8,
+    marginRight: 10,
   },
   commentUserName: {
-    fontSize: 14,
     fontWeight: 'bold',
-    color: '#E7E5E5',
+    color: '#333',
   },
   comment: {
     fontSize: 14,
-    color: '#E7E5E5',
+    color: '#555',
   },
   commentInputSection: {
     flexDirection: 'row',
@@ -344,21 +365,20 @@ const styles = StyleSheet.create({
   },
   commentInput: {
     flex: 1,
-    borderRadius: 4,
-    borderColor: '#B3492D',
     borderWidth: 1,
-    padding: 8,
-    color: '#E7E5E5',
+    borderColor: '#B3492D',
+    borderRadius: 10,
+    padding: 5,
+    marginRight: 10,
+    color: '#333',
   },
   commentSubmitButton: {
-    marginLeft: 8,
     backgroundColor: '#B3492D',
-    borderRadius: 4,
-    padding: 8,
+    borderRadius: 10,
+    padding: 5,
   },
   commentSubmitText: {
-    color: '#FFFFFF',
-    fontWeight: 'bold',
+    color: '#fff',
   },
 });
 
