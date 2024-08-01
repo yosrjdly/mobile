@@ -1,3 +1,4 @@
+
 // src/components/Profile/Profile.tsx
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View, Image, TouchableOpacity, ScrollView, Dimensions, FlatList,ActivityIndicator, } from 'react-native';
@@ -17,13 +18,16 @@ type RootStackParamList = {
 
 type ProfileScreenNavigationProp = DrawerNavigationProp<RootStackParamList, 'Profile'>;
 
+
 const { width } = Dimensions.get("window");
 
 const Profile = () => {
+
   const router = useRouter();
   const navigation = useNavigation<ProfileScreenNavigationProp>();
   const profileImage = require('../../assets/images/default-avatar.webp'); // Default profile image
   const [user, setUser] = useState<any>(null);
+
 
   const [userData, setUserData] = useState<any>(null);
   const [selectedCamp, setSelectedCamp] = useState<any>(null);
@@ -39,7 +43,7 @@ const Profile = () => {
   const handleAccept = async (userId, postId) => {
     try {
       const response = await axios.post(
-        `http://192.168.10.7:5000/api/acceptAndReject/${userId}/${postId}`
+        `http:// 192.168.10.4:5000/api/acceptAndReject/${userId}/${postId}`
       );
       console.log(`Accepted: ${userId}`, response.data);
       setParticipants((prevParticipants) =>
@@ -57,7 +61,7 @@ const Profile = () => {
   const handleReject = async (userId, postId) => {
     try {
       const response = await axios.post(
-        `http://192.168.10.7:5000/api/acceptAndReject/reject/${userId}/${postId}`
+        `http:// 192.168.10.4:5000/api/acceptAndReject/reject/${userId}/${postId}`
       );
       console.log(`Rejected: ${userId}`, response.data);
       setParticipants((prevParticipants) =>
@@ -75,7 +79,7 @@ const Profile = () => {
     const fetchUserData = async (userId: string) => {
       try {
         const response = await axios.get(
-          `http://192.168.10.7:5000/api/users/${userId}`
+          `http:// 192.168.10.4:5000/api/users/${userId}`
         );
         console.log("User data fetched:", response.data);
         setUserData({
@@ -103,12 +107,12 @@ const Profile = () => {
         const tokenData = await AsyncStorage.getItem("token");
         if (tokenData) {
           const token = tokenData.startsWith('Bearer ') ? tokenData.replace('Bearer ', '') : tokenData;
-          const key = 'mySuperSecretPrivateKey'; 
-      
+          const key = 'mySuperSecretPrivateKey';
 
           try {
             const decodedToken = JWT.decode(token, key);
             if (decodedToken && decodedToken.id) {
+
               // Fetch user data based on ID from decoded token
               const response = await axios.get(`http://192.168.10.7:5000/api/users/${decodedToken.id}`);
               setUser(response.data);
@@ -124,6 +128,7 @@ const Profile = () => {
                 interests: response.data.interests,
                 camps: response.data.camps,
               });
+
               fetchUserData(decodedToken.id);
             } else {
               console.error(
@@ -152,11 +157,11 @@ const Profile = () => {
     decodeToken();
   }, []);
 
- 
+
   const fetchParticipants = async (campId: string) => {
     try {
       const response = await axios.get(
-        `http://192.168.10.7:5000/api/camps/participants/${campId}`
+        `http:// 192.168.10.4:5000/api/camps/participants/${campId}`
       );
       setParticipants(response.data.data.joinCampingPosts); // Assuming the endpoint returns an array of participants
     } catch (error) {
@@ -228,7 +233,11 @@ const Profile = () => {
       </View>
       <View style={styles.statisticsSection}>
         <View style={styles.statItem}>
-          <MaterialCommunityIcons name="account-multiple" size={20} color="#fff" />
+          <MaterialCommunityIcons
+            name="account-multiple"
+            size={20}
+            color="#fff"
+          />
           <Text style={styles.statNumber}>{userData?.friendsCount || 0}</Text>
           <Text style={styles.statLabel}>Friends</Text>
         </View>
@@ -257,22 +266,29 @@ const Profile = () => {
               onPress={() => handleCampPress(item.post)}
             >
               <Text style={styles.campTitle}>{item.post.title}</Text>
-              <Text style={styles.campDescription}>{item.post.description}</Text>
-              <MaterialCommunityIcons name="arrow-right" size={20} color="#42a5f5" />
+              <Text style={styles.campDescription}>
+                {item.post.description}
+              </Text>
+              <MaterialCommunityIcons
+                name="arrow-right"
+                size={20}
+                color="#42a5f5"
+              />
             </TouchableOpacity>
           )}
         />
       </View>
       {selectedCamp && (
-  <View style={styles.participantsSection}>
-    <Text style={styles.sectionTitle}>Participants</Text>
-    {participants.length > 0 ? (
-      participants.map((participant) => {
-        console.log('Participant:', participant);
-        return (
-          <View key={participant.id} style={styles.participantCard}>
-              <Image
-                    source={{ uri: participant.user.imagesProfile ||profileImage
+        <View style={styles.participantsSection}>
+          <Text style={styles.sectionTitle}>Participants</Text>
+          {participants.length > 0 ? (
+            participants.map((participant) => {
+              console.log("Participant:", participant);
+              return (
+                <View key={participant.id} style={styles.participantCard}>
+                  <Image
+                    source={{
+                      uri: participant.user.imagesProfile || profileImage,
                     }}
                     style={styles.profileImage}
                   />
@@ -304,7 +320,6 @@ const Profile = () => {
         <SharedExp userId={userData?.id} /> {/* Integrate the SharedExp component */}
       </View>
 </ScrollView>
-
   );
 };
 
@@ -480,7 +495,8 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 20,
     marginHorizontal: 5,
-  },  profileImage: {
+  },
+  profileImage: {
     width: 40,
     height: 40,
     borderRadius: 20,
