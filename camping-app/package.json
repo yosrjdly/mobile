@@ -21,7 +21,6 @@
     "@react-native-picker/picker": "^2.7.7",
     "@react-native-firebase/app": "^20.3.0",
     "@react-native-firebase/storage": "^20.3.0",
-    "@react-native-picker/picker": "^2.7.5",
     "@react-navigation/drawer": "^6.7.2",
     "@react-navigation/native": "^6.1.18",
     "@react-navigation/stack": "^6.4.1",
