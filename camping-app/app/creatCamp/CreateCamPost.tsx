@@ -100,7 +100,7 @@ const uploadImage = async (uri) => {
       const equipmentList = equipment ? equipment.split(',').map(item => item.trim()) : [];
       const imageUrls = images.length > 0 ? images.map(image => image.trim()) : []; // Assuming images is an array of image URLs
   
-      const response = await axios.post('http://172.19.0.185:5000/api/camps/add', {
+      const response = await axios.post('http://192.168.232.110:5000/api/camps/add', {
         organizerId: 1,
         title,
         description,

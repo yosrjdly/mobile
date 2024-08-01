@@ -1,24 +1,33 @@
-import React, { useEffect, useState } from "react";
-import {
-  StyleSheet,
-  Text,
-  View,
-  Image,
-  TouchableOpacity,
-  ScrollView,
-  Dimensions,
-  FlatList,
-  ActivityIndicator,
-} from "react-native";
-import { MaterialCommunityIcons, FontAwesome } from "@expo/vector-icons";
-import axios from "axios";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import JWT from "expo-jwt";
+
+// src/components/Profile/Profile.tsx
+import React, { useEffect, useState } from 'react';
+import { StyleSheet, Text, View, Image, TouchableOpacity, ScrollView, Dimensions, FlatList,ActivityIndicator, } from 'react-native';
+import { MaterialCommunityIcons , FontAwesome} from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import JWT from 'expo-jwt';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
+import { DrawerNavigationProp } from '@react-navigation/drawer';
+import { useNavigation } from '@react-navigation/native';
+import SharedExp from '../../components/SharedExp';
+
+// Define your navigation types if necessary
+type RootStackParamList = {
+  Profile: undefined; // Define other screens as needed
+};
+
+type ProfileScreenNavigationProp = DrawerNavigationProp<RootStackParamList, 'Profile'>;
+
 
 const { width } = Dimensions.get("window");
 
 const Profile = () => {
-  const profileImage = require("../../assets/images/default-avatar.webp"); // Default profile image
+
+  const router = useRouter();
+  const navigation = useNavigation<ProfileScreenNavigationProp>();
+  const profileImage = require('../../assets/images/default-avatar.webp'); // Default profile image
+  const [user, setUser] = useState<any>(null);
+
 
   const [userData, setUserData] = useState<any>(null);
   const [selectedCamp, setSelectedCamp] = useState<any>(null);
@@ -66,7 +75,6 @@ const Profile = () => {
       console.error("Error rejecting participant:", error);
     }
   };
-console.log("hhhh")
   useEffect(() => {
     const fetchUserData = async (userId: string) => {
       try {
@@ -98,14 +106,29 @@ console.log("hhhh")
       try {
         const tokenData = await AsyncStorage.getItem("token");
         if (tokenData) {
-          const token = tokenData.startsWith("Bearer ")
-            ? tokenData.replace("Bearer ", "")
-            : tokenData;
-          const key = "mySuperSecretPrivateKey"; // Ensure this matches the encoding key
+          const token = tokenData.startsWith('Bearer ') ? tokenData.replace('Bearer ', '') : tokenData;
+          const key = 'mySuperSecretPrivateKey';
 
           try {
             const decodedToken = JWT.decode(token, key);
             if (decodedToken && decodedToken.id) {
+
+              // Fetch user data based on ID from decoded token
+              const response = await axios.get(`http://192.168.10.7:5000/api/users/${decodedToken.id}`);
+              setUser(response.data);
+              setUserData({
+                id: response.data.id,
+                name: response.data.name,
+                email: response.data.email,
+                age: response.data.age,
+                location: response.data.location,
+                bio: response.data.bio,
+                friendsCount: response.data.friendsCount,
+                campsJoined: response.data.campsJoined,
+                interests: response.data.interests,
+                camps: response.data.camps,
+              });
+
               fetchUserData(decodedToken.id);
             } else {
               console.error(
@@ -133,6 +156,7 @@ console.log("hhhh")
 
     decodeToken();
   }, []);
+
 
   const fetchParticipants = async (campId: string) => {
     try {
@@ -209,7 +233,11 @@ console.log("hhhh")
       </View>
       <View style={styles.statisticsSection}>
         <View style={styles.statItem}>
-          <MaterialCommunityIcons name="account-multiple" size={20} color="#fff" />
+          <MaterialCommunityIcons
+            name="account-multiple"
+            size={20}
+            color="#fff"
+          />
           <Text style={styles.statNumber}>{userData?.friendsCount || 0}</Text>
           <Text style={styles.statLabel}>Friends</Text>
         </View>
@@ -238,22 +266,29 @@ console.log("hhhh")
               onPress={() => handleCampPress(item.post)}
             >
               <Text style={styles.campTitle}>{item.post.title}</Text>
-              <Text style={styles.campDescription}>{item.post.description}</Text>
-              <MaterialCommunityIcons name="arrow-right" size={20} color="#42a5f5" />
+              <Text style={styles.campDescription}>
+                {item.post.description}
+              </Text>
+              <MaterialCommunityIcons
+                name="arrow-right"
+                size={20}
+                color="#42a5f5"
+              />
             </TouchableOpacity>
           )}
         />
       </View>
       {selectedCamp && (
-  <View style={styles.participantsSection}>
-    <Text style={styles.sectionTitle}>Participants</Text>
-    {participants.length > 0 ? (
-      participants.map((participant) => {
-        console.log('Participant:', participant);
-        return (
-          <View key={participant.id} style={styles.participantCard}>
-              <Image
-                    source={{ uri: participant.user.imagesProfile ||profileImage
+        <View style={styles.participantsSection}>
+          <Text style={styles.sectionTitle}>Participants</Text>
+          {participants.length > 0 ? (
+            participants.map((participant) => {
+              console.log("Participant:", participant);
+              return (
+                <View key={participant.id} style={styles.participantCard}>
+                  <Image
+                    source={{
+                      uri: participant.user.imagesProfile || profileImage,
                     }}
                     style={styles.profileImage}
                   />
@@ -279,9 +314,12 @@ console.log("hhhh")
       <Text>No participants found</Text>
     )}
   </View>
+  
 )}
+ <View style={styles.sharedExperienceSection}>
+        <SharedExp userId={userData?.id} /> {/* Integrate the SharedExp component */}
+      </View>
 </ScrollView>
-
   );
 };
 
@@ -457,11 +495,15 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 20,
     marginHorizontal: 5,
-  },  profileImage: {
+  },
+  profileImage: {
     width: 40,
     height: 40,
     borderRadius: 20,
     marginRight: 16,
+  },
+  sharedExperienceSection: {
+    padding: 20,
   },
 });
 

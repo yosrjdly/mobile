@@ -78,6 +78,7 @@ const PostDetailScreen: React.FC = () => {
 
       const response = await axios.post('http://192.168.10.20:5000/api/joinPosts/add', body);
 
+      const response = await axios.post('http://192.168.232.110:5000/api/joinPosts/add', body);
       console.log('Success', response.data.data);
       setIsSuccessModalVisible(true); // Show success modal
       setRefresh(prev => !prev); // Trigger data refresh
@@ -91,6 +92,7 @@ const PostDetailScreen: React.FC = () => {
     try {
       const response = await axios.post('http://192.168.10.20:5000/api/joinPosts/cancel', body);
 
+      const response = await axios.post('http://192.168.232.110:5000/api/joinPosts/cancel', body);
       console.log('Success', response.data);
       setIsCancelSuccessModalVisible(true); // Show cancellation success modal
       setRefresh(prev => !prev); // Trigger data refresh
