@@ -46,14 +46,23 @@ const Home = () => {
     const fetchUserAndCamps = async () => {
       try {
         const tokenData = await AsyncStorage.getItem('token');
+        console.log("token:",tokenData)
+
         if (tokenData) {
           const token = tokenData.startsWith('Bearer ') ? tokenData.replace('Bearer ', '') : tokenData;
           const key = 'mySuperSecretPrivateKey'; // Ensure this matches the encoding key
 
           try {
             const decodedToken = JWT.decode(token, key);
+            console.log("decoded token:",decodedToken)
             if (decodedToken && decodedToken.id) {
-              const userResponse = await axios.get(`http://192.168.10.4:5000/api/users/${decodedToken.id}`);
+
+
+              // Fetch user data based on ID from decoded token
+            console.log("decoded token id:",decodedToken.id)
+
+              const userResponse = await axios.get(`http://192.168.10.7:5000/api/users/${decodedToken.id}`);
+
               setUser(userResponse.data);
             } else {
               console.error('Failed to decode token or token does not contain ID');
@@ -64,7 +73,9 @@ const Home = () => {
             setError('Failed to decode token');
           }
 
-          const campsResponse = await axios.get('http://192.168.10.4:5000/api/camps/getAll');
+
+          // Fetch camps data
+          const campsResponse = await axios.get('http://192.168.10.7:5000/api/camps/getAll');
           setCamps(campsResponse.data.data);
           setFilteredCamps(campsResponse.data.data);
         } else {
@@ -108,12 +119,8 @@ const Home = () => {
       </View>
       <View style={styles.actionSection}>
 
-        <Image source={profileImage} style={styles.profileImage} />
-        <TouchableOpacity
-          style={[styles.actionButton, styles.campingPostButton]}
-          onPress={() => router.push('/creatCamp/CreateCamPost')} 
-        >
-
+       
+          
         <TouchableOpacity onPress={() => router.replace('/profile/Profile')}>
           <Image source={profileImage} style={styles.profileImage} />
         </TouchableOpacity>
@@ -132,6 +139,7 @@ const Home = () => {
             onPress={() => handleCategoryChange(category)}
           >
             <Text style={styles.categoryButtonText}>{category}</Text>
+
           </TouchableOpacity>
         ))}
       </View>
