@@ -10,6 +10,7 @@ interface User {
   name: string;
   imagesProfile: string[];
   joinCampingPosts: JoinCampingPost[];
+  posts:Post[]
 }
 
 interface Post {
@@ -58,7 +59,8 @@ const Notifications = () => {
           name: response.data.user.name,
           email: response.data.user.email,
           imagesProfile:response.data.user.imagesProfile,
-          joinCampingPosts:response.data.user.joinCampingPosts
+          joinCampingPosts:response.data.user.joinCampingPosts,
+          posts:response.data.posts
          
         });
       } catch (error) {
