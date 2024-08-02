@@ -3,8 +3,10 @@ import { StyleSheet, Text, View, ImageBackground, TextInput, TouchableOpacity, K
 import { AntDesign } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import axios from 'axios';
+import interests from '../UserInterests/Interests'
 
 interface User {
+
   name: string;
   email: string;
   password: string;
@@ -12,6 +14,7 @@ interface User {
 }
 
 const RegisterScreen = () => {
+  const [user, setUser] = useState<User | null>(null);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -54,12 +57,17 @@ const RegisterScreen = () => {
 
       const response = await axios.post('http://192.168.10.20:5000/api/users/register', userData);
 
-      Alert.alert('Success', response.data.message);
-      router.replace('UserInterests/Interests');
+      Alert.alert('Success', response.data.message)
+      setUser(response.data.user)
+      console.log(response.data.user)
+      router.replace({
+        pathname: 'UserInterests/Interests',
+        params: { userId: response.data.user.id } // Pass userId as a parameter
+      });
     } catch (err: any) {
-      console.error('Registration failed:', err);
+      console.error('Registration failed:', err)
       setError(err.message);
-      Alert.alert('Registration Error', err.message);
+      Alert.alert('Registration Error', err.message)
     } finally {
       setIsSubmitting(false);
     }
@@ -151,6 +159,7 @@ const RegisterScreen = () => {
     </ImageBackground>
   );
 };
+
 
 export default RegisterScreen;
 
