@@ -75,6 +75,7 @@ const Profile = () => {
       console.error("Error rejecting participant:", error);
     }
   };
+  
   useEffect(() => {
     const fetchUserData = async (userId: string) => {
       try {
