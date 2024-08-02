@@ -1,45 +1,134 @@
 import { StyleSheet, Text, View, Image } from 'react-native';
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import JWT from 'expo-jwt';
+import axios from 'axios';
 
-const notifications = () => {
-  const profileImageUrl = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSRuRip5LBOHjlx6SIMhLsGHLxpw_wUUXG8Z0sz9YUBaP9PstT_BmRY1CGaFBqqDeFAX9w&usqp=CAU';
+interface User {
+  id: string;
+  email: string;
+  name: string;
+  imagesProfile: string[];
+  joinCampingPosts: JoinCampingPost[];
+}
+
+interface Post {
+  id: number;
+  title: string;
+  description: string;
+  location: string;
+  startDate: string; // ISO 8601 format
+  endDate: string; // ISO 8601 format
+  equipment: string[];
+  places: number;
+  ageCategory: "ADULT" | "CHILD" | "TEEN";
+  images: string[];
+  organizerId: number;
+  category: string;
+  status: "InProgress" | "Completed" | "Cancelled";
+  joinCampingPosts: JoinCampingPost[];
+}
+
+interface JoinCampingPost {
+  userId: number;
+  postId: number;
+  rating: number;
+  reviews: string;
+  favorite: "Yes" | "No";
+  notification: string;
+  status: "ACCEPTED" | "REJECTED" | "PENDING";
+  user: User;
+  post: Post;
+}
+
+const Notifications = () => {
+  const [user, setUser] = useState<User | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    const fetchUserData = async (userId: string) => {
+      try {
+        const response = await axios.get(
+          `http://192.168.10.20:5000/api/users/${userId}`
+        );
+        console.log("User data fetched:", response.data);
+        setUser({
+          id: response.data.user.id,
+          name: response.data.user.name,
+          email: response.data.user.email,
+          imagesProfile:response.data.user.imagesProfile,
+          joinCampingPosts:response.data.user.joinCampingPosts
+         
+        });
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+        setError("Failed to fetch user data");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const decodeToken = async () => {
+      try {
+        const tokenData = await AsyncStorage.getItem("token");
+        if (tokenData) {
+          const token = tokenData.startsWith('Bearer ') ? tokenData.replace('Bearer ', '') : tokenData;
+          const key = 'mySuperSecretPrivateKey';
+
+          try {
+            const decodedToken = JWT.decode(token, key);
+            if (decodedToken && decodedToken.id) {
+              fetchUserData(decodedToken.id);
+            } else {
+              console.error("Failed to decode token or token does not contain ID");
+              setError("Failed to decode token or token does not contain ID");
+            }
+          } catch (decodeError) {
+            console.error("Error decoding token:", decodeError);
+            setError("Failed to decode token");
+          }
+        } else {
+          console.error("Token not found in AsyncStorage");
+          setError("Token not found");
+        }
+      } catch (storageError) {
+        console.error("Failed to fetch token from AsyncStorage:", storageError);
+        setError("Failed to fetch token");
+      }
+    };
+
+    decodeToken();
+  }, []);
+  console.log('user',user?.joinCampingPosts)
+
+  if (loading) {
+    return <Text style={styles.message}>Loading...</Text>;
+  }
+
+  if (error) {
+    return <Text style={styles.message}>{error}</Text>;
+  }
+
+  const profileImageUrl = user?.imagesProfile?.[0] || 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSRuRip5LBOHjlx6SIMhLsGHLxpw_wUUXG8Z0sz9YUBaP9PstT_BmRY1CGaFBqqDeFAX9w&usqp=CAU';
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Notifications</Text>
-      <View style={styles.notification}>
-        <Image style={styles.profile} source={{ uri: profileImageUrl }} />
-        <View style={styles.info}>
-          <Text style={styles.name}>Samir</Text>
-          <Text style={styles.message}>Liked your Post</Text>
+      {user?.joinCampingPosts?.map((notification, index) => (
+        <View key={index} style={styles.notification}>
+          <Image style={styles.profile} source={{ uri: profileImageUrl }} />
+          <View style={styles.info}>
+            <Text style={styles.name}>{user.name}</Text>
+            <Text style={styles.message}>{notification.notification}</Text>
+          </View>
         </View>
-      </View>
-      <View style={styles.notification}>
-        <Image style={styles.profile} source={{ uri: profileImageUrl }} />
-        <View style={styles.info}>
-          <Text style={styles.name}>Yosri Bounjeh</Text>
-          <Text style={styles.message}>Joined your trip</Text>
-        </View>
-      </View>
-      <View style={styles.notification}>
-        <Image style={styles.profile} source={{ uri: profileImageUrl }} />
-        <View style={styles.info}>
-          <Text style={styles.name}>Samir</Text>
-          <Text style={styles.message}>Commented on your Post</Text>
-        </View>
-      </View>
-      <View style={styles.notification}>
-        <Image style={styles.profile} source={{ uri: profileImageUrl }} />
-        <View style={styles.info}>
-          <Text style={styles.name}>Yosri Bounjeh</Text>
-          <Text style={styles.message}>Shared your trip</Text>
-        </View>
-      </View>
+      ))}
     </View>
   );
 }
 
-export default notifications;
+export default Notifications;
 
 const styles = StyleSheet.create({
   container: {
