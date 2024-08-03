@@ -43,7 +43,7 @@ const Profile = () => {
   const handleAccept = async (userId, postId) => {
     try {
       const response = await axios.post(
-        `http://192.168.10.20:5000/api/acceptAndReject/${userId}/${postId}`
+        `http://192.168.1.100:5000/api/acceptAndReject/${userId}/${postId}`
       );
       console.log(`Accepted: ${userId}`, response.data);
       setParticipants((prevParticipants) =>
@@ -61,7 +61,7 @@ const Profile = () => {
   const handleReject = async (userId, postId) => {
     try {
       const response = await axios.post(
-        `http://192.168.10.20:5000/api/acceptAndReject/reject/${userId}/${postId}`
+        `http://192.168.1.100:5000/api/acceptAndReject/reject/${userId}/${postId}`
       );
       console.log(`Rejected: ${userId}`, response.data);
       setParticipants((prevParticipants) =>
@@ -80,7 +80,7 @@ const Profile = () => {
     const fetchUserData = async (userId: string) => {
       try {
         const response = await axios.get(
-          `http://192.168.10.20:5000/api/users/${userId}`
+          `http://192.168.1.100:5000/api/users/${userId}`
         );
         console.log("User data fetched:", response.data);
         setUserData({
@@ -116,7 +116,7 @@ const Profile = () => {
             if (decodedToken && decodedToken.id) {
 
               // Fetch user data based on ID from decoded token
-              const response = await axios.get(`http://192.168.10.20:5000/api/users/${decodedToken.id}`);
+              const response = await axios.get(`http://192.168.1.100:5000/api/users/${decodedToken.id}`);
               setUser(response.data);
               setUserData({
                 id: response.data.id,
@@ -163,7 +163,7 @@ const Profile = () => {
   const fetchParticipants = async (campId: string) => {
     try {
       const response = await axios.get(
-        `http://192.168.10.20:5000/api/camps/participants/${campId}`
+        `http://192.168.1.100:5000/api/camps/participants/${campId}`
       );
       setParticipants(response.data.data.joinCampingPosts); // Assuming the endpoint returns an array of participants
     } catch (error) {
