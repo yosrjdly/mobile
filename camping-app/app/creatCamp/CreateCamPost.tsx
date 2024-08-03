@@ -71,44 +71,7 @@ const handleImagePick = async () => {
     alert('An unexpected error occurred while picking the image. Please try again.');
   }
 };
-// const uploadImage = async (uri) => {
   
-
-//   if (!uri) {
-//     console.error('No image selected');
-//     return;
-//   }
-
-//   try {
-//     const response = await fetch(uri);
-//     const blob = await response.blob();
-//     const filename = uri.split('/').pop();
-//     const ref = storage.ref().child(`images/${filename}`);
-
-//     const uploadTask = await ref.put(blob);
-
-//     // Handle upload progress if needed
-//     uploadTask.on('state_changed',
-//       (snapshot) => {
-//         // Handle progress
-//       },
-//       (error) => {
-//         // Handle unsuccessful uploads
-//         console.error('Error uploading image:', error);
-//       },
-//       () => {
-//         // Handle successful uploads on completion   
-
-//         uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
-//           setImages(prevImages => [...prevImages, downloadURL]);
-//         });
-//       }
-//     );
-//   } catch (error) {
-//     console.error('Error uploading image:', error);
-//     console.log('Error uploading image:', error.message, error.code, error.stack);
-//   }
-// };
 
 console.log(images);
 

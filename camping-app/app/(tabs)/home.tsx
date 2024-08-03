@@ -10,10 +10,17 @@ const { width, height } = Dimensions.get('window');
 
 const categories = ['Kayaking', 'Climbing', 'Fishing', 'Hiking', 'Hitchhiking'];
 
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  imagesProfile?: string[]; // Optional, used for campmates
+}
 const Home = () => {
   const router = useRouter();
   const profileImage = require('../../assets/images/default-avatar.webp');
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User>({ id: "", name: "", email: "", role: "",imagesProfile:[] });
   const [camps, setCamps] = useState<any[]>([]);
   const [filteredCamps, setFilteredCamps] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -54,30 +61,30 @@ const Home = () => {
 
           try {
             const decodedToken = JWT.decode(token, key);
-            console.log("decoded token:",decodedToken)
-            if (decodedToken && decodedToken.id) {
 
+            if (decodedToken) {
+              setUser({
+                id: decodedToken.id || '',
+                name: decodedToken.name || '',
+                email: decodedToken.email || '',
+                imagesProfile: decodedToken.imagesProfile,
+                role: decodedToken.role || '',
+              });
 
-              // Fetch user data based on ID from decoded token
-            console.log("decoded token id:",decodedToken.id)
-
-              const userResponse = await axios.get(`http://192.168.10.6:5000/api/users/${decodedToken.id}`);
-
-              setUser(userResponse.data);
             } else {
-              console.error('Failed to decode token or token does not contain ID');
-              setError('Failed to decode token or token does not contain ID');
+              console.error('Failed to decode token');
             }
           } catch (decodeError) {
             console.error('Error decoding token:', decodeError);
-            setError('Failed to decode token');
           }
 
 
           // Fetch camps data
+
           const campsResponse = await axios.get('http://192.168.10.6:5000/api/camps/getAll');
           console.log(campsResponse.data.data[0].user.imagesProfile[0]);
           
+
           setCamps(campsResponse.data.data);
           setFilteredCamps(campsResponse.data.data);
         } else {
@@ -94,6 +101,12 @@ const Home = () => {
 
     fetchUserAndCamps();
   }, []); // Empty dependency array to run only once
+
+
+  console.log('User:', user);
+  console.log('Camps:', camps);
+
+ 
 
   if (loading) {
     return <Text style={styles.loadingText}>Loading...</Text>;
@@ -121,10 +134,8 @@ const Home = () => {
       </View>
       <View style={styles.actionSection}>
 
-
-          
         <TouchableOpacity onPress={() => router.replace('/profile/Profile')}>
-          <Image source={profileImage} style={styles.profileImage} />
+          <Image source={{ uri: user.imagesProfile?.[0]  || 'https://via.placeholder.com/50' }}style={styles.profileImage} />
         </TouchableOpacity>
         <TouchableOpacity onPress={() =>router.push('/creatCamp/CreateCamPost')} style={[styles.actionButton, styles.campingPostButton]} >
           <Text style={styles.actionButtonText}>Add a Camp</Text>
