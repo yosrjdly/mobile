@@ -21,10 +21,6 @@ const Profile = () => {
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
 
-    const openDrawer = () => {
-        navigation.dispatch(DrawerActions.openDrawer());
-    };
-
     useEffect(() => {
         const fetchUserData = async (userId: string) => {
             try {
