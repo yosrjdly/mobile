@@ -22,6 +22,7 @@ const LoginScreen = () => {
   };
 
   const handleLogin = async () => {
+
     try {
       if (!email || !password) {
         throw new Error('Email and password are required');
@@ -32,13 +33,6 @@ const LoginScreen = () => {
       }
 
       const newData: User = { email, password };
-
-
-
-
-
-     
-
 
       const res = await fetch('http://192.168.10.20:5000/api/users/login', {
         method: 'POST',
@@ -55,17 +49,16 @@ const LoginScreen = () => {
       await AsyncStorage.setItem('token', data.token);
       await AsyncStorage.setItem('isAuthenticated', 'true');
       const token = data.token.replace('Bearer ', '');
-
-      const key = 'mySuperSecretPrivateKey';
+      /*const key = 'myS
+      uperSecretPrivateKey';
       const decodedToken = JWT.decode(token, key);
-      console.log('Decoded Token:', decodedToken);
+      console.log('Decoded Token:', decodedToken);*/
 
       console.log('Login successful!', data);
 
       // Navigate to the Home tab after successful login
 
       router.replace('home');
-
 
     } catch (err: any) {
       console.error('Login failed:', err);
