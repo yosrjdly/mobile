@@ -39,7 +39,7 @@ const LoginScreen = () => {
 
      
 
-      const res = await fetch('http://192.168.10.7:5000/api/users/login', {
+      const res = await fetch('http://192.168.10.4:5000/api/users/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newData)
@@ -55,9 +55,9 @@ const LoginScreen = () => {
       await AsyncStorage.setItem('isAuthenticated', 'true');
       const token = data.token.replace('Bearer ', '');
 
-      const key = 'mySuperSecretPrivateKey';
-      const decodedToken = JWT.decode(token, key);
-      console.log('Decoded Token:', decodedToken);
+      // const key = 'mySuperSecretPrivateKey';
+      // const decodedToken = JWT.decode(token, key);
+      // console.log('Decoded Token:', decodedToken);
 
       console.log('Login successful!', data);
 

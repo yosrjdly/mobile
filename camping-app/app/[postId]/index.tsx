@@ -43,6 +43,7 @@ interface CampingEventData {
   organizerId: number;
   user: User;
   joinCampingPosts: JoinCampingPost[];
+  category:string
 }
 
 interface ApiResponse {
@@ -76,7 +77,7 @@ const PostDetailScreen: React.FC = () => {
     try {
 
 
-      const response = await axios.post('http://192.168.232.110:5000/api/joinPosts/add', body);
+      const response = await axios.post('http://192.168.10.4:5000/api/joinPosts/add', body);
       console.log('Success', response.data.data);
       setIsSuccessModalVisible(true); // Show success modal
       setRefresh(prev => !prev); // Trigger data refresh
@@ -89,7 +90,7 @@ const PostDetailScreen: React.FC = () => {
   const cancelPost = async (body: JoinCampingPost) => {
     try {
 
-      const response = await axios.post('http://192.168.232.110:5000/api/joinPosts/cancel', body);
+      const response = await axios.post('http://192.168.10.4:5000/api/joinPosts/cancel', body);
       console.log('Success', response.data);
       setIsCancelSuccessModalVisible(true); // Show cancellation success modal
       setRefresh(prev => !prev); // Trigger data refresh
@@ -103,7 +104,7 @@ const PostDetailScreen: React.FC = () => {
     const fetchPostDetails = async (id: string) => {
       setLoading(true);
       try {
-        const response = await axios.get<ApiResponse>(`http://192.168.232.110:5000/api/camps/${id}`);
+        const response = await axios.get<ApiResponse>(`http://192.168.10.4:5000/api/camps/${id}`);
 
         setPost(response.data.data);
         console.log(response.data.data);

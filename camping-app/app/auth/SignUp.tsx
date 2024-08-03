@@ -54,8 +54,6 @@ const RegisterScreen = () => {
 
       const response = await axios.post('http://192.168.10.4:5000/api/users/register', userData);
 
-     
-
       Alert.alert('Success', response.data.message);
       router.replace('UserInterests/Interests');
     } catch (err: any) {
