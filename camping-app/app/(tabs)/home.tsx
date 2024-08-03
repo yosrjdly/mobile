@@ -61,6 +61,7 @@ const Home = () => {
 
           try {
             const decodedToken = JWT.decode(token, key);
+
             if (decodedToken) {
               setUser({
                 id: decodedToken.id || '',
@@ -69,6 +70,7 @@ const Home = () => {
                 imagesProfile: decodedToken.imagesProfile,
                 role: decodedToken.role || '',
               });
+
             } else {
               console.error('Failed to decode token');
             }
@@ -78,7 +80,11 @@ const Home = () => {
 
 
           // Fetch camps data
-          const campsResponse = await axios.get('http://192.168.10.4:5000/api/camps/getAll');
+
+          const campsResponse = await axios.get('http://192.168.10.6:5000/api/camps/getAll');
+          console.log(campsResponse.data.data[0].user.imagesProfile[0]);
+          
+
           setCamps(campsResponse.data.data);
           setFilteredCamps(campsResponse.data.data);
         } else {
@@ -118,7 +124,7 @@ const Home = () => {
           <TouchableOpacity style={styles.iconButton}>
             <Feather name="search" size={24} color="white" />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.iconButton}>
+          <TouchableOpacity style={styles.iconButton}  onPress={() =>router.push('emergenci')} >
             <MaterialCommunityIcons name="medical-bag" size={24} color="white" />
           </TouchableOpacity>
           <TouchableOpacity style={styles.iconButton}>
@@ -127,13 +133,14 @@ const Home = () => {
         </View>
       </View>
       <View style={styles.actionSection}>
+
         <TouchableOpacity onPress={() => router.replace('/profile/Profile')}>
           <Image source={{ uri: user.imagesProfile?.[0]  || 'https://via.placeholder.com/50' }}style={styles.profileImage} />
         </TouchableOpacity>
-        <TouchableOpacity style={[styles.actionButton, styles.campingPostButton]}>
+        <TouchableOpacity onPress={() =>router.push('/creatCamp/CreateCamPost')} style={[styles.actionButton, styles.campingPostButton]} >
           <Text style={styles.actionButtonText}>Add a Camp</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={[styles.actionButton, styles.experiencesButton]}>
+        <TouchableOpacity  style={[styles.actionButton, styles.experiencesButton]}>
           <Text style={styles.actionButtonText}>Experiences</Text>
         </TouchableOpacity>
       </View>
@@ -174,7 +181,7 @@ const Home = () => {
                 </Text>
                 {camp.user && (
                   <View style={styles.hostInfo}>
-                    <Image source={{ uri: camp.user.imagesProfile[0] || profileImage }} style={styles.hostProfileImage} />
+                    {/* <Image source={{ uri: camp.user.imagesProfile[0] || profileImage }} style={styles.hostProfileImage} /> */}
                     <Text style={styles.hostName}>{camp.user.name}</Text>
                   </View>
                 )}
@@ -244,6 +251,9 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     marginRight: 15,
   },
+  actionButtonsContainer: {
+    flexDirection: 'row',
+  },
   actionButton: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -291,6 +301,10 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     borderRadius: 10,
     overflow: 'hidden',
+    height: height * 0.4,
+    backgroundColor: '#014043', // Updated color
+    borderColor: '#00796B', // Updated color
+    borderWidth: 2,
   },
   postImage: {
     width: width - 20,
@@ -302,18 +316,19 @@ const styles = StyleSheet.create({
   },
   textOverlay: {
     position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
+    bottom: 10,
+    left: 10,
+    right: 10,
+    backgroundColor: '#00595E',
     padding: 10,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)', // semi-transparent background
+    borderTopLeftRadius: 15,
   },
   postTitle: {
     fontWeight: 'bold',
-    color: 'white',
-    fontSize: 18,
+  
   },
   postLocation: {
+    fontSize: 14,
     color: 'white',
     fontSize: 14,
     marginVertical: 2,
@@ -327,16 +342,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginVertical: 5,
+
   },
   hostProfileImage: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 30,
+    height: 30,
+    borderRadius: 15,
     marginRight: 10,
   },
   hostName: {
-    color: 'white',
     fontSize: 14,
+    color: 'white',
   },
   postActions: {
     flexDirection: 'row',
@@ -365,12 +381,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     color: 'white',
+    textAlign: 'center',
+    marginTop: 50,
   },
   errorText: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     color: 'red',
+    textAlign: 'center',
+    marginTop: 50,
   },
 });
 
