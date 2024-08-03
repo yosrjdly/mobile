@@ -34,13 +34,24 @@ const LoginScreen = () => {
 
       const newData: User = { email, password };
 
-      const res = await fetch('http://192.168.10.20:5000/api/users/login', {
+
+
+
+
+
+     
+
+
+      const res = await fetch('http://192.168.10.4:5000/api/users/login', {
+
+
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newData)
       });
 
       const data = await res.json();
+console.log(data);
 
       if (!res.ok) {
         throw new Error(data.error || 'Failed to login');
@@ -49,10 +60,13 @@ const LoginScreen = () => {
       await AsyncStorage.setItem('token', data.token);
       await AsyncStorage.setItem('isAuthenticated', 'true');
       const token = data.token.replace('Bearer ', '');
-      /*const key = 'myS
-      uperSecretPrivateKey';
-      const decodedToken = JWT.decode(token, key);
-      console.log('Decoded Token:', decodedToken);*/
+
+
+      const key = 'mySuperSecretPrivateKey';
+
+      // const decodedToken = JWT.decode(token, key);
+      // console.log('Decoded Token:', decodedToken);
+
 
       console.log('Login successful!', data);
 
@@ -68,9 +82,9 @@ const LoginScreen = () => {
   };
 
 
-  useEffect(() => {
-    // Optionally hide the header or set other navigation options here
-  },);
+  // useEffect(() => {
+  //   // Optionally hide the header or set other navigation options here
+  // },);
 
   return (
     <ImageBackground
