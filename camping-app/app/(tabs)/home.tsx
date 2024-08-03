@@ -127,9 +127,6 @@ const Home = () => {
         </View>
       </View>
       <View style={styles.actionSection}>
-
-       
-          
         <TouchableOpacity onPress={() => router.replace('/profile/Profile')}>
           <Image source={{ uri: user.imagesProfile?.[0]  || 'https://via.placeholder.com/50' }}style={styles.profileImage} />
         </TouchableOpacity>
