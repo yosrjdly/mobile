@@ -43,6 +43,7 @@ interface CampingEventData {
   organizerId: number;
   user: User;
   joinCampingPosts: JoinCampingPost[];
+  category:string
 }
 
 interface ApiResponse {

@@ -55,9 +55,9 @@ const LoginScreen = () => {
       await AsyncStorage.setItem('isAuthenticated', 'true');
       const token = data.token.replace('Bearer ', '');
 
-      const key = 'mySuperSecretPrivateKey';
-      const decodedToken = JWT.decode(token, key);
-      console.log('Decoded Token:', decodedToken);
+      // const key = 'mySuperSecretPrivateKey';
+      // const decodedToken = JWT.decode(token, key);
+      // console.log('Decoded Token:', decodedToken);
 
       console.log('Login successful!', data);
 
