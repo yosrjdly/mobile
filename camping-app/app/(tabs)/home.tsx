@@ -78,7 +78,7 @@ const Home = () => {
 
 
           // Fetch camps data
-          const campsResponse = await axios.get('http://192.168.10.20:5000/api/camps/getAll');
+          const campsResponse = await axios.get('http://192.168.10.4:5000/api/camps/getAll');
           setCamps(campsResponse.data.data);
           setFilteredCamps(campsResponse.data.data);
         } else {
@@ -127,9 +127,6 @@ const Home = () => {
         </View>
       </View>
       <View style={styles.actionSection}>
-
-       
-          
         <TouchableOpacity onPress={() => router.replace('/profile/Profile')}>
           <Image source={{ uri: user.imagesProfile?.[0]  || 'https://via.placeholder.com/50' }}style={styles.profileImage} />
         </TouchableOpacity>
