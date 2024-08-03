@@ -14,7 +14,7 @@ interface User {
   name: string;
   email: string;
   role: string;
-  imagesProfile?: string[]; // Optional, used for campmates
+  imagesProfile?: string[]; 
   gender?: string;
   address?: string;
 }

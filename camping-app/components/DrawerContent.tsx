@@ -82,6 +82,9 @@ const styles = StyleSheet.create({
   icon: {
     marginLeft: 10,
   },
+  icons: {
+    marginLeft: 10,
+  },
 });
 
 export default DrawerContent;
