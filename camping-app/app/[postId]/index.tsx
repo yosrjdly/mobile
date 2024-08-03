@@ -14,8 +14,8 @@ interface User {
   email: string;
   role: string;
   imagesProfile?: string[]; // Optional, used for campmates
-  gender?:string;
-  address?:string;
+  gender?: string;
+  address?: string;
 }
 
 interface JoinCampingPost {
@@ -25,7 +25,7 @@ interface JoinCampingPost {
   reviews: string;
   favorite: string;
   notification: string;
-  status:string,
+  status: string,
   user: User;
 }
 
@@ -43,7 +43,7 @@ interface CampingEventData {
   organizerId: number;
   user: User;
   joinCampingPosts: JoinCampingPost[];
-  category:string
+  category: string
 }
 
 interface ApiResponse {
@@ -64,7 +64,8 @@ const PostDetailScreen: React.FC = () => {
   const [isCancelSuccessModalVisible, setIsCancelSuccessModalVisible] = useState<boolean>(false); // Cancellation Success Modal
   const [actionType, setActionType] = useState<'join' | 'cancel'>('join'); // Track action type
 
- 
+
+
 
   const { postId } = useLocalSearchParams();
   const postIdString = typeof postId === 'string' ? postId : Array.isArray(postId) ? postId[0] : '';
@@ -171,9 +172,6 @@ const PostDetailScreen: React.FC = () => {
   }, [refresh]);
   console.log('user', user)
 
-  // Determine the image URI
-  const postImageUri = post?.images.length ? post.images[0] : 'https://via.placeholder.com/400';
-
   if (loading) {
     return (
       <View style={styles.container}>
@@ -227,7 +225,7 @@ const PostDetailScreen: React.FC = () => {
         rating: 5,
         reviews: 'Great camping experience!',
         favorite: 'Yes',
-        status:'PENDING',
+        status: 'PENDING',
         notification: 'Great camping experience!',
         user: user,
       };
@@ -240,7 +238,7 @@ const PostDetailScreen: React.FC = () => {
         reviews: 'Great camping experience!',
         favorite: 'Yes',
         notification: 'Great camping experience!',
-        status:"PENDING",
+        status: "PENDING",
         user: user,
       };
       await cancelPost(cancelPostData);
@@ -260,7 +258,7 @@ const PostDetailScreen: React.FC = () => {
       reviews: 'Great camping experience!',
       favorite: 'Yes',
       notification: 'Great camping experience!',
-      status:'PENDING',
+      status: 'PENDING',
       user: user,
     };
     await cancelPost(cancelPostData);
@@ -317,7 +315,7 @@ const PostDetailScreen: React.FC = () => {
               <Text key={index} style={styles.equipmentItem}>- {item}</Text>
             ))}
           </View>
-          
+
           {post.user && (
             <View style={styles.hostInfo}>
               <Image source={{ uri: post.user.imagesProfile?.[0] || 'https://via.placeholder.com/50' }} style={styles.hostProfileImage} />
@@ -327,7 +325,7 @@ const PostDetailScreen: React.FC = () => {
           <View style={styles.campMatesSection}>
             <Text style={styles.campMatesTitle}>Campmates:</Text>
             <View style={styles.campMatesList}>
-              {post.joinCampingPosts.map((mate, index) => (
+              {post.joinCampingPosts.filter(mate => mate.status === 'ACCEPTED').map((mate, index) => (
                 <View key={index} style={styles.campMate}>
                   <Image source={{ uri: mate.user.imagesProfile?.[0] || 'https://via.placeholder.com/40' }} style={styles.campMateImage} />
                   <Text style={styles.campMateName}>{mate.user.name}</Text>
@@ -338,6 +336,10 @@ const PostDetailScreen: React.FC = () => {
           {!hasJoined ? (
             <TouchableOpacity style={styles.joinButton} onPress={handleJoinPress}>
               <Text style={styles.joinButtonText}>Join Us</Text>
+            </TouchableOpacity>
+          ) : post.joinCampingPosts.some(joinPost => joinPost.userId === user.id && joinPost.status === "PENDING") ? (
+            <TouchableOpacity style={styles.joinButton} disabled>
+              <Text style={styles.joinButtonText}>PENDING</Text>
             </TouchableOpacity>
           ) : (
             <TouchableOpacity style={styles.joinButton} onPress={handleCancelPress}>
@@ -525,7 +527,7 @@ const styles = StyleSheet.create({
     marginRight: 15,
     borderColor: '#ddd',
     borderWidth: 1,
-    
+
   },
   hostName: {
     fontSize: 18,
