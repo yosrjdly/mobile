@@ -4,7 +4,7 @@ import { View, Text, TouchableOpacity, StyleSheet, Image } from "react-native";
 import { useRouter } from "expo-router";
 import profileImage from "../assets/images/default-avatar.webp";
 import Icon from "react-native-vector-icons/MaterialIcons";
-import Icons from 'react-native-vector-icons/FontAwesome';
+
 // Import the icon library
 
 const DrawerContent = () => {
@@ -25,7 +25,7 @@ const DrawerContent = () => {
         <Text style={styles.drawerItemText}>Edit Profile</Text>
       </TouchableOpacity>
       <TouchableOpacity style={styles.drawerItem} onPress={() => router.push('/profile/MyCamps')}>
-        <Icon name="camp" size={24} color="#fff" style={styles.icon} />
+        <Icon name="camp" size={24} color="#fff" style={styles.icons} />
         <Text style={styles.drawerItemText}>My Camps</Text>
       </TouchableOpacity>
       <TouchableOpacity style={styles.drawerItem} onPress={() => router.push('/profile/MyJoinedCamps')}>
@@ -33,7 +33,7 @@ const DrawerContent = () => {
         <Text style={styles.drawerItemText}>My Joined Camps</Text>
       </TouchableOpacity>
       <TouchableOpacity style={styles.drawerItem} onPress={() => router.push('/profile/RatingAndReviews')}>
-      <Icon name="star" size={24} color="#fff" style={styles.icons} />
+      <Icon name="star" size={24} color="#fff" style={styles.icon} />
        <Text style={styles.drawerItemText}>Ratings And Reviews</Text>
       </TouchableOpacity>
 
