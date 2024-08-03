@@ -61,7 +61,7 @@ const Home = () => {
               // Fetch user data based on ID from decoded token
             console.log("decoded token id:",decodedToken.id)
 
-              const userResponse = await axios.get(`http://192.168.10.7:5000/api/users/${decodedToken.id}`);
+              const userResponse = await axios.get(`http://192.168.10.6:5000/api/users/${decodedToken.id}`);
 
               setUser(userResponse.data);
             } else {
@@ -111,7 +111,7 @@ const Home = () => {
           <TouchableOpacity style={styles.iconButton}>
             <Feather name="search" size={24} color="white" />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.iconButton}>
+          <TouchableOpacity style={styles.iconButton}  onPress={() =>router.push('emergenci')} >
             <MaterialCommunityIcons name="medical-bag" size={24} color="white" />
           </TouchableOpacity>
           <TouchableOpacity style={styles.iconButton}>
@@ -121,15 +121,15 @@ const Home = () => {
       </View>
       <View style={styles.actionSection}>
 
-       
+
           
         <TouchableOpacity onPress={() => router.replace('/profile/Profile')}>
           <Image source={profileImage} style={styles.profileImage} />
         </TouchableOpacity>
-        <TouchableOpacity style={[styles.actionButton, styles.campingPostButton]}>
+        <TouchableOpacity onPress={() =>router.push('/creatCamp/CreateCamPost')} style={[styles.actionButton, styles.campingPostButton]} >
           <Text style={styles.actionButtonText}>Add a Camp</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={[styles.actionButton, styles.experiencesButton]}>
+        <TouchableOpacity  style={[styles.actionButton, styles.experiencesButton]}>
           <Text style={styles.actionButtonText}>Experiences</Text>
         </TouchableOpacity>
       </View>
@@ -170,7 +170,7 @@ const Home = () => {
                 </Text>
                 {camp.user && (
                   <View style={styles.hostInfo}>
-                    <Image source={{ uri: camp.user.imagesProfile[0] || profileImage }} style={styles.hostProfileImage} />
+                    {/* <Image source={{ uri: camp.user.imagesProfile[0] || profileImage }} style={styles.hostProfileImage} /> */}
                     <Text style={styles.hostName}>{camp.user.name}</Text>
                   </View>
                 )}

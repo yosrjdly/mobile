@@ -46,6 +46,7 @@ const LoginScreen = () => {
       });
 
       const data = await res.json();
+console.log(data);
 
       if (!res.ok) {
         throw new Error(data.error || 'Failed to login');
@@ -55,9 +56,10 @@ const LoginScreen = () => {
       await AsyncStorage.setItem('isAuthenticated', 'true');
       const token = data.token.replace('Bearer ', '');
 
+
       const key = 'mySuperSecretPrivateKey';
-      const decodedToken = JWT.decode(token, key);
-      console.log('Decoded Token:', decodedToken);
+      // const decodedToken = JWT.decode(token, key);
+      // console.log('Decoded Token:', decodedToken);
 
       console.log('Login successful!', data);
 
@@ -74,9 +76,9 @@ const LoginScreen = () => {
   };
 
 
-  useEffect(() => {
-    // Optionally hide the header or set other navigation options here
-  },);
+  // useEffect(() => {
+  //   // Optionally hide the header or set other navigation options here
+  // },);
 
   return (
     <ImageBackground
