@@ -68,9 +68,19 @@ const MyCamps = () => {
       if (!userId) return;
 
       try {
-        const response = await axios.get(`http://192.168.10.4:5000/api/camps/user/${userId}/campings`);
-        setCamps(response.data.data);
-        setFilteredCamps(response.data.data);
+        const response = await axios.get(`http://192.168.1.17:5000/api/camps/user/${userId}/campings`);
+        const campsData = response.data.data;
+
+        // Ensure unique IDs
+        const uniqueCamps = campsData.reduce((acc, camp) => {
+          if (!acc.some(existingCamp => existingCamp.id === camp.id)) {
+            acc.push(camp);
+          }
+          return acc;
+        }, []);
+
+        setCamps(uniqueCamps);
+        setFilteredCamps(uniqueCamps);
       } catch (err) {
         setError(err.message);
       } finally {
