@@ -118,7 +118,7 @@ const Home = () => {
           <TouchableOpacity style={styles.iconButton}>
             <Feather name="search" size={24} color="white" />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.iconButton}>
+          <TouchableOpacity style={styles.iconButton}  onPress={() =>router.push('emergenci')}>
             <MaterialCommunityIcons name="medical-bag" size={24} color="white" />
           </TouchableOpacity>
           <TouchableOpacity style={styles.iconButton}>
@@ -130,7 +130,7 @@ const Home = () => {
         <TouchableOpacity onPress={() => router.replace('/profile/Profile')}>
           <Image source={{ uri: user.imagesProfile?.[0]  || 'https://via.placeholder.com/50' }}style={styles.profileImage} />
         </TouchableOpacity>
-        <TouchableOpacity style={[styles.actionButton, styles.campingPostButton]}>
+        <TouchableOpacity  onPress={() =>router.push('/creatCamp/CreateCamPost')}style={[styles.actionButton, styles.campingPostButton]}>
           <Text style={styles.actionButtonText}>Add a Camp</Text>
         </TouchableOpacity>
         <TouchableOpacity style={[styles.actionButton, styles.experiencesButton]}>
