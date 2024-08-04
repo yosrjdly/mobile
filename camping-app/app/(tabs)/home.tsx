@@ -15,7 +15,7 @@ interface User {
   name: string;
   email: string;
   role: string;
-  imagesProfile?: string[]; // Optional, used for campmates
+  imagesProfile?: string[]; 
 }
 
 const Home = () => {
@@ -29,7 +29,7 @@ const Home = () => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [likedCamps, setLikedCamps] = useState<Set<number>>(new Set());
   const [menuVisible, setMenuVisible] = useState<boolean>(false);
-  const menuAnimation = useState(new Animated.Value(-width))[0]; // Start off-screen
+  const menuAnimation = useState(new Animated.Value(-width))[0]; 
 
   const handleHeartPress = (campId: number) => {
     setLikedCamps(prevLikedCamps => {
@@ -83,7 +83,7 @@ const Home = () => {
 
         if (tokenData) {
           const token = tokenData.startsWith('Bearer ') ? tokenData.replace('Bearer ', '') : tokenData;
-          const key = 'mySuperSecretPrivateKey'; // Ensure this matches the encoding key
+          const key = 'mySuperSecretPrivateKey'; 
 
           try {
             const decodedToken = JWT.decode(token, key);
@@ -151,10 +151,11 @@ const Home = () => {
             <Image source={{ uri: user.imagesProfile?.[0] || 'https://via.placeholder.com/50' }} style={styles.profileImage} />
           </TouchableOpacity>
 
-          <TouchableOpacity style={[styles.actionButton, styles.campingPostButton]}>
+          <TouchableOpacity style={[styles.actionButton, styles.campingPostButton]} onPress={() => router.replace('creatCamp/CreateCamPost')}>
             <Text style={styles.actionButtonText}>Add a Camp</Text>
+            
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.actionButton, styles.experiencesButton]}>
+          <TouchableOpacity style={[styles.actionButton, styles.experiencesButton]} onPress={() => router.replace('experience/experience')}>
             <Text style={styles.actionButtonText}>Experiences</Text>
           </TouchableOpacity>
         </View>
