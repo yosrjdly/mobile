@@ -1,18 +1,37 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, Animated, Image, Dimensions } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams} from 'expo-router';
+import axios from 'axios';
 
 const { width } = Dimensions.get('window');
 
 type Interest = 'Hitchhiking' | 'Kayaking' | 'Climbing' | 'Hiking' | 'Fishing' | 'Other';
 
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  interests: Interest[];
+}
+
 const Interests = () => {
+  const [user, setUser] = useState<User | null>(null);
   const router = useRouter();
+  const { userId } = useLocalSearchParams();
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(-100)).current;
 
-  // State to manage selected interests
   const [selectedInterests, setSelectedInterests] = useState<Interest[]>([]);
+
+  const updateInterests = async (userId: string, interests: Interest[]) => {
+    try {
+      const response = await axios.post('http://192.168.10.20:5000/api/users/updateInterests', { userId, interests });
+      console.log('Success', response.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   useEffect(() => {
     Animated.parallel([
@@ -29,6 +48,7 @@ const Interests = () => {
     ]).start();
   }, [fadeAnim, slideAnim]);
 
+
   const handleInterestPress = (interest: Interest) => {
     setSelectedInterests(prev =>
       prev.includes(interest) ? prev.filter(item => item !== interest) : [...prev, interest]
@@ -36,13 +56,17 @@ const Interests = () => {
   };
 
   const handleDone = () => {
-    // Pass selected interests or save them before navigation
-    console.log('Selected interests:', selectedInterests);
-    router.push('/auth/SignIn'); // Adjust this path to your actual login route path
+    if (typeof userId === 'string') {
+      updateInterests(userId, selectedInterests)
+      router.push('/auth/SignIn');
+    } else {
+      console.error('Invalid userId')
+    }
   };
+  
 
   const handleSkip = () => {
-    router.push('/auth/SignIn'); // Adjust this path to your actual login route path
+    router.push('/auth/SignIn');
   };
 
   return (
@@ -53,86 +77,22 @@ const Interests = () => {
         So we can show you what you like. Come back and change this whenever.
       </Animated.Text>
       <View style={styles.interestContainer}>
-        <TouchableOpacity
-          style={[styles.interestBtn, selectedInterests.includes('Hitchhiking') && styles.selectedInterestBtn]}
-          onPress={() => handleInterestPress('Hitchhiking')}
-        >
-          <View style={styles.iconContainer}>
-            <Image 
-              source={{ uri: 'https://cdn.dribbble.com/users/589499/screenshots/3583371/hikeman_01_4x3.gif' }} 
-              style={styles.interestIcon} 
-              resizeMode="cover" 
-            />
-          </View>
-          <Text style={styles.interestText}>Hitchhiking</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.interestBtn, selectedInterests.includes('Kayaking') && styles.selectedInterestBtn]}
-          onPress={() => handleInterestPress('Kayaking')}
-        >
-          <View style={styles.iconContainer}>
-            <Image 
-              source={{ uri: 'https://cdn.dribbble.com/users/230073/screenshots/3780396/kayak8.gif' }} 
-              style={styles.interestIcon} 
-              resizeMode="cover" 
-            />
-          </View>
-          <Text style={styles.interestText}>Kayaking</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.interestBtn, selectedInterests.includes('Climbing') && styles.selectedInterestBtn]}
-          onPress={() => handleInterestPress('Climbing')}
-        >
-          <View style={styles.iconContainer}>
-            <Image 
-              source={{ uri: 'https://i.pinimg.com/originals/f8/80/28/f88028821915496a4fa2622a6f89e658.gif' }} 
-              style={styles.interestIcon} 
-              resizeMode="cover" 
-            />
-          </View>
-          <Text style={styles.interestText}>Climbing</Text>
-        </TouchableOpacity>
-      </View>
-      <View style={styles.interestContainer}>
-        <TouchableOpacity
-          style={[styles.interestBtn, selectedInterests.includes('Hiking') && styles.selectedInterestBtn]}
-          onPress={() => handleInterestPress('Hiking')}
-        >
-          <View style={styles.iconContainer}>
-            <Image 
-              source={{ uri: 'https://cdn.dribbble.com/users/422998/screenshots/1282571/dribbblegif.gif' }} 
-              style={styles.interestIcon} 
-              resizeMode="cover" 
-            />
-          </View>
-          <Text style={styles.interestText}>Hiking</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.interestBtn, selectedInterests.includes('Fishing') && styles.selectedInterestBtn]}
-          onPress={() => handleInterestPress('Fishing')}
-        >
-          <View style={styles.iconContainer}>
-            <Image 
-              source={{ uri: 'https://cdn.dribbble.com/users/3683190/screenshots/8631389/media/3862fb67eead2fc355e2351441d87b19.gif' }} 
-              style={styles.interestIcon} 
-              resizeMode="cover" 
-            />
-          </View>
-          <Text style={styles.interestText}>Fishing</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.interestBtn, selectedInterests.includes('Other') && styles.selectedInterestBtn]}
-          onPress={() => handleInterestPress('Other')}
-        >
-          <View style={styles.iconContainer}>
-            <Image 
-              source={{ uri: 'https://data.textstudio.com/output/sample/animated/8/4/5/5/other-1-5548.gif' }} 
-              style={styles.interestIcon} 
-              resizeMode="cover" 
-            />
-          </View>
-          <Text style={styles.interestText}>Other</Text>
-        </TouchableOpacity>
+        {['Hitchhiking', 'Kayaking', 'Climbing', 'Hiking', 'Fishing', 'Other'].map((interest) => (
+          <TouchableOpacity
+            key={interest}
+            style={[styles.interestBtn, selectedInterests.includes(interest as Interest) && styles.selectedInterestBtn]}
+            onPress={() => handleInterestPress(interest as Interest)}
+          >
+            <View style={styles.iconContainer}>
+              <Image 
+                source={{ uri: getImageUri(interest as Interest) }} 
+                style={styles.interestIcon} 
+                resizeMode="cover" 
+              />
+            </View>
+            <Text style={styles.interestText}>{interest}</Text>
+          </TouchableOpacity>
+        ))}
       </View>
       <TouchableOpacity style={styles.doneBtn} onPress={handleDone}>
         <Text style={styles.doneText}>Done</Text>
@@ -144,7 +104,17 @@ const Interests = () => {
   );
 };
 
-export default Interests;
+const getImageUri = (interest: Interest) => {
+  const imageUris: Record<Interest, string> = {
+    Hitchhiking: 'https://cdn.dribbble.com/users/589499/screenshots/3583371/hikeman_01_4x3.gif',
+    Kayaking: 'https://cdn.dribbble.com/users/230073/screenshots/3780396/kayak8.gif',
+    Climbing: 'https://i.pinimg.com/originals/f8/80/28/f88028821915496a4fa2622a6f89e658.gif',
+    Hiking: 'https://cdn.dribbble.com/users/422998/screenshots/1282571/dribbblegif.gif',
+    Fishing: 'https://cdn.dribbble.com/users/3683190/screenshots/8631389/media/3862fb67eead2fc355e2351441d87b19.gif',
+    Other: 'https://data.textstudio.com/output/sample/animated/8/4/5/5/other-1-5548.gif'
+  };
+  return imageUris[interest];
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -189,7 +159,7 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   selectedInterestBtn: {
-    backgroundColor: '#00695C', // Highlight color for selected interest
+    backgroundColor: '#00695C',
   },
   iconContainer: {
     width: 60,
@@ -251,3 +221,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 });
+
+export default Interests;
+
