@@ -64,14 +64,8 @@ console.log(data);
 
       const key = 'mySuperSecretPrivateKey';
 
-      // const decodedToken = JWT.decode(token, key);
-      // console.log('Decoded Token:', decodedToken);
-
 
       console.log('Login successful!', data);
-
-      // Navigate to the Home tab after successful login
-
       router.replace('home');
 
     } catch (err: any) {
@@ -80,12 +74,6 @@ console.log(data);
       Alert.alert('Login Error', err.message);
     }
   };
-
-
-  // useEffect(() => {
-  //   // Optionally hide the header or set other navigation options here
-  // },);
-
   return (
     <ImageBackground
       source={{ uri: 'https://images.ctfassets.net/jxp0iaf0waox/4vIPUXYin41sR4fswBzFJD/1a52a94a60964682d2a894f2c7823e3f/ill6.jpg?w=635&h=635&q=70' }}
