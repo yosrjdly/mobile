@@ -1,6 +1,8 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet ,Linking} from 'react-native';
 import { AntDesign, FontAwesome5 } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import { useNavigation } from '@react-navigation/native';
 
 
 const index = () => {
@@ -18,6 +20,8 @@ const index = () => {
       console.error('Error:', error);
     }
   };
+  const router = useRouter();
+
 
 
   return (
@@ -42,15 +46,15 @@ const index = () => {
       </View>
     </View>
 
-      {/* First Aid Information Section */}
+      {/* First Aid Information Section ****** onPress={router.push('Burns')}*/}
         <View style={styles.firstAidSection}>
       <Text style={styles.firstAidTitle}>First Aid Information</Text>
       <View style={styles.infoGrid}>
-        <TouchableOpacity style={styles.infoItem}>
+        <TouchableOpacity style={styles.infoItem} onPress={()=>router.replace('/emergenci/Burns')}>
           <FontAwesome5 name="fire" size={24} color="#B3492D" />
           <Text style={styles.infoText}>Burns</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.infoItem}>
+        <TouchableOpacity style={styles.infoItem} onPress={()=>router.replace('/emergenci/Bites')}>
           <FontAwesome5 name="bug" size={24} color="#B3492D" />
           <Text style={styles.infoText}>Bites</Text>
         </TouchableOpacity>

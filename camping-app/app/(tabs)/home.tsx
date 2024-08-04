@@ -150,13 +150,18 @@ const Home = () => {
           <TouchableOpacity onPress={() => router.replace('/profile/Profile')}>
             <Image source={{ uri: user.imagesProfile?.[0] || 'https://via.placeholder.com/50' }} style={styles.profileImage} />
           </TouchableOpacity>
+
           <TouchableOpacity style={[styles.actionButton, styles.campingPostButton]}>
             <Text style={styles.actionButtonText}>Add a Camp</Text>
+          <TouchableOpacity style={styles.iconButton}  onPress={() =>router.push('emergenci')}>
+            <MaterialCommunityIcons name="medical-bag" size={24} color="white" />
+
           </TouchableOpacity>
           <TouchableOpacity style={[styles.actionButton, styles.experiencesButton]}>
             <Text style={styles.actionButtonText}>Experiences</Text>
           </TouchableOpacity>
         </View>
+
         <View style={styles.categorySection}>
           {['All', ...categories].map(category => (
             <TouchableOpacity
@@ -201,6 +206,7 @@ const Home = () => {
                     <TouchableOpacity onPress={() => router.push(`/${camp.id}`)} style={styles.exploreButton}>
                       <Text style={styles.exploreText}>Explore</Text>
                     </TouchableOpacity>
+
                   </View>
                 </View>
               </View>
