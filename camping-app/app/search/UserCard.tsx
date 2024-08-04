@@ -1,10 +1,22 @@
-import { StyleSheet, Text, View, Image } from 'react-native';
+import { StyleSheet, Text, View, Image, TouchableOpacity } from 'react-native';
 import React from 'react';
+import { useRouter } from 'expo-router';
 
 const UserCard = ({ user }) => {
+  const router = useRouter();
+
+  const handlePress = () => {
+    router.push(`/SearchedUserProfile/UserProfile?userId=${user.id}`); 
+  };
+
   return (
     <View style={styles.card}>
-      <Image source={{ uri: user.image }} style={styles.image} />
+      <TouchableOpacity onPress={handlePress}>
+        <Image 
+          source={{ uri: user.imagesProfile?.[0] || 'default-image-url' }} 
+          style={styles.image} 
+        />
+      </TouchableOpacity>
       <Text style={styles.name}>{user.name}</Text>
     </View>
   );
@@ -15,7 +27,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#014043', 
     borderRadius: 12,
     padding: 15,
-    marginTop:20,
+    marginTop: 20,
     width: '100%',
     flexDirection: 'row',
     alignItems: 'center',
