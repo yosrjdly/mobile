@@ -171,7 +171,7 @@ export default Shop;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#00595E',  // Updated background color
+    backgroundColor: '#00595E', 
     padding: 20,
   },
   header: {

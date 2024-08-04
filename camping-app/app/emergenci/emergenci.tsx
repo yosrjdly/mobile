@@ -29,7 +29,7 @@ const index = () => {
       {/* Header Section */}
       <View style={styles.header}>
         <TouchableOpacity style={styles.backButton} >
-          <AntDesign name="arrowleft" size={24} color="white" />
+          <AntDesign name="arrowleft" size={24} color="white" onPress={() =>router.replace('home')} />
         </TouchableOpacity>
         <View style={styles.headerTitleContainer} >
           <Text style={styles.headerTitle}>Emergency Help</Text>
@@ -46,7 +46,7 @@ const index = () => {
       </View>
     </View>
 
-      {/* First Aid Information Section ****** onPress={router.push('Burns')}*/}
+      {/* First Aid Information Section ****** onPress={router.push('InjuryInfo')}*/}
         <View style={styles.firstAidSection}>
       <Text style={styles.firstAidTitle}>First Aid Information</Text>
       <View style={styles.infoGrid}>
@@ -58,12 +58,12 @@ const index = () => {
           <FontAwesome5 name="bug" size={24} color="#B3492D" />
           <Text style={styles.infoText}>Bites</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.infoItem}>
+        <TouchableOpacity style={styles.infoItem} onPress={()=>router.replace('/emergenci/InjuryInfo')}>
           <FontAwesome5 name="medkit" size={24} color="#B3492D" />
           <Text style={styles.infoText}>Injuries</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.infoItem}>
-          <FontAwesome5 name="ellipsis-h" size={24} color="#B3492D" />
+          <FontAwesome5 name="ellipsis-h" size={24} color="#B3492D" onPress={()=>router.replace('/emergenci/Others')}/>
           <Text style={styles.infoText}>Other</Text>
         </TouchableOpacity>
       </View>
