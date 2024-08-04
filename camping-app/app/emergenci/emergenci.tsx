@@ -29,7 +29,7 @@ const index = () => {
       {/* Header Section */}
       <View style={styles.header}>
         <TouchableOpacity style={styles.backButton} >
-          <AntDesign name="arrowleft" size={24} color="white" />
+          <AntDesign name="arrowleft" size={24} color="white" onPress={() =>router.replace('home')} />
         </TouchableOpacity>
         <View style={styles.headerTitleContainer} >
           <Text style={styles.headerTitle}>Emergency Help</Text>

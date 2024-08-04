@@ -136,10 +136,10 @@ const Home = () => {
           <Text style={styles.campSkoutText}>CampSkout</Text>
           <View style={styles.iconGroup}>
             <TouchableOpacity style={styles.iconButton}>
-              <Feather name="search" size={24} color="white" />
+              <Feather name="search" size={24} color="white" onPress={() =>router.replace('search/SearchByName')} />
             </TouchableOpacity>
             <TouchableOpacity style={styles.iconButton}>
-              <MaterialCommunityIcons name="medical-bag" size={24} color="white" />
+              <MaterialCommunityIcons name="medical-bag" size={24} color="white" onPress={() =>router.replace('emergenci/emergenci')} />
             </TouchableOpacity>
             <TouchableOpacity style={styles.iconButton} onPress={toggleMenu}>
               <MaterialCommunityIcons name="menu" size={24} color="white" />
@@ -153,9 +153,6 @@ const Home = () => {
 
           <TouchableOpacity style={[styles.actionButton, styles.campingPostButton]}>
             <Text style={styles.actionButtonText}>Add a Camp</Text>
-          <TouchableOpacity style={styles.iconButton}  onPress={() =>router.push('emergenci')}>
-            <MaterialCommunityIcons name="medical-bag" size={24} color="white" />
-
           </TouchableOpacity>
           <TouchableOpacity style={[styles.actionButton, styles.experiencesButton]}>
             <Text style={styles.actionButtonText}>Experiences</Text>

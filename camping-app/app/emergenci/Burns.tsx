@@ -49,7 +49,7 @@ const Burns = () => {
       return (
         <ScrollView style={styles.container}>
             <View>
-               <TouchableOpacity style={styles.backButton} onPress={() => router.replace('emergenci')} >
+               <TouchableOpacity style={styles.backButton} onPress={() => router.replace('emergenci/emergenci')} >
                      <AntDesign name="arrowleft" size={24} color="white" />
                  </TouchableOpacity>
       </View>
