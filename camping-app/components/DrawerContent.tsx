@@ -35,7 +35,7 @@ const DrawerContent = () => {
       </TouchableOpacity>
       <TouchableOpacity style={styles.drawerItem} onPress={() => router.push('/profile/MyCamps')}>
       <MaterialCommunityIcons name="campfire" size={24} color="white" />
-        <Text style={styles.drawerItemText}>My Camps</Text>
+        <Text style={styles.drawerItemText}>My Camps Status</Text>
       </TouchableOpacity>
       <TouchableOpacity style={styles.drawerItem} onPress={() => router.push('/profile/MyJoinedCamps')}>
         <Icon name="group" size={24} color="#fff" style={styles.icon} />
