@@ -103,7 +103,7 @@ const Home = () => {
           }
 
           // Fetch camps data
-          const campsResponse = await axios.get('http://192.168.1.17:5000/api/camps/getAll');
+          const campsResponse = await axios.get('http://192.168.1.106:5000/api/camps/getAll');
           setCamps(campsResponse.data.data);
           setFilteredCamps(campsResponse.data.data);
         } else {
@@ -119,7 +119,13 @@ const Home = () => {
     };
 
     fetchUserAndCamps();
-  }, []); 
+  }, []); // Empty dependency array to run only once
+
+
+  // console.log('User:', user);
+  // console.log('Camps:', camps);
+
+ 
 
   if (loading) {
     return <Text style={styles.loadingText}>Loading...</Text>;
