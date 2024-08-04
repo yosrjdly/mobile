@@ -15,6 +15,7 @@ export default function RootLayout() {
       <Stack.Screen name="experience/experience" options={{title: "experience", headerShown: false}} />
       <Stack.Screen name="emergenci/Burns" options={{title: "burns", headerShown: false}} />
       <Stack.Screen name="emergenci/Bites" options={{title: "bites", headerShown: false}} />
+      {/* <Stack.Screen name="emergenci/InjuryInfo" options={{title: "InjuryInfo", headerShown: false}} /> */}
 
 
     </Stack>

@@ -78,7 +78,7 @@ const Home = () => {
 
 
           // Fetch camps data
-          const campsResponse = await axios.get('http://192.168.10.4:5000/api/camps/getAll');
+          const campsResponse = await axios.get('http://192.168.1.106:5000/api/camps/getAll');
           setCamps(campsResponse.data.data);
           setFilteredCamps(campsResponse.data.data);
         } else {
@@ -97,8 +97,8 @@ const Home = () => {
   }, []); // Empty dependency array to run only once
 
 
-  console.log('User:', user);
-  console.log('Camps:', camps);
+  // console.log('User:', user);
+  // console.log('Camps:', camps);
 
  
 
@@ -174,7 +174,7 @@ const Home = () => {
                 </Text>
                 {camp.user && (
                   <View style={styles.hostInfo}>
-                    <Image source={{ uri: camp.user.imagesProfile[0] || profileImage }} style={styles.hostProfileImage} />
+                    {/* <Image source={{ uri: camp.user.imagesProfile[0] || profileImage }} style={styles.hostProfileImage} /> */}
                     <Text style={styles.hostName}>{camp.user.name}</Text>
                   </View>
                 )}

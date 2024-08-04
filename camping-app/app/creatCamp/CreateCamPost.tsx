@@ -20,7 +20,7 @@ interface User {
 }
 const CampingPost = () => {
   const [skip, setSkip] = useState<number>(0);
-  const [currentStep, setCurrentStep] = useState<number>(1);
+  const [currentStep, setCurrentStep] = useState<number>(2);
   const [user, setUser] = useState<User>({ id: "", name: "", email: "", role: "" });
   const [refresh, setRefresh] = useState<boolean>(false);
   const [title, setTitle] = useState<string>('');
@@ -107,7 +107,7 @@ console.log(images);
         });
       });
 
-      const response = await axios.post('http://192.168.10.6:5000/api/camps/add', formData, {
+      const response = await axios.post('http://192.168.1.106:5000/api/camps/add', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
