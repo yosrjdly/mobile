@@ -10,7 +10,9 @@ const { width, height } = Dimensions.get('window');
 
 const categories = ['Kayaking', 'Climbing', 'Fishing', 'Hiking', 'Hitchhiking'];
 
+
 interface User {
+
   id: string;
   name: string;
   email: string;

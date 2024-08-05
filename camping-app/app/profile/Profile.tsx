@@ -13,6 +13,7 @@ import { useNavigation } from '@react-navigation/native';
 
 const { width } = Dimensions.get("window");
 
+
 const Profile = () => {
     const navigation = useNavigation();
     const router = useRouter();

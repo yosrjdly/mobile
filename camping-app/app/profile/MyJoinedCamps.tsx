@@ -14,6 +14,7 @@ const Profile = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
+  
 
   const handleCampPress = (camp: any) => {
     setSelectedCamp(camp);
