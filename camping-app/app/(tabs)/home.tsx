@@ -10,7 +10,9 @@ const { width, height } = Dimensions.get('window');
 
 const categories = ['Kayaking', 'Climbing', 'Fishing', 'Hiking', 'Hitchhiking'];
 
+
 interface User {
+
   id: string;
   name: string;
   email: string;
@@ -103,7 +105,7 @@ const Home = () => {
           }
 
           // Fetch camps data
-          const campsResponse = await axios.get('http://192.168.1.106:5000/api/camps/getAll');
+          const campsResponse = await axios.get('http://192.168.10.20:5000/api/camps/getAll');
           setCamps(campsResponse.data.data);
           setFilteredCamps(campsResponse.data.data);
         } else {
