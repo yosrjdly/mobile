@@ -117,17 +117,19 @@ const Home = () => {
   // console.log('Camps:', camps);
 
   const handleHeartPress = (campId: number) => {
+    console.log(`Heart pressed for campId: ${campId}`); // Debugging log
     setLikedCamps(prevLikedCamps => {
       const newLikedCamps = new Set(prevLikedCamps);
       if (newLikedCamps.has(campId)) {
         newLikedCamps.delete(campId); // Remove from liked camps
+        console.log(`Removed campId: ${campId} from likedCamps`); // Debugging log
       } else {
         newLikedCamps.add(campId); // Add to liked camps
+        console.log(`Added campId: ${campId} to likedCamps`); // Debugging log
       }
       return newLikedCamps;
     });
   };
- 
 
   if (loading) {
     return <Text style={styles.loadingText}>Loading...</Text>;
@@ -184,16 +186,17 @@ const Home = () => {
             <View style={styles.postContainer} key={camp.id}>
            <Image source={{ uri: camp.images[0] }} style={styles.postImage} />
               <View style={styles.postOverlay}>
-                <TouchableOpacity
-                  style={styles.heartButton}
-                  onPress={() => handleHeartPress(camp.id)}
-                >
-                  <MaterialCommunityIcons
-                    name={likedCamps.has(camp.id) ? 'heart' : 'heart-outline'}
-                    size={30}
-                    color={likedCamps.has(camp.id) ? 'red' : 'white'}
-                  />
-                </TouchableOpacity>
+              <TouchableOpacity
+  style={styles.heartButton}
+  onPress={() => handleHeartPress(camp.id)}
+>
+  <MaterialCommunityIcons
+    name={likedCamps.has(camp.id) ? 'heart' : 'heart-outline'}
+    size={30}
+    color={likedCamps.has(camp.id) ? 'red' : 'white'}
+  />
+</TouchableOpacity>
+
                 <View style={styles.textOverlay}>
                   <Text style={styles.postTitle}>{camp.title}</Text>
                   <Text style={styles.postLocation}>
@@ -351,8 +354,11 @@ const styles = StyleSheet.create({
     right: 10,
     backgroundColor: 'rgba(0, 0, 0, 0.3)',
     borderRadius: 20,
-    padding: 5,
+    padding: 10,
+    zIndex: 1,
   },
+  
+  
   textOverlay: {
     marginBottom: 10,
   },

@@ -3,13 +3,13 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import JWT from 'expo-jwt';
-import { AirbnbRating, Rating } from 'react-native-ratings';  // Import the Rating component
+import { AirbnbRating, Rating } from 'react-native-ratings'; 
 
 const RatingAndReviews = () => {
   const [userData, setUserData] = useState<any>(null);
   const [postId, setPostId] = useState('');
   const [userId, setUserId] = useState('');
-  const [rating, setRating] = useState<number>(0);  // Changed to number
+  const [rating, setRating] = useState<number>(0); 
   const [reviews, setReviews] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -134,7 +134,7 @@ const RatingAndReviews = () => {
           ratingCount={5}
           imageSize={20}
           readonly
-          startingValue={item.rating}  // Display the rating
+          startingValue={item.rating} 
         />
       </View>
       <Text>Review: {item.reviews}</Text>
