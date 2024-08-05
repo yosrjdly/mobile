@@ -20,7 +20,7 @@ interface User {
 }
 const CampingPost = () => {
   const [skip, setSkip] = useState<number>(0);
-  const [currentStep, setCurrentStep] = useState<number>(1);
+  const [currentStep, setCurrentStep] = useState<number>(2);
   const [user, setUser] = useState<User>({ id: "", name: "", email: "", role: "" });
   const [refresh, setRefresh] = useState<boolean>(false);
   const [title, setTitle] = useState<string>('');
@@ -107,7 +107,7 @@ console.log(images);
         });
       });
 
-      const response = await axios.post('http://192.168.10.6:5000/api/camps/add', formData, {
+      const response = await axios.post('http://192.168.10.20:5000/api/camps/add', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -254,17 +254,13 @@ const back=()=>{
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity>
-          <AntDesign name="arrowleft" size={24} color="white" />
-        </TouchableOpacity>
-        <View style={styles.headerIcons}>
-          <FontAwesome name="search" size={24} color="white" />
-          <FontAwesome name="clipboard" size={24} color="white" style={styles.clipboardIcon} />
-        </View>
       </View>
       <Modal visible={currentStep === 1} transparent={true} animationType="slide">
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
+          <TouchableOpacity style={styles.backButton} onPress={() => router.replace('home')}>
+        <AntDesign name="arrowleft" size={24} color="white" />
+      </TouchableOpacity>
           <Text style={styles.popUPtitle}>Add Camp</Text>
             <Text style={styles.titleOfInput}> Title :</Text>
             <TextInput
@@ -357,6 +353,9 @@ const back=()=>{
 
             <TouchableOpacity style={styles.postButton} onPress={handleNext}>
               <Text style={styles.postButtonText}>Next</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.postButton}  onPress={() => router.replace('home')}>
+              <Text style={styles.postButtonText}>Cancel</Text>
             </TouchableOpacity>
           </View>
         </View>

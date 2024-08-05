@@ -4,11 +4,20 @@ import { View, Text, TouchableOpacity, StyleSheet, Image } from "react-native";
 import { useRouter } from "expo-router";
 import profileImage from "../assets/images/default-avatar.webp";
 import Icon from "react-native-vector-icons/MaterialIcons";
-import Icons from 'react-native-vector-icons/FontAwesome';
-// Import the icon library
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+
+
 
 const DrawerContent = () => {
   const router = useRouter();
+
+  
+  const handleLogout = async () => {
+    await AsyncStorage.removeItem('token');
+    router.replace('auth/SignIn'); 
+  };
 
   return (
     <View style={styles.drawerContainer}>
@@ -25,19 +34,19 @@ const DrawerContent = () => {
         <Text style={styles.drawerItemText}>Edit Profile</Text>
       </TouchableOpacity>
       <TouchableOpacity style={styles.drawerItem} onPress={() => router.push('/profile/MyCamps')}>
-        <Icon name="camp" size={24} color="#fff" style={styles.icon} />
-        <Text style={styles.drawerItemText}>My Camps</Text>
+      <MaterialCommunityIcons name="campfire" size={24} color="white" />
+        <Text style={styles.drawerItemText}>My Camps Status</Text>
       </TouchableOpacity>
       <TouchableOpacity style={styles.drawerItem} onPress={() => router.push('/profile/MyJoinedCamps')}>
         <Icon name="group" size={24} color="#fff" style={styles.icon} />
         <Text style={styles.drawerItemText}>My Joined Camps</Text>
       </TouchableOpacity>
       <TouchableOpacity style={styles.drawerItem} onPress={() => router.push('/profile/RatingAndReviews')}>
-      <Icon name="star" size={24} color="#fff" style={styles.icons} />
+      <Icon name="star" size={24} color="#fff" style={styles.icon} />
        <Text style={styles.drawerItemText}>Ratings And Reviews</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.drawerItem} onPress={() => router.push('/logout')}>
+      <TouchableOpacity style={styles.drawerItem} onPress={handleLogout}>
         <Icon name="logout" size={24} color="#fff" style={styles.icon} />
         <Text style={styles.drawerItemText}>Logout</Text>
       </TouchableOpacity>
