@@ -22,6 +22,8 @@ export default function RootLayout() {
       <Stack.Screen name="Tutoriels/Tutoriels" options={{title: "Tutoriels", headerShown: false}} />
       <Stack.Screen name="SearchedUserProfile/UserProfile" options={{title: "UserProfile", headerShown: false}} />
       <Stack.Screen name="createExp/CreateExp" options={{title: "create experience", headerShown: false}} />
+      <Stack.Screen name="addTips/addTips" options={{title: "create experience", headerShown: false}} />
+
 
     </Stack>
   );
