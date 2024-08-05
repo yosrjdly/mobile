@@ -68,7 +68,7 @@ const MyCamps = () => {
       if (!userId) return;
 
       try {
-        const response = await axios.get(`http://192.168.1.17:5000/api/camps/user/${userId}/campings`);
+        const response = await axios.get(`http://192.168.10.20:5000/api/camps/user/${userId}/campings`);
         const campsData = response.data.data;
 
         // Ensure unique IDs

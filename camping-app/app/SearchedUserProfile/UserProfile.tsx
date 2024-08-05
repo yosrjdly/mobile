@@ -12,7 +12,7 @@ const UserProfile = () => {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const response = await axios.get(`http://192.168.1.17:5000/api/users/${userId}`);
+        const response = await axios.get(`http://192.168.10.20:5000/api/users/${userId}`);
         setUser(response.data);
       } catch (error) {
         console.error('Error fetching user:', error);
