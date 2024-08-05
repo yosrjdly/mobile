@@ -25,7 +25,7 @@ const Profile = () => {
     useEffect(() => {
         const fetchUserData = async (userId: string) => {
             try {
-                const response = await axios.get(`http://192.168.1.100:5000/api/users/${userId}`);
+                const response = await axios.get(`http://192.168.1.17:5000/api/users/${userId}`);
                 console.log("User data fetched:", response.data, response.data.posts);
                 setUserData({
                     id: response.data.user.id,
@@ -61,7 +61,7 @@ const Profile = () => {
                         const decodedToken = JWT.decode(token, key);
                         if (decodedToken && decodedToken.id) {
                             // Fetch user data based on ID from decoded token
-                            const response = await axios.get(`http://192.168.1.100:5000/api/users/${decodedToken.id}`);
+                            const response = await axios.get(`http://192.168.1.17:5000/api/users/${decodedToken.id}`);
                             setUser(response.data);
                             setUserData({
                                 id: response.data.id,
@@ -178,16 +178,16 @@ const Profile = () => {
                 </View>
             </View>
             <View style={styles.interestsSection}>
-                <Text style={styles.sectionTitle}>Interests</Text>
-                <View style={styles.tickets}>
-                    {userData?.interests?.map((interest: string) => (
-                        <View key={interest} style={styles.ticket}>
-                            <FontAwesome name="star" size={15} color="#fff" />
-                            <Text style={styles.ticketText}>{interest}</Text>
-                        </View>
-                    ))}
-                </View>
+    <Text style={styles.sectionTitle}>Interests</Text>
+    <View style={styles.tickets}>
+        {userData?.interests?.map((interest: string, index: number) => (
+            <View key={`${interest}-${index}`} style={styles.ticket}>
+                <FontAwesome name="star" size={15} color="#fff" />
+                <Text style={styles.ticketText}>{interest}</Text>
             </View>
+        ))}
+    </View>
+</View>
             <View style={styles.sharedExperienceSection}>
                 <SharedExp userId={userData?.id} />
                 {/* Integrate the SharedExp component */}
