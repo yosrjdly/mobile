@@ -107,7 +107,7 @@ console.log(images);
         });
       });
 
-      const response = await axios.post('http://192.168.1.106:5000/api/camps/add', formData, {
+      const response = await axios.post('http://192.168.10.4:5000/api/camps/add', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },

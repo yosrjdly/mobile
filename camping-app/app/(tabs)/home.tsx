@@ -31,18 +31,6 @@ const Home = () => {
   const [menuVisible, setMenuVisible] = useState<boolean>(false);
   const menuAnimation = useState(new Animated.Value(-width))[0]; 
 
-  const handleHeartPress = (campId: number) => {
-    setLikedCamps(prevLikedCamps => {
-      const newLikedCamps = new Set(prevLikedCamps);
-      if (newLikedCamps.has(campId)) {
-        newLikedCamps.delete(campId);
-      } else {
-        newLikedCamps.add(campId);
-      }
-      return newLikedCamps;
-    });
-  };
-
   const handleCategoryChange = (category: string) => {
     setSelectedCategory(category);
     if (category === 'All') {
@@ -103,7 +91,7 @@ const Home = () => {
           }
 
           // Fetch camps data
-          const campsResponse = await axios.get('http://192.168.1.106:5000/api/camps/getAll');
+          const campsResponse = await axios.get('http://192.168.10.4:5000/api/camps/getAll');
           setCamps(campsResponse.data.data);
           setFilteredCamps(campsResponse.data.data);
         } else {
@@ -125,6 +113,17 @@ const Home = () => {
   // console.log('User:', user);
   // console.log('Camps:', camps);
 
+  const handleHeartPress = (campId: number) => {
+    setLikedCamps(prevLikedCamps => {
+      const newLikedCamps = new Set(prevLikedCamps);
+      if (newLikedCamps.has(campId)) {
+        newLikedCamps.delete(campId); // Remove from liked camps
+      } else {
+        newLikedCamps.add(campId); // Add to liked camps
+      }
+      return newLikedCamps;
+    });
+  };
  
 
   if (loading) {
@@ -180,7 +179,7 @@ const Home = () => {
         <View style={styles.postList}>
           {filteredCamps.map((camp) => (
             <View style={styles.postContainer} key={camp.id}>
-              <Image source={{ uri: camp.images[0] }} style={styles.postImage} />
+           <Image source={{ uri: camp.images[0] }} style={styles.postImage} />
               <View style={styles.postOverlay}>
                 <TouchableOpacity
                   style={styles.heartButton}

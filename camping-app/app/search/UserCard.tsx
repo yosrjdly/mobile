@@ -6,7 +6,12 @@ const UserCard = ({ user }) => {
   const router = useRouter();
 
   const handlePress = () => {
-    router.push(`/SearchedUserProfile/UserProfile?userId=${user.id}`); 
+    console.log(user)
+    router.replace(`/SearchedUserProfile/UserProfile?userId=${user.id}`); 
+    // router.replace({
+    //   pathname:`/SearchedUserProfile/UserProfile?userId=${user.id}`,
+    //   params:{userId: user.id}
+    // })
   };
 
   return (
