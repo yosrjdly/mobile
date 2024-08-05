@@ -95,6 +95,7 @@ const Home = () => {
           // Fetch camps data
           const campsResponse = await axios.get('http://192.168.10.4:5000/api/camps/getAll');
           setCamps(campsResponse.data.data);
+          console.log(campsResponse.data.data)
           setFilteredCamps(campsResponse.data.data);
         } else {
           console.error('Token not found in AsyncStorage');
