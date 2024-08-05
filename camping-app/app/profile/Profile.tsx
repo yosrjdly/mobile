@@ -13,88 +13,8 @@ import { DrawerActions } from "@react-navigation/drawer";
 
 const { width } = Dimensions.get("window");
 
+
 const Profile = () => {
-
-  const router = useRouter();
-  const navigation = useNavigation<ProfileScreenNavigationProp>();
-  const profileImage = require('../../assets/images/default-avatar.webp'); // Default profile image
-  const [user, setUser] = useState<any>(null);
-
-
-  const [userData, setUserData] = useState<any>(null);
-  const [selectedCamp, setSelectedCamp] = useState<any>(null);
-  const [participants, setParticipants] = useState<any[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const handleCampPress = (camp: any) => {
-    setSelectedCamp(camp);
-    fetchParticipants(camp.id);
-  };
-
-  const handleAccept = async (userId, postId) => {
-    try {
-      const response = await axios.post(
-        `http://192.168.1.100:5000/api/acceptAndReject/${userId}/${postId}`
-      );
-      console.log(`Accepted: ${userId}`, response.data);
-      setParticipants((prevParticipants) =>
-        prevParticipants.map((participant) =>
-          participant.userId === userId && participant.postId === postId
-            ? { ...participant, status: "accepted" }
-            : participant
-        )
-      );
-    } catch (error) {
-      console.error("Error accepting participant:", error);
-    }
-  };
-
-  const handleReject = async (userId, postId) => {
-    try {
-      const response = await axios.post(
-        `http://192.168.1.100:5000/api/acceptAndReject/reject/${userId}/${postId}`
-      );
-      console.log(`Rejected: ${userId}`, response.data);
-      setParticipants((prevParticipants) =>
-        prevParticipants.map((participant) =>
-          participant.userId === userId && participant.postId === postId
-            ? { ...participant, status: "rejected" }
-            : participant
-        )
-      );
-    } catch (error) {
-      console.error("Error rejecting participant:", error);
-    }
-  };
-  
-  useEffect(() => {
-    const fetchUserData = async (userId: string) => {
-      try {
-        const response = await axios.get(
-          `http://192.168.1.100:5000/api/users/${userId}`
-        );
-        console.log("User data fetched:", response.data);
-        setUserData({
-          id: response.data.user.id,
-          name: response.data.user.name,
-          email: response.data.user.email,
-          age: response.data.user.age,
-          imagesProfile:response.data.user.imagesProfile,
-          location: response.data.user.location,
-          bio: response.data.user.bio,
-          friendsCount: response.data.user.friendsCount,
-          joinedUsers: response.data.posts,
-          interests: response.data.user.interests,
-          posts: response.data.posts,
-        });
-      } catch (error) {
-        console.error("Error fetching user data:", error);
-        setError("Failed to fetch user data");
-      } finally {
-        setLoading(false);
-      }
-    };
     const navigation = useNavigation();
     const router = useRouter();
     const [user, setUser] = useState<any>(null);
@@ -181,25 +101,13 @@ const Profile = () => {
         decodeToken();
     }, []);
 
-
-  const fetchParticipants = async (campId: string) => {
-    try {
-      const response = await axios.get(
-        `http://192.168.1.100:5000/api/camps/participants/${campId}`
-      );
-      setParticipants(response.data.data.joinCampingPosts); // Assuming the endpoint returns an array of participants
-    } catch (error) {
-      console.error("Error fetching participants:", error);
+    if (loading) {
+        return (
+            <View style={styles.loadingContainer}>
+                <ActivityIndicator size="large" color="#42a5f5" />
+            </View>
+        );
     }
-  };
-
-  if (loading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#42a5f5" />
-      </View>
-    );
-  }
 
     if (error) {
         return <Text style={styles.errorText}>Error: {error}</Text>;
