@@ -20,7 +20,7 @@ const RatingAndReviews = () => {
   // Fetch user data
   const fetchUserData = async (userId: string) => {
     try {
-      const response = await axios.get(`http://192.168.10.20:5000/api/users/${userId}`);
+      const response = await axios.get(`http://192.168.10.4:5000/api/users/${userId}`);
       const user = response.data.user;
       setUserData({
         id: user.id,
@@ -54,7 +54,7 @@ const RatingAndReviews = () => {
     }
 
     try {
-      const response = await fetch('http://192.168.10.20:5000/api/camps/updateReview', {
+      const response = await fetch('http://192.168.10.4:5000/api/camps/updateReview', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
