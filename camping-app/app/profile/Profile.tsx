@@ -152,7 +152,7 @@ const Profile = () => {
                     <TouchableOpacity style={[styles.actionButton, styles.addCampButton]}>
                         <Text style={styles.buttonText}>Add Camp</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={[styles.actionButton, styles.addExperienceButton]}>
+                    <TouchableOpacity  onPress={()=>router.replace('')} style={[styles.actionButton, styles.addExperienceButton]}>
                         <Text style={styles.buttonText}>Add Experience</Text>
                     </TouchableOpacity>
                 </View>
