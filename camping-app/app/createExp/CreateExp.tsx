@@ -101,7 +101,7 @@ const CreateExperience = () => {
         });
       });
 
-      const response = await axios.post('http://192.168.10.7:5000/api/experienceTip/add', formData, {
+      const response = await axios.post('http://192.168.10.4:5000/api/experienceTip/add', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },

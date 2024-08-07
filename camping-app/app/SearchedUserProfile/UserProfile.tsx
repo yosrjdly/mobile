@@ -100,8 +100,7 @@ interface Share {
 import { StyleSheet, Text, View, Image, ActivityIndicator, FlatList, ScrollView, TouchableOpacity } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { useLocalSearchParams } from 'expo-router'; 
-import axios from 'axios';
-import profileImage from "../../assets/images/default-avatar.webp"; 
+import axios from 'axios'; 
 
 const UserProfile = () => {
   const { userId } = useLocalSearchParams(); 
@@ -113,8 +112,10 @@ const UserProfile = () => {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const response = await axios.get(`http://192.168.10.20:5000/api/users/${userId}`);
-        setUser(response.data.user);
+
+        const response = await axios.get(`http://192.168.10.4:5000/api/users/${userId}`);
+        setUser(response.data);
+
       } catch (error) {
         setError('Error fetching user data');
         console.error('Error fetching user:', error);
@@ -152,6 +153,7 @@ const UserProfile = () => {
   }
 
   return (
+
     <ScrollView style={styles.container}>
       <View style={styles.profileHeader}>
         <Image 
@@ -263,6 +265,7 @@ const UserProfile = () => {
         )}
       </View>
     </ScrollView>
+
   );
 };
 

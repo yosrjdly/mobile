@@ -1,17 +1,18 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Image, FlatList, StyleSheet, ActivityIndicator, TouchableOpacity, TextInput } from 'react-native';
+import {Modal , View, Text, Image, FlatList, StyleSheet, ActivityIndicator, TouchableOpacity, TextInput } from 'react-native';
 import axios from 'axios';
 import { FontAwesome, AntDesign } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import JWT from 'expo-jwt';
 
-const ExperienceList = () => {
+const ExperienceList = ({ navigation }) => {
   const [experiences, setExperiences] = useState([]);
   const [loading, setLoading] = useState(true);
   const [expandedComments, setExpandedComments] = useState({});
   const [newComment, setNewComment] = useState('');
   const [selectedExperienceId, setSelectedExperienceId] = useState(null);
   const [userId, setUserId] = useState(null);
+  const [showShareModal, setShowShareModal] = useState(false);
 
   useEffect(() => {
     const fetchUserId = async () => {
@@ -34,9 +35,7 @@ const ExperienceList = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-
-        const response = await axios.get('http://192.168.10.20:5000/api/experienceTip/all/get');
-
+        const response = await axios.get('http://192.168.10.4:5000/api/experienceTip/all/get');
         setExperiences(response.data);
         setLoading(false);
       } catch (error) {
@@ -48,7 +47,7 @@ const ExperienceList = () => {
     fetchData();
   }, []);
 
-  const handleLikeToggle = async (experienceId, isLiked) => {
+  const handleLikeToggle = async (experienceId: any, isLiked: any) => {
     try {
       if (userId === null) {
         console.error('User ID not found');
@@ -56,10 +55,8 @@ const ExperienceList = () => {
       }
 
       const url = isLiked
-
-        ? `http://192.168.1.106:5000/api/like/${experienceId}/unlike`
-        : `http://192.168.1.106:5000/api/like/${experienceId}/like`;
-
+        ? `http://192.168.10.4:5000/api/like/${experienceId}/unlike`
+        : `http://192.168.10.4:5000/api/like/${experienceId}/like`;
 
       const method = isLiked ? 'DELETE' : 'POST';
 
@@ -77,7 +74,7 @@ const ExperienceList = () => {
                 ...exp, 
                 likeCounter: isLiked ? exp.likeCounter - 1 : exp.likeCounter + 1,
                 likes: isLiked 
-                  ? exp.likes.filter(like => like.user.id !== userId) 
+                  ? exp.likes.filter((like: { user: { id: any; }; }) => like.user.id !== userId) 
                   : [...exp.likes, { user: { id: userId } }] 
               }
             : exp
@@ -88,16 +85,14 @@ const ExperienceList = () => {
     }
   };
 
-  const handleShare = async (experienceId) => {
+  const handleShare = async (experienceId: any) => {
     try {
       if (userId === null) {
         console.error('User ID not found');
         return;
       }
 
-
-      await axios.post('http://192.168.10.20:5000/api/share/add', {
-
+      await axios.post('http://192.168.10.4:5000/api/share/add', {
         userId,
         experienceId,
       });
@@ -106,16 +101,19 @@ const ExperienceList = () => {
       setExperiences(prevExperiences =>
         prevExperiences.map(exp =>
           exp.id === experienceId
-            ? { ...exp, shareCounter: exp.shareCounter + 1 }
+           ? {...exp, shareCounter: exp.shareCounter + 1 }
             : exp
         )
       );
+
+      // Show share modal
+      setShowShareModal(true);
     } catch (error) {
       console.error('Error sharing experience:', error);
     }
   };
 
-  const toggleComments = (experienceId) => {
+  const toggleComments = (experienceId: string | number | React.SetStateAction<null>) => {
     setSelectedExperienceId(experienceId);
     setExpandedComments(prevState => ({
       ...prevState,
@@ -129,8 +127,7 @@ const ExperienceList = () => {
     }
 
     try {
-      const response = await axios.post(`http://192.168.10.20:5000/api/comment/add`, {
-
+      const response = await axios.post(`http://192.168.10.4:5000/api/comment/add`, {
         content: newComment,
         experienceId: selectedExperienceId,
         userId: userId
@@ -159,7 +156,7 @@ const ExperienceList = () => {
   }
 
   const renderExperience = ({ item }) => {
-    const isLiked = item.likes.some(like => like.user.id === userId);
+    const isLiked = item.likes.some((like: { user: { id: null; }; }) => like.user.id === userId);
 
     return (
       <View style={styles.experienceCard}>
@@ -187,16 +184,16 @@ const ExperienceList = () => {
         <Text style={styles.filterCategory}>{item.filterCategory}</Text>
         <View style={styles.reactions}>
           <TouchableOpacity onPress={() => handleLikeToggle(item.id, isLiked)} style={styles.reactionItem}>
-            <FontAwesome name={isLiked ? "thumbs-up" : "thumbs-o-up"} size={20} color="#B3492D" />
+            <FontAwesome name={isLiked? "thumbs-up" : "thumbs-o-up"} size={20} color="#B3492D" />
             <Text style={styles.reactionText}>{item.likeCounter}</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => handleShare(item.id)} style={styles.reactionItem}>
-            <FontAwesome name="share" size={20} color="#B3492D" />
-            <Text style={styles.reactionText}>{item.shareCounter}</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={() => toggleComments(item.id)} style={styles.commentButton}>
             <AntDesign name="message1" size={20} color="#B3492D" />
             <Text style={styles.commentButtonText}>{item.comments.length}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => handleShare(item.id)} style={styles.reactionItem}>
+            <FontAwesome name="share" size={20} color="#B3492D" />
+            <Text style={styles.reactionText}>{item.shareCounter}</Text>
           </TouchableOpacity>
         </View>
         {expandedComments[item.id] && (
@@ -231,24 +228,99 @@ const ExperienceList = () => {
             </View>
           </View>
         )}
+<Modal
+  visible={showShareModal}
+  animationType="slide"
+  transparent={true}
+  onRequestClose={() => setShowShareModal(false)}
+>
+  <View style={styles.modalContainer}>
+    <View style={styles.modalCard}>
+      <Text style={styles.modalTitle}>Experience Shared!</Text>
+      <Text style={styles.modalMessage}>Your experience has been shared successfully!</Text>
+      <TouchableOpacity onPress={() => setShowShareModal(false)}>
+        <View style={styles.modalButton}>
+          <Text style={styles.modalButtonText}>Close</Text>
+        </View>
+      </TouchableOpacity>
+    </View>
+  </View>
+</Modal>
       </View>
     );
   };
 
   return (
-    <FlatList
-      data={experiences}
-      keyExtractor={(item) => item.id.toString()}
-      renderItem={renderExperience}
-      contentContainerStyle={styles.container}
-    />
+    <View style={styles.container}>
+      <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+        <AntDesign name="left" size={24} color="#fff" />
+      </TouchableOpacity>
+      <Text style={styles.header}>Experiences</Text>
+      <FlatList
+        data={experiences}
+        keyExtractor={(item) => item.id.toString()}
+        renderItem={renderExperience}
+        contentContainerStyle={styles.list}
+      />
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    padding: 10,
+    flex: 1,
     backgroundColor: '#00595E',
+    paddingHorizontal: 10,
+    paddingVertical: 20,
+  },
+  backButton: {
+    position: 'absolute',
+    top:  40,
+    left: 20,
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(1, 64, 67, 0.8)',
+  },
+  modalCard: {
+    backgroundColor: '#014043',
+    borderRadius: 10,
+    padding: 20,
+    width: '80%',
+    alignSelf: 'center',
+  },
+  modalTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#fff',
+    marginBottom: 10,
+  },
+  modalMessage: {
+    fontSize: 16,
+    color: '#fff',
+    marginBottom: 20,
+  },
+  modalButton: {
+    backgroundColor: '#B3492D',
+    borderRadius: 10,
+    padding: 10,
+    width: '100%',
+  },
+  modalButtonText: {
+    fontSize: 16,
+    color: '#fff',
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  header: {
+    fontSize: 30,
+    fontWeight: 'bold',
+    color: '#fff',
+    marginBottom: 10,
+    marginTop: 10,
+    marginLeft: 85,
   },
   loading: {
     flex: 1,
@@ -256,77 +328,77 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   experienceCard: {
-    backgroundColor: '#E6D5B8',
-    borderRadius: 10,
-    padding: 10,
-    marginBottom: 10,
+    backgroundColor: '#014043',
+    borderRadius: 8,
+    padding: 15,
+    marginBottom: 15,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.3,
-    shadowRadius: 1,
-    elevation: 3,
+    shadowOpacity: 0.1,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
   },
   userSection: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 10,
   },
   profileImage: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 60,
+    height: 60,
+    borderRadius: 50,
     marginRight: 10,
   },
   userName: {
+    fontSize: 17,
     fontWeight: 'bold',
-    color: '#333',
+    color: '#fff'
   },
   title: {
-    fontWeight: 'bold',
     fontSize: 18,
-    marginBottom: 5,
-    color: '#333',
+    fontWeight: 'bold',
+    marginVertical: 10,
+    color:"#fff"
   },
   content: {
-    fontSize: 14,
-    marginBottom: 5,
-    color: '#555',
+    fontSize: 16,
+    color: '#fff',
   },
   imageSlider: {
-    marginBottom: 10,
+    marginVertical: 10,
   },
   image: {
-    width: 100,
-    height: 100,
-    borderRadius: 10,
+    width: 150,
+    height: 150,
+    borderRadius: 8,
     marginRight: 5,
   },
   location: {
-    fontSize: 12,
-    color: '#888',
+    fontSize: 14,
+    color: '#fff',
   },
   category: {
-    fontSize: 12,
-    color: '#888',
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#fff',
   },
   filterCategory: {
-    fontSize: 12,
-    color: '#888',
-    marginBottom: 5,
+    fontSize: 14,
+    color: '#B3492D',
   },
   reactions: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
+    justifyContent: 'space-between', 
     alignItems: 'center',
-    marginVertical: 5,
+    marginVertical: 10,
   },
   reactionItem: {
     flexDirection: 'row',
     alignItems: 'center',
+    marginRight: 15,
   },
   reactionText: {
     marginLeft: 5,
-    color: '#B3492D',
+    fontSize: 14,
+    color: '#333',
   },
   commentButton: {
     flexDirection: 'row',
@@ -334,37 +406,40 @@ const styles = StyleSheet.create({
   },
   commentButtonText: {
     marginLeft: 5,
-    color: '#B3492D',
+    fontSize: 14,
+    color: '#333',
   },
   commentsSection: {
     marginTop: 10,
   },
   commentsTitle: {
+    fontSize: 16,
     fontWeight: 'bold',
     marginBottom: 5,
-    color: '#333',
   },
   commentContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
     marginBottom: 10,
   },
   commentUserSection: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 5,
+    marginRight: 10,
   },
   commentProfileImage: {
     width: 30,
     height: 30,
     borderRadius: 15,
-    marginRight: 10,
+    marginRight: 5,
   },
   commentUserName: {
+    fontSize: 14,
     fontWeight: 'bold',
-    color: '#333',
   },
   comment: {
     fontSize: 14,
-    color: '#555',
+    color: '#333',
   },
   commentInputSection: {
     flexDirection: 'row',
@@ -372,20 +447,20 @@ const styles = StyleSheet.create({
   },
   commentInput: {
     flex: 1,
+    borderColor: '#ccc',
     borderWidth: 1,
-    borderColor: '#B3492D',
-    borderRadius: 10,
-    padding: 5,
-    marginRight: 10,
-    color: '#333',
+    borderRadius: 20,
+    padding: 10,
   },
   commentSubmitButton: {
     backgroundColor: '#B3492D',
-    borderRadius: 10,
-    padding: 5,
+    borderRadius: 20,
+    padding: 10,
+    marginLeft: 10,
   },
   commentSubmitText: {
     color: '#fff',
+    fontWeight: 'bold',
   },
 });
 

@@ -1,8 +1,8 @@
 // AboutUs.tsx
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialIcons'; // Import the icon library
-import Logo from "../../assets/images/Logo.png"; // Adjust the path to your logo
+import Icon from 'react-native-vector-icons/MaterialIcons'; 
+import Logo from "../../assets/images/Logo.png"; 
 import { useRouter, router } from 'expo-router';
 const AboutUs = () => {
   return (
