@@ -51,7 +51,7 @@ const Notifications = () => {
     const fetchUserData = async (userId: string) => {
       try {
         const response = await axios.get(
-          `http://192.168.10.20:5000/api/users/${userId}`
+          `http://192.168.1.51:5000/api/users/${userId}`
         );
         console.log("User data fetched:", response.data);
         setUser({

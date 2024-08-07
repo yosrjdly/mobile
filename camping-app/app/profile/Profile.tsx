@@ -25,7 +25,7 @@ const Profile = () => {
     useEffect(() => {
         const fetchUserData = async (userId: string) => {
             try {
-                const response = await axios.get(`http://192.168.10.20:5000/api/users/${userId}`);
+                const response = await axios.get(`http://192.168.10.13:5000/api/users/${userId}`);
                 console.log("User data fetched:", response.data, response.data.posts);
                 setUserData({
                     id: response.data.user.id,
@@ -61,7 +61,7 @@ const Profile = () => {
                         const decodedToken = JWT.decode(token, key);
                         if (decodedToken && decodedToken.id) {
                             // Fetch user data based on ID from decoded token
-                            const response = await axios.get(`http://192.168.10.20:5000/api/users/${decodedToken.id}`);
+                            const response = await axios.get(`http://192.168.10.13:5000/api/users/${decodedToken.id}`);
                             setUser(response.data);
                             setUserData({
                                 id: response.data.id,
