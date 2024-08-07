@@ -1,66 +1,32 @@
-import { StyleSheet, Text, View, TextInput, Button, Alert, ActivityIndicator, FlatList, Image, Modal, Pressable } from 'react-native';
+import { StyleSheet, Text, View, TextInput, Alert, ActivityIndicator, FlatList, Image, Modal, Pressable, ScrollView } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import JWT from 'expo-jwt';
-import { AirbnbRating, Rating } from 'react-native-ratings'; 
+import { AirbnbRating, Rating } from 'react-native-ratings';
 
 const RatingAndReviews = () => {
   const [userData, setUserData] = useState<any>(null);
   const [postId, setPostId] = useState('');
   const [userId, setUserId] = useState('');
-  const [rating, setRating] = useState<number>(0); 
+  const [rating, setRating] = useState<number>(0);
   const [reviews, setReviews] = useState('');
+  const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [isUserAccepted, setIsUserAccepted] = useState<boolean>(false);
   const [postsJoined, setPostsJoined] = useState<any[]>([]);
   const [modalVisible, setModalVisible] = useState<boolean>(false);
 
-  // Fetch user data
-  const fetchUserData = async (userId: string) => {
-    try {
-      const response = await axios.get(`http://192.168.10.4:5000/api/users/${userId}`);
-      const user = response.data.user;
-      setUserData({
-        id: user.id,
-        name: user.name,
-        camps: response.data.posts,
-        joinCampingPosts: user.joinCampingPosts,
-      });
-      setUserId(user.id);
-      if (user.joinCampingPosts.length > 0) {
-        setPostId(user.joinCampingPosts[0].postId.toString());
-      }
-
-      const acceptedStatus = user.joinCampingPosts.some(
-        (post: any) => post.postId === Number(postId) && post.status === 'ACCEPTED'
-      );
-      setIsUserAccepted(acceptedStatus);
-      setPostsJoined(user.joinCampingPosts);
-    } catch (error) {
-      console.error('Error fetching user data:', error);
-      setError('Failed to fetch user data');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Handle update review
   const handleUpdateReview = async () => {
-    if (!isUserAccepted) {
-      Alert.alert('Error', 'You are not accepted to join this trip, so you cannot review or rate it.');
-      return;
-    }
-
     try {
-      const response = await fetch('http://192.168.10.4:5000/api/camps/updateReview', {
+      const response = await fetch('http://192.168.10.20:5000/api/camps/updateReview', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          postId: Number(postId),
+          postId: Number(selectedPostId),
           userId: Number(userId),
           rating,
           reviews,
@@ -71,14 +37,43 @@ const RatingAndReviews = () => {
 
       if (response.ok) {
         Alert.alert('Success', data.msg);
-        // Refresh data after update
-        fetchUserData(userId);
+        fetchUserData(userId); // Refresh data after update
       } else {
-        Alert.alert('Error', data.message);
+        Alert.alert('Error', data.message || 'Failed to update review');
       }
     } catch (error) {
       console.error('Error:', error);
       Alert.alert('Error', 'An unexpected error occurred.');
+    }
+  };
+
+  const fetchUserData = async (userId: string) => {
+    try {
+      const response = await axios.get(`http://192.168.10.20:5000/api/users/${userId}`);
+      const user = response.data.user;
+      const joinedPosts = user.joinCampingPosts;
+
+      setUserData({
+        id: user.id,
+        name: user.name,
+        camps: response.data.posts,
+        joinCampingPosts: joinedPosts,
+      });
+      setUserId(user.id);
+      if (joinedPosts.length > 0) {
+        setPostId(joinedPosts[0].postId.toString());
+      }
+
+      // Filter posts to include only those with status 'ACCEPTED' and post.status 'Completed'
+      const acceptedAndCompletedPosts = joinedPosts.filter((post: any) =>
+        post.status === 'ACCEPTED' && post.post.status === 'Completed'
+      );
+      setPostsJoined(acceptedAndCompletedPosts);
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+      setError('Failed to fetch user data');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -108,49 +103,64 @@ const RatingAndReviews = () => {
     };
 
     decodeToken();
-  }, [postId]);
+  }, []); // Empty dependency array ensures this runs only on mount
 
   if (loading) {
     return <ActivityIndicator size="large" color="#0000ff" />;
   }
 
-  const renderJoinedPost = ({ item }: { item: any }) => (
-    <View style={styles.postItem}>
-      {item.post && item.post.images && item.post.images.length > 0 && (
-        <Image
-          source={{ uri: item.post.images[0] }}
-          style={styles.postImage}
-          resizeMode="cover"
-        />
-      )}
-      <Text style={styles.postTitle}>Title: {item.post.title}</Text>
-      <Text>Status: {item.status}</Text>
-      <Text>Description: {item.post.description}</Text>
-      <Text>Category: {item.post.category}</Text>
-      <View style={styles.ratingContainer}>
-        <Text>Rating:</Text>
-        <Rating
-          type='star'
-          ratingCount={5}
-          imageSize={20}
-          readonly
-          startingValue={item.rating} 
-        />
-      </View>
-      <Text>Review: {item.reviews}</Text>
-    </View>
-  );
+  const renderJoinedPost = ({ item }: { item: any }) => {
+    // Check if the post status is 'Completed'
+    const isPostCompleted = item.post.status === 'Completed';
 
-  const openModal = () => {
-    if (!isUserAccepted) {
-      Alert.alert('Error', 'You are not accepted to join this trip, so you cannot update your review.');
-      return;
-    }
-    setModalVisible(true);
+    return (
+      <View style={styles.postItem}>
+        {item.post && item.post.images && item.post.images.length > 0 && (
+          <Image
+            source={{ uri: item.post.images[0] }}
+            style={styles.postImage}
+            resizeMode="cover"
+          />
+        )}
+        <Text style={styles.postTitle}>Title: {item.post.title}</Text>
+        <Text>Status: {item.status}</Text>
+        <Text>Description: {item.post.description}</Text>
+        <Text>Category: {item.post.category}</Text>
+       
+          <Text>StatusPost: Completed</Text>
+        
+        <View style={styles.ratingContainer}>
+          <Text>Rating:</Text>
+          <Rating
+            type='star'
+            ratingCount={5}
+            imageSize={20}
+            readonly
+            startingValue={item.rating} // Display the rating
+          />
+        </View>
+        <Text>Review: {item.reviews}</Text>
+        {isPostCompleted && (
+          <Pressable
+            style={styles.updateButton} // Apply the new button style
+            onPress={() => {
+              
+              setSelectedPostId(item.postId.toString());
+              setRating(item.rating || 0);
+              setReviews(item.reviews || '');
+              setModalVisible(true);
+            }}
+          >
+            <Text style={styles.textStyle}>Update Review</Text>
+          </Pressable>
+        )}
+      </View>
+    );
   };
 
   const closeModal = () => {
     setModalVisible(false);
+    setSelectedPostId(null);
   };
 
   const submitReview = () => {
@@ -160,14 +170,15 @@ const RatingAndReviews = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.sectionTitle}>Posts Joined</Text>
-      <FlatList
-        data={postsJoined}
-        renderItem={renderJoinedPost}
-        keyExtractor={(item) => item.postId.toString()}
-      />
-      <Button title="Update Review" onPress={openModal} />
-      {error && <Text style={styles.error}>{error}</Text>}
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
+        <Text style={styles.sectionTitle}>Posts Joined by User</Text>
+        <FlatList
+          data={postsJoined}
+          renderItem={renderJoinedPost}
+          keyExtractor={(item) => item.postId.toString()}
+        />
+        {error && <Text style={styles.error}>{error}</Text>}
+      </ScrollView>
       <Modal
         animationType="slide"
         transparent={true}
@@ -180,7 +191,7 @@ const RatingAndReviews = () => {
             count={5}
             defaultRating={rating}
             size={20}
-            onFinishRating={setRating}  // Update rating when user selects
+            onFinishRating={setRating} // Update rating when user selects
           />
           <Text>Reviews:</Text>
           <TextInput
@@ -209,7 +220,12 @@ const RatingAndReviews = () => {
 
 const styles = StyleSheet.create({
   container: {
-    padding: 20,
+    flex: 1,
+    backgroundColor: '#014043',
+  },
+  scrollContainer: {
+    flexGrow: 1,
+    paddingHorizontal: 20,
   },
   input: {
     borderWidth: 1,
@@ -224,11 +240,13 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     marginVertical: 10,
+    color: '#fff', // Optional: to make the title stand out
   },
   postItem: {
     padding: 10,
     borderBottomWidth: 1,
     borderBottomColor: '#ccc',
+    backgroundColor: '#fff', // Optional: background color for the posts
   },
   postTitle: {
     fontWeight: 'bold',
@@ -261,11 +279,17 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: 10,
     elevation: 2,
-    backgroundColor: '#00796b',
   },
   buttonClose: {
     backgroundColor: '#2196F3',
     marginVertical: 10,
+  },
+  updateButton: {
+    backgroundColor: '#B3492D', // New button color
+    borderRadius: 20,
+    padding: 10,
+    elevation: 2,
+    alignItems: 'center', // Center text within the button
   },
   textStyle: {
     color: 'white',
@@ -275,4 +299,5 @@ const styles = StyleSheet.create({
 });
 
 export default RatingAndReviews;
+
 
