@@ -1,6 +1,8 @@
-import { StyleSheet, Text, View, Image, ScrollView, TouchableOpacity, Modal, Pressable, TextInput } from 'react-native';
+import { StyleSheet, Text, View, Image, ScrollView, TouchableOpacity, Modal, Pressable, TextInput, Dimensions } from 'react-native';
 import React, { useState } from 'react';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+
+const { width } = Dimensions.get('window');
 
 const Shop = () => {
   const [modalVisible, setModalVisible] = useState(false);
@@ -111,7 +113,6 @@ const Shop = () => {
     </ScrollView>
   );
 };
-
 const categories = [
   'BackPacks and Bugs',
   'Tents & Shelters',
@@ -237,7 +238,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 10,
     marginBottom: 20,
-    width: '48%',
+    width: (width / 2) - 30, // Adjust card width to fit two cards per row with spacing
   },
   productImage: {
     width: '100%',

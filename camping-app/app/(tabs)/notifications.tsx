@@ -18,8 +18,8 @@ interface Post {
   title: string;
   description: string;
   location: string;
-  startDate: string; // ISO 8601 format
-  endDate: string; // ISO 8601 format
+  startDate: string; 
+  endDate: string; 
   equipment: string[];
   places: number;
   ageCategory: "ADULT" | "CHILD" | "TEEN";
@@ -51,7 +51,7 @@ const Notifications = () => {
     const fetchUserData = async (userId: string) => {
       try {
         const response = await axios.get(
-          `http://192.168.1.17:5000/api/users/${userId}`
+          `http://192.168.10.4:5000/api/users/${userId}`
         );
         console.log("User data fetched:", response.data);
         setUser({

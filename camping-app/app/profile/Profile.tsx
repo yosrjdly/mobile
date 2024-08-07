@@ -9,9 +9,10 @@ import axios from "axios";
 import SharedExp from "../../components/SharedExp";
 import profileImage from "../../assets/images/default-avatar.webp"; // Default profile image
 import { useNavigation } from '@react-navigation/native';
-import { DrawerActions } from "@react-navigation/drawer";
+
 
 const { width } = Dimensions.get("window");
+
 
 const Profile = () => {
     const navigation = useNavigation();
@@ -24,7 +25,7 @@ const Profile = () => {
     useEffect(() => {
         const fetchUserData = async (userId: string) => {
             try {
-                const response = await axios.get(`http://192.168.1.17:5000/api/users/${userId}`);
+                const response = await axios.get(`http://192.168.10.4:5000/api/users/${userId}`);
                 console.log("User data fetched:", response.data, response.data.posts);
                 setUserData({
                     id: response.data.user.id,
@@ -60,7 +61,7 @@ const Profile = () => {
                         const decodedToken = JWT.decode(token, key);
                         if (decodedToken && decodedToken.id) {
                             // Fetch user data based on ID from decoded token
-                            const response = await axios.get(`http://192.168.1.17:5000/api/users/${decodedToken.id}`);
+                            const response = await axios.get(`http://192.168.10.4:5000/api/users/${decodedToken.id}`);
                             setUser(response.data);
                             setUserData({
                                 id: response.data.id,
@@ -151,7 +152,7 @@ const Profile = () => {
                     <TouchableOpacity style={[styles.actionButton, styles.addCampButton]}>
                         <Text style={styles.buttonText}>Add Camp</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={[styles.actionButton, styles.addExperienceButton]}>
+                    <TouchableOpacity  onPress={()=>router.replace('createExp/CreateExp')} style={[styles.actionButton, styles.addExperienceButton]}>
                         <Text style={styles.buttonText}>Add Experience</Text>
                     </TouchableOpacity>
                 </View>

@@ -10,7 +10,7 @@ const SharedExp = ({ userId }) => {
   useEffect(() => {
     const fetchSharedExperiences = async () => {
       try {
-        const response = await axios.get(`http://192.168.1.17:5000/api/share/all/${userId}`);
+        const response = await axios.get(`http://192.168.10.4:5000/api/share/all/${userId}`);
         setSharedExperiences(response.data);
       } catch (err) {
         setError(err);
@@ -25,7 +25,7 @@ const SharedExp = ({ userId }) => {
   if (loading) {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#0000ff" />
+        <ActivityIndicator size="large" color="#ffffff" />
       </View>
     );
   }
@@ -39,78 +39,71 @@ const SharedExp = ({ userId }) => {
   }
 
   return (
-    <View style={styles.container}>
-      {sharedExperiences.length === 0 ? (
-        <Text style={styles.noDataText}>No experiences shared yet.</Text>
-      ) : (
-        <FlatList
-          data={sharedExperiences}
-          keyExtractor={(item) => item.id.toString()}
-          renderItem={({ item }) => (
-            <View style={styles.experienceContainer}>
-              <View style={styles.userContainer}>
-                {item.experience.user.imagesProfile.length > 0 ? (
-                  <Image source={{ uri: item.experience.user.imagesProfile[0] }} style={styles.userProfileImage} />
-                ) : (
-                  <Image  style={styles.userProfileImage} /> // Use a default image if no profile image is available
-                )}
-                <Text style={styles.userName}>{item.experience.user.name}</Text>
+    <FlatList
+      data={sharedExperiences}
+      keyExtractor={(item) => item.id.toString()}
+      renderItem={({ item }) => (
+        <View style={styles.card}>
+          <View style={styles.userContainer}>
+            {item.experience.user.imagesProfile.length > 0 ? (
+              <Image source={{ uri: item.experience.user.imagesProfile[0] }} style={styles.userProfileImage} />
+            ) : (
+              <View style={styles.noProfileImage}>
+                <Text style={styles.noProfileText}>No Image</Text>
               </View>
-              <Text style={styles.title}>{item.experience.title}</Text>
-              <Text style={styles.content}>{item.experience.content}</Text>
-              <FlatList
-                data={item.experience.imagesUrl}
-                horizontal
-                keyExtractor={(url, index) => index.toString()}
-                renderItem={({ item }) => (
-                  <Image source={{ uri: item }} style={styles.image} />
-                )}
-              />
-              <Text style={styles.info}>
-                Location: <Text style={styles.infoValue}>{item.experience.location}</Text>
-              </Text>
-              <Text style={styles.info}>
-                Category: <Text style={styles.infoValue}>{item.experience.category}</Text>
-              </Text>
-              <Text style={styles.info}>
-                Shares: <Text style={styles.infoValue}>{item.experience.shareCounter}</Text>
-              </Text>
-              <Text style={styles.info}>
-                Likes: <Text style={styles.infoValue}>{item.experience.likeCounter}</Text>
-              </Text>
-            </View>
-          )}
-        />
+            )}
+            <Text style={styles.userName}>{item.experience.user.name}</Text>
+          </View>
+          <Text style={styles.title}>{item.experience.title}</Text>
+          <Text style={styles.content}>{item.experience.content}</Text>
+          <FlatList
+            data={item.experience.imagesUrl}
+            horizontal
+            keyExtractor={(url, index) => index.toString()}
+            renderItem={({ item }) => (
+              <Image source={{ uri: item }} style={styles.image} />
+            )}
+          />
+          <View style={styles.infoContainer}>
+            <Text style={styles.info}>
+              Location: <Text style={styles.infoValue}>{item.experience.location}</Text>
+            </Text>
+            <Text style={styles.info}>
+              Category: <Text style={styles.infoValue}>{item.experience.category}</Text>
+            </Text>
+            <Text style={styles.info}>
+              Shares: <Text style={styles.infoValue}>{item.experience.shareCounter}</Text>
+            </Text>
+            <Text style={styles.info}>
+              Likes: <Text style={styles.infoValue}>{item.experience.likeCounter}</Text>
+            </Text>
+          </View>
+        </View>
       )}
-    </View>
+    />
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 16,
-    backgroundColor: '#fff',
-  },
   centered: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
   errorText: {
-    color: 'red',
+    color: 'white',
     fontSize: 16,
   },
-  noDataText: {
-    color: '#888',
-    fontSize: 16,
-    textAlign: 'center',
-  },
-  experienceContainer: {
+  card: {
+    backgroundColor: '#00595E',
+    borderRadius: 8,
+    padding: 16,
     marginBottom: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
-    paddingBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2, // For Android shadow effect
   },
   userContainer: {
     flexDirection: 'row',
@@ -118,32 +111,53 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   userProfileImage: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
     marginRight: 8,
   },
-  userName: {
-    fontSize: 16,
-    fontWeight: 'bold',
+  noProfileImage: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: '#ddd',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 8,
   },
-  title: {
+  noProfileText: {
+    color: '#888',
+    fontSize: 12,
+  },
+  userName: {
     fontSize: 18,
     fontWeight: 'bold',
+    color: 'white',
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: 'white',
+    marginBottom: 8,
   },
   content: {
     fontSize: 16,
-    marginVertical: 8,
+    color: 'white',
+    marginBottom: 8,
   },
   image: {
-    width: 200,
-    height: 120,
+    width: 250,
+    height: 150,
     borderRadius: 8,
     marginRight: 8,
   },
+  infoContainer: {
+    marginTop: 8,
+  },
   info: {
     fontSize: 16,
-    marginVertical: 4,
+    color: 'white',
+    marginBottom: 4,
   },
   infoValue: {
     fontWeight: 'bold',

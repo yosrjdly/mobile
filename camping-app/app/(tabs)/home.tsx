@@ -10,7 +10,9 @@ const { width, height } = Dimensions.get('window');
 
 const categories = ['Kayaking', 'Climbing', 'Fishing', 'Hiking', 'Hitchhiking'];
 
+
 interface User {
+
   id: string;
   name: string;
   email: string;
@@ -30,18 +32,6 @@ const Home = () => {
   const [likedCamps, setLikedCamps] = useState<Set<number>>(new Set());
   const [menuVisible, setMenuVisible] = useState<boolean>(false);
   const menuAnimation = useState(new Animated.Value(-width))[0]; 
-
-  const handleHeartPress = (campId: number) => {
-    setLikedCamps(prevLikedCamps => {
-      const newLikedCamps = new Set(prevLikedCamps);
-      if (newLikedCamps.has(campId)) {
-        newLikedCamps.delete(campId);
-      } else {
-        newLikedCamps.add(campId);
-      }
-      return newLikedCamps;
-    });
-  };
 
   const handleCategoryChange = (category: string) => {
     setSelectedCategory(category);
@@ -103,8 +93,9 @@ const Home = () => {
           }
 
           // Fetch camps data
-          const campsResponse = await axios.get('http://192.168.1.17:5000/api/camps/getAll');
+          const campsResponse = await axios.get('http://192.168.10.4:5000/api/camps/getAll');
           setCamps(campsResponse.data.data);
+          console.log(campsResponse.data.data)
           setFilteredCamps(campsResponse.data.data);
         } else {
           console.error('Token not found in AsyncStorage');
@@ -120,6 +111,25 @@ const Home = () => {
 
     fetchUserAndCamps();
   }, []); 
+
+
+  // console.log('User:', user);
+  // console.log('Camps:', camps);
+
+  const handleHeartPress = (campId: number) => {
+    console.log(`Heart pressed for campId: ${campId}`); 
+    setLikedCamps(prevLikedCamps => {
+      const newLikedCamps = new Set(prevLikedCamps);
+      if (newLikedCamps.has(campId)) {
+        newLikedCamps.delete(campId);
+        console.log(`Removed campId: ${campId} from likedCamps`); 
+      } else {
+        newLikedCamps.add(campId); // Add to liked camps
+        console.log(`Added campId: ${campId} to likedCamps`); 
+      }
+      return newLikedCamps;
+    });
+  };
 
   if (loading) {
     return <Text style={styles.loadingText}>Loading...</Text>;
@@ -174,18 +184,19 @@ const Home = () => {
         <View style={styles.postList}>
           {filteredCamps.map((camp) => (
             <View style={styles.postContainer} key={camp.id}>
-              <Image source={{ uri: camp.images[0] }} style={styles.postImage} />
+           <Image source={{ uri: camp.images[0] }} style={styles.postImage} />
               <View style={styles.postOverlay}>
-                <TouchableOpacity
-                  style={styles.heartButton}
-                  onPress={() => handleHeartPress(camp.id)}
-                >
-                  <MaterialCommunityIcons
-                    name={likedCamps.has(camp.id) ? 'heart' : 'heart-outline'}
-                    size={30}
-                    color={likedCamps.has(camp.id) ? 'red' : 'white'}
-                  />
-                </TouchableOpacity>
+              <TouchableOpacity
+  style={styles.heartButton}
+  onPress={() => handleHeartPress(camp.id)}
+>
+  <MaterialCommunityIcons
+    name={likedCamps.has(camp.id) ? 'heart' : 'heart-outline'}
+    size={30}
+    color={likedCamps.has(camp.id) ? 'red' : 'white'}
+  />
+</TouchableOpacity>
+
                 <View style={styles.textOverlay}>
                   <Text style={styles.postTitle}>{camp.title}</Text>
                   <Text style={styles.postLocation}>
@@ -343,8 +354,11 @@ const styles = StyleSheet.create({
     right: 10,
     backgroundColor: 'rgba(0, 0, 0, 0.3)',
     borderRadius: 20,
-    padding: 5,
+    padding: 10,
+    zIndex: 1,
   },
+  
+  
   textOverlay: {
     marginBottom: 10,
   },
