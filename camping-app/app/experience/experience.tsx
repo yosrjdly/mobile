@@ -1,17 +1,18 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Image, FlatList, StyleSheet, ActivityIndicator, TouchableOpacity, TextInput } from 'react-native';
+import {Modal , View, Text, Image, FlatList, StyleSheet, ActivityIndicator, TouchableOpacity, TextInput } from 'react-native';
 import axios from 'axios';
 import { FontAwesome, AntDesign } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import JWT from 'expo-jwt';
 
-const ExperienceList = () => {
+const ExperienceList = ({ navigation }) => {
   const [experiences, setExperiences] = useState([]);
   const [loading, setLoading] = useState(true);
   const [expandedComments, setExpandedComments] = useState({});
   const [newComment, setNewComment] = useState('');
   const [selectedExperienceId, setSelectedExperienceId] = useState(null);
   const [userId, setUserId] = useState(null);
+  const [showShareModal, setShowShareModal] = useState(false);
 
   useEffect(() => {
     const fetchUserId = async () => {
@@ -100,10 +101,13 @@ const ExperienceList = () => {
       setExperiences(prevExperiences =>
         prevExperiences.map(exp =>
           exp.id === experienceId
-            ? { ...exp, shareCounter: exp.shareCounter + 1 }
+           ? {...exp, shareCounter: exp.shareCounter + 1 }
             : exp
         )
       );
+
+      // Show share modal
+      setShowShareModal(true);
     } catch (error) {
       console.error('Error sharing experience:', error);
     }
@@ -180,16 +184,16 @@ const ExperienceList = () => {
         <Text style={styles.filterCategory}>{item.filterCategory}</Text>
         <View style={styles.reactions}>
           <TouchableOpacity onPress={() => handleLikeToggle(item.id, isLiked)} style={styles.reactionItem}>
-            <FontAwesome name={isLiked ? "thumbs-up" : "thumbs-o-up"} size={20} color="#B3492D" />
+            <FontAwesome name={isLiked? "thumbs-up" : "thumbs-o-up"} size={20} color="#B3492D" />
             <Text style={styles.reactionText}>{item.likeCounter}</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => handleShare(item.id)} style={styles.reactionItem}>
-            <FontAwesome name="share" size={20} color="#B3492D" />
-            <Text style={styles.reactionText}>{item.shareCounter}</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={() => toggleComments(item.id)} style={styles.commentButton}>
             <AntDesign name="message1" size={20} color="#B3492D" />
             <Text style={styles.commentButtonText}>{item.comments.length}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => handleShare(item.id)} style={styles.reactionItem}>
+            <FontAwesome name="share" size={20} color="#B3492D" />
+            <Text style={styles.reactionText}>{item.shareCounter}</Text>
           </TouchableOpacity>
         </View>
         {expandedComments[item.id] && (
@@ -224,12 +228,33 @@ const ExperienceList = () => {
             </View>
           </View>
         )}
+<Modal
+  visible={showShareModal}
+  animationType="slide"
+  transparent={true}
+  onRequestClose={() => setShowShareModal(false)}
+>
+  <View style={styles.modalContainer}>
+    <View style={styles.modalCard}>
+      <Text style={styles.modalTitle}>Experience Shared!</Text>
+      <Text style={styles.modalMessage}>Your experience has been shared successfully!</Text>
+      <TouchableOpacity onPress={() => setShowShareModal(false)}>
+        <View style={styles.modalButton}>
+          <Text style={styles.modalButtonText}>Close</Text>
+        </View>
+      </TouchableOpacity>
+    </View>
+  </View>
+</Modal>
       </View>
     );
   };
 
   return (
     <View style={styles.container}>
+      <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+        <AntDesign name="left" size={24} color="#fff" />
+      </TouchableOpacity>
       <Text style={styles.header}>Experiences</Text>
       <FlatList
         data={experiences}
@@ -248,13 +273,54 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 20,
   },
+  backButton: {
+    position: 'absolute',
+    top:  40,
+    left: 20,
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(1, 64, 67, 0.8)',
+  },
+  modalCard: {
+    backgroundColor: '#014043',
+    borderRadius: 10,
+    padding: 20,
+    width: '80%',
+    alignSelf: 'center',
+  },
+  modalTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#fff',
+    marginBottom: 10,
+  },
+  modalMessage: {
+    fontSize: 16,
+    color: '#fff',
+    marginBottom: 20,
+  },
+  modalButton: {
+    backgroundColor: '#B3492D',
+    borderRadius: 10,
+    padding: 10,
+    width: '100%',
+  },
+  modalButtonText: {
+    fontSize: 16,
+    color: '#fff',
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
   header: {
     fontSize: 30,
     fontWeight: 'bold',
     color: '#fff',
     marginBottom: 10,
-    marginTop:10,
-    marginLeft:85
+    marginTop: 10,
+    marginLeft: 85,
   },
   loading: {
     flex: 1,
@@ -262,7 +328,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   experienceCard: {
-    backgroundColor: '#A3A88A',
+    backgroundColor: '#014043',
     borderRadius: 8,
     padding: 15,
     marginBottom: 15,
@@ -284,15 +350,17 @@ const styles = StyleSheet.create({
   userName: {
     fontSize: 17,
     fontWeight: 'bold',
+    color: '#fff'
   },
   title: {
     fontSize: 18,
     fontWeight: 'bold',
     marginVertical: 10,
+    color:"#fff"
   },
   content: {
     fontSize: 16,
-    color: '#333',
+    color: '#fff',
   },
   imageSlider: {
     marginVertical: 10,
@@ -305,12 +373,12 @@ const styles = StyleSheet.create({
   },
   location: {
     fontSize: 14,
-    color: '#888',
+    color: '#fff',
   },
   category: {
     fontSize: 14,
     fontWeight: 'bold',
-    color: '#B3492D',
+    color: '#fff',
   },
   filterCategory: {
     fontSize: 14,
@@ -318,7 +386,7 @@ const styles = StyleSheet.create({
   },
   reactions: {
     flexDirection: 'row',
-    justifyContent: 'space-between', // Distributes icons equally
+    justifyContent: 'space-between', 
     alignItems: 'center',
     marginVertical: 10,
   },

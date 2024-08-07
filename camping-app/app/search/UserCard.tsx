@@ -18,7 +18,7 @@ const UserCard = ({ user }) => {
     <View style={styles.card}>
       <TouchableOpacity onPress={handlePress}>
         <Image 
-          source={{ uri: user.imagesProfile?.[0] || 'default-image-url' }} 
+          source={{ uri: user.imagesProfile?.[0] || 'https://via.placeholder.com/50' }} 
           style={styles.image} 
         />
       </TouchableOpacity>

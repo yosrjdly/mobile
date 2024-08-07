@@ -110,22 +110,22 @@ const Home = () => {
     };
 
     fetchUserAndCamps();
-  }, []); // Empty dependency array to run only once
+  }, []); 
 
 
   // console.log('User:', user);
   // console.log('Camps:', camps);
 
   const handleHeartPress = (campId: number) => {
-    console.log(`Heart pressed for campId: ${campId}`); // Debugging log
+    console.log(`Heart pressed for campId: ${campId}`); 
     setLikedCamps(prevLikedCamps => {
       const newLikedCamps = new Set(prevLikedCamps);
       if (newLikedCamps.has(campId)) {
-        newLikedCamps.delete(campId); // Remove from liked camps
-        console.log(`Removed campId: ${campId} from likedCamps`); // Debugging log
+        newLikedCamps.delete(campId);
+        console.log(`Removed campId: ${campId} from likedCamps`); 
       } else {
         newLikedCamps.add(campId); // Add to liked camps
-        console.log(`Added campId: ${campId} to likedCamps`); // Debugging log
+        console.log(`Added campId: ${campId} to likedCamps`); 
       }
       return newLikedCamps;
     });

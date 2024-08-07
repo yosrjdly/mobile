@@ -18,8 +18,8 @@ interface Post {
   title: string;
   description: string;
   location: string;
-  startDate: string; // ISO 8601 format
-  endDate: string; // ISO 8601 format
+  startDate: string; 
+  endDate: string; 
   equipment: string[];
   places: number;
   ageCategory: "ADULT" | "CHILD" | "TEEN";

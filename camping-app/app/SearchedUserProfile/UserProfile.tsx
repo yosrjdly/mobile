@@ -29,6 +29,7 @@ const UserProfile = () => {
     <View style={styles.container}>
       <Image source={{ uri: user.imagesProfile?.[0] || 'https://via.placeholder.com/50'  }} style={styles.image} />
       <Text style={styles.name}>{user.name}</Text>
+      <Text style={styles.name}>hello</Text>
       <Text style={styles.email}>{user.email}</Text>
     </View>
   );
