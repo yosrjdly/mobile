@@ -8,10 +8,6 @@ const UserCard = ({ user }) => {
   const handlePress = () => {
     console.log(user)
     router.replace(`/SearchedUserProfile/UserProfile?userId=${user.id}`); 
-    // router.replace({
-    //   pathname:`/SearchedUserProfile/UserProfile?userId=${user.id}`,
-    //   params:{userId: user.id}
-    // })
   };
 
   return (
