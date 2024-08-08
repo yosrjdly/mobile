@@ -10,7 +10,9 @@ const SharedExp = ({ userId }) => {
   useEffect(() => {
     const fetchSharedExperiences = async () => {
       try {
+
         const response = await axios.get(`http://192.168.10.4:5000/api/share/all/${userId}`);
+
         setSharedExperiences(response.data);
       } catch (err) {
         setError(err);

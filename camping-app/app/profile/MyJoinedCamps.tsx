@@ -24,6 +24,7 @@ const Profile = () => {
 
   const handleAccept = async (userId: string, postId: string) => {
     try {
+
       await axios.post(`http://192.168.10.4:5000/api/acceptAndReject/${userId}/${postId}`);
       setParticipants(prevParticipants =>
         prevParticipants.map(participant =>
@@ -39,7 +40,9 @@ const Profile = () => {
 
   const handleReject = async (userId: string, postId: string) => {
     try {
+
       await axios.post(`http://192.168.10.4:5000/api/acceptAndReject/reject/${userId}/${postId}`);
+
       setParticipants(prevParticipants =>
         prevParticipants.map(participant =>
           participant.userId === userId && participant.postId === postId
@@ -55,7 +58,9 @@ const Profile = () => {
   useEffect(() => {
     const fetchUserData = async (userId: string) => {
       try {
+
         const response = await axios.get(`http://192.168.10.4:5000/api/users/${userId}`);
+
         setUserData({
           id: response.data.user.id,
           name: response.data.user.name,
@@ -98,6 +103,7 @@ const Profile = () => {
 
   const fetchParticipants = async (campId: string) => {
     try {
+
       const response = await axios.get(`http://192.168.10.4:5000/api/camps/participants/${campId}`);
       setParticipants(response.data.data.joinCampingPosts);
     } catch (error) {

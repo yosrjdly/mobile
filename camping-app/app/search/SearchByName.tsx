@@ -16,7 +16,9 @@ const SearchByName = () => {
 
   const handleSearch = async () => {
     try {
+
       const response = await axios.get('http://192.168.10.4:5000/api/users/search', {
+
         params: { name: searchTerm },
       });
 

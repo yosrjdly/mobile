@@ -35,6 +35,7 @@ const ExperienceList = ({ navigation }) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
+
         const response = await axios.get('http://192.168.10.4:5000/api/experienceTip/all/get');
         setExperiences(response.data);
         setLoading(false);
@@ -55,6 +56,7 @@ const ExperienceList = ({ navigation }) => {
       }
 
       const url = isLiked
+
         ? `http://192.168.10.4:5000/api/like/${experienceId}/unlike`
         : `http://192.168.10.4:5000/api/like/${experienceId}/like`;
 
@@ -93,6 +95,7 @@ const ExperienceList = ({ navigation }) => {
       }
 
       await axios.post('http://192.168.10.4:5000/api/share/add', {
+
         userId,
         experienceId,
       });
@@ -127,7 +130,9 @@ const ExperienceList = ({ navigation }) => {
     }
 
     try {
+
       const response = await axios.post(`http://192.168.10.4:5000/api/comment/add`, {
+
         content: newComment,
         experienceId: selectedExperienceId,
         userId: userId

@@ -18,9 +18,41 @@ const RatingAndReviews = () => {
   const [postsJoined, setPostsJoined] = useState<any[]>([]);
   const [modalVisible, setModalVisible] = useState<boolean>(false);
 
+  // Fetch user data
+  const fetchUserData = async (userId: string) => {
+    try {
+      const response = await axios.get(`http://192.168.10.13:5000/api/users/${userId}`);
+      const user = response.data.user;
+      setUserData({
+        id: user.id,
+        name: user.name,
+        camps: response.data.posts,
+        joinCampingPosts: user.joinCampingPosts,
+      });
+      setUserId(user.id);
+      if (user.joinCampingPosts.length > 0) {
+        setPostId(user.joinCampingPosts[0].postId.toString());
+      }
+
+      const acceptedStatus = user.joinCampingPosts.some(
+        (post: any) => post.postId === Number(postId) && post.status === 'ACCEPTED'
+      );
+      setIsUserAccepted(acceptedStatus);
+      setPostsJoined(user.joinCampingPosts);
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+      setError('Failed to fetch user data');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Handle update review
   const handleUpdateReview = async () => {
     try {
+
       const response = await fetch('http://192.168.10.4:5000/api/camps/updateReview', {
+
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -46,6 +78,7 @@ const RatingAndReviews = () => {
       Alert.alert('Error', 'An unexpected error occurred.');
     }
   };
+
 
   const fetchUserData = async (userId: string) => {
     try {
@@ -106,11 +139,10 @@ const RatingAndReviews = () => {
   }, []); // Empty dependency array ensures this runs only on mount
 
   if (loading) {
-    return <ActivityIndicator size="large" color="#0000ff" />;
+    return <ActivityIndicator size="large" color="#B3492D" />;
   }
 
   const renderJoinedPost = ({ item }: { item: any }) => {
-    // Check if the post status is 'Completed'
     const isPostCompleted = item.post.status === 'Completed';
 
     return (
@@ -122,38 +154,39 @@ const RatingAndReviews = () => {
             resizeMode="cover"
           />
         )}
-        <Text style={styles.postTitle}>Title: {item.post.title}</Text>
-        <Text>Status: {item.status}</Text>
-        <Text>Description: {item.post.description}</Text>
-        <Text>Category: {item.post.category}</Text>
-       
-          <Text>StatusPost: Completed</Text>
-        
-        <View style={styles.ratingContainer}>
-          <Text>Rating:</Text>
-          <Rating
-            type='star'
-            ratingCount={5}
-            imageSize={20}
-            readonly
-            startingValue={item.rating} // Display the rating
-          />
+        <View style={styles.postDetails}>
+          <Text style={styles.postTitle}>{item.post.title}</Text>
+          <Text style={styles.text}>Status: {item.status}</Text>
+          <Text style={styles.text}>Description: {item.post.description}</Text>
+          <Text style={styles.text}>Category: {item.post.category}</Text>
+          <Text style={styles.text}>StatusPost: Completed</Text>
+          <View style={styles.ratingContainer}>
+            <Text style={styles.text}>Rating:</Text>
+            <View style={styles.ratingWrapper}>
+              <Rating
+                type='star'
+                ratingCount={5}
+                imageSize={24}
+                readonly
+                startingValue={item.rating}
+              />
+            </View>
+          </View>
+          <Text style={styles.text}>Review: {item.reviews}</Text>
+          {isPostCompleted && (
+            <Pressable
+              style={styles.updateButton}
+              onPress={() => {
+                setSelectedPostId(item.postId.toString());
+                setRating(item.rating || 0);
+                setReviews(item.reviews || '');
+                setModalVisible(true);
+              }}
+            >
+              <Text style={styles.buttonText}>Update Review</Text>
+            </Pressable>
+          )}
         </View>
-        <Text>Review: {item.reviews}</Text>
-        {isPostCompleted && (
-          <Pressable
-            style={styles.updateButton} // Apply the new button style
-            onPress={() => {
-              
-              setSelectedPostId(item.postId.toString());
-              setRating(item.rating || 0);
-              setReviews(item.reviews || '');
-              setModalVisible(true);
-            }}
-          >
-            <Text style={styles.textStyle}>Update Review</Text>
-          </Pressable>
-        )}
       </View>
     );
   };
@@ -185,33 +218,39 @@ const RatingAndReviews = () => {
         visible={modalVisible}
         onRequestClose={closeModal}
       >
-        <View style={styles.modalView}>
-          <Text>Rating:</Text>
-          <AirbnbRating
-            count={5}
-            defaultRating={rating}
-            size={20}
-            onFinishRating={setRating} // Update rating when user selects
-          />
-          <Text>Reviews:</Text>
-          <TextInput
-            style={styles.input}
-            value={reviews}
-            onChangeText={setReviews}
-            multiline
-          />
-          <Pressable
-            style={[styles.button, styles.buttonClose]}
-            onPress={submitReview}
-          >
-            <Text style={styles.textStyle}>Submit Review</Text>
-          </Pressable>
-          <Pressable
-            style={[styles.button, styles.buttonClose]}
-            onPress={closeModal}
-          >
-            <Text style={styles.textStyle}>Close</Text>
-          </Pressable>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalView}>
+            <Text style={styles.modalText}>Rate your experience:</Text>
+            <AirbnbRating
+              count={5}
+              defaultRating={rating}
+              size={30}
+              onFinishRating={setRating}
+              selectedColor="#B3492D"
+              showRating={false}
+            />
+            <Text style={styles.modalText}>Write your review:</Text>
+            <TextInput
+              style={styles.input}
+              value={reviews}
+              onChangeText={setReviews}
+              multiline
+              placeholder="Enter your review here..."
+              placeholderTextColor="#014043"
+            />
+            <Pressable
+              style={[styles.button, styles.buttonSubmit]}
+              onPress={submitReview}
+            >
+              <Text style={styles.buttonText}>Submit Review</Text>
+            </Pressable>
+            <Pressable
+              style={[styles.button, styles.buttonClose]}
+              onPress={closeModal}
+            >
+              <Text style={styles.buttonText}>Close</Text>
+            </Pressable>
+          </View>
         </View>
       </Modal>
     </View>
@@ -221,83 +260,116 @@ const RatingAndReviews = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#014043',
+    backgroundColor: '#00595E',
   },
   scrollContainer: {
     flexGrow: 1,
-    paddingHorizontal: 20,
+    padding: 20,
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: '#014043',
     padding: 10,
     marginVertical: 10,
+    width: '100%',
+    borderRadius: 5,
+    backgroundColor: '#F1FADA',
+    textAlignVertical: 'top',
+    fontSize: 16,
+    color: '#014043',
   },
   error: {
-    color: 'red',
+    color: '#B3492D',
     marginTop: 10,
+    textAlign: 'center',
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: 20,
     marginVertical: 10,
-    color: '#fff', // Optional: to make the title stand out
-  },
-  postItem: {
-    padding: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
-    backgroundColor: '#fff', // Optional: background color for the posts
-  },
-  postTitle: {
+    color: '#F1FADA',
     fontWeight: 'bold',
   },
+  postItem: {
+    padding: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#B3492D',
+    backgroundColor: '#014043',
+    borderRadius: 10,
+    marginBottom: 15,
+    elevation: 3,
+  },
+  postDetails: {
+    marginTop: 10,
+  },
+  postTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#F1FADA',
+  },
   postImage: {
-    width: 100,
-    height: 100,
+    width: '100%',
+    height: 200,
+    borderRadius: 10,
+    marginBottom: 10,
   },
   ratingContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     marginVertical: 10,
   },
+  ratingWrapper: {
+    marginLeft: 5,
+    backgroundColor: 'transparent',
+  },
+  text: {
+    color: '#F1FADA',
+    marginBottom: 5,
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+  },
   modalView: {
     margin: 20,
-    backgroundColor: 'white',
+    backgroundColor: '#F1FADA',
     borderRadius: 10,
-    padding: 35,
+    padding: 25,
     alignItems: 'center',
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
       height: 2,
     },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 10,
   },
   button: {
-    borderRadius: 20,
+    borderRadius: 5,
     padding: 10,
     elevation: 2,
+    width: '100%',
+    alignItems: 'center',
   },
-  buttonClose: {
-    backgroundColor: '#2196F3',
+  buttonSubmit: {
+    backgroundColor: '#B3492D',
     marginVertical: 10,
   },
-  updateButton: {
-    backgroundColor: '#B3492D', // New button color
-    borderRadius: 20,
-    padding: 10,
-    elevation: 2,
-    alignItems: 'center', // Center text within the button
+  buttonClose: {
+    backgroundColor: '#00595E',
   },
-  textStyle: {
-    color: 'white',
+  buttonText: {
+    color: '#F1FADA',
     fontWeight: 'bold',
     textAlign: 'center',
+  },
+  modalText: {
+    fontSize: 16,
+    marginBottom: 10,
+    color: '#00595E',
   },
 });
 
 export default RatingAndReviews;
-
-
