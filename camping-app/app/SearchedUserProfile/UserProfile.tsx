@@ -488,7 +488,7 @@ const styles = StyleSheet.create({
   email: {
     top:5,
     fontSize: 16,
-    color: "#A3A88A",
+    color: "#ffff",
   },
   bio: {
     fontSize: 14,
