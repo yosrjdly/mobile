@@ -96,7 +96,7 @@ const ExperienceList = () => {
       }
 
 
-      await axios.post('http://192.168.10.20:5000/api/share/add', {
+      await axios.post('http://192.168.10.13:5000/api/share/add', {
 
         userId,
         experienceId,
@@ -129,7 +129,7 @@ const ExperienceList = () => {
     }
 
     try {
-      const response = await axios.post(`http://192.168.10.20:5000/api/comment/add`, {
+      const response = await axios.post(`http://192.168.10.13:5000/api/comment/add`, {
 
         content: newComment,
         experienceId: selectedExperienceId,
