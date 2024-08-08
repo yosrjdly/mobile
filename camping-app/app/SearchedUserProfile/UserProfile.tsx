@@ -1,3 +1,4 @@
+
 import {
   StyleSheet,
   Text,
@@ -18,6 +19,106 @@ import profileImage from "../../assets/images/default-avatar.webp";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import JWT from "expo-jwt";
 import { Ionicons, FontAwesome, AntDesign } from "@expo/vector-icons";
+=======
+// User Interface
+interface User {
+  id: number;
+  email: string;
+  password: string; // Encrypted password, should be handled securely
+  name: string;
+  address: string;
+  interests: string[];
+  imagesProfile: string[];
+  gender: 'Men' | 'Women'; // Adjusted to be more specific
+  bio: string;
+  phoneNumber: string;
+  dateOfBirth: string; // ISO 8601 date format
+  createdAt: string; // ISO 8601 date format
+  posts: Post[];
+  joinCampingPosts: JoinCampingPost[];
+  experiences: Experience[];
+  likes: Like[];
+  comments: Comment[];
+  shares: Share[];
+}
+
+// Post Interface
+interface Post {
+  id: number;
+  title: string;
+  description: string;
+  location: string;
+  startDate: string; // ISO 8601 date format
+  endDate: string;   // ISO 8601 date format
+  equipment: string[]; // Array of equipment names
+  places: number;
+  ageCategory: 'TEEN' | 'ADULT';
+  images: string[];
+  organizerId: number;
+  category: string;
+  status: 'PENDING' | 'ACCEPTED' | 'REJECTED';
+  user: User;
+  joinCampingPosts: JoinCampingPost[];
+}
+
+// JoinCampingPost Interface
+interface JoinCampingPost {
+  userId: number;
+  postId: number;
+  rating: number;
+  reviews: string;
+  favorite: 'Yes' | 'No';
+  notification: string;
+  status: 'ACCEPTED' | 'PENDING' | 'REJECTED';
+  user: User;
+  post: Post;
+}
+
+// Experience Interface
+interface Experience {
+  id: number;
+  title: string;
+  content: string;
+  imagesUrl: string[];
+  location: string;
+  category: string;
+  filterCategory: string;
+  likeCounter: number;
+  shareCounter: number;
+  userId: number;
+  createdAt: string; // ISO 8601 date format
+  user: User;
+  likes: Like[];
+  comments: Comment[];
+  shares: Share[];
+}
+
+// Like Interface
+interface Like {
+  id: number;
+  experienceId: number;
+  userId: number;
+  user: User;
+}
+
+// Comment Interface
+interface Comment {
+  id: number;
+  content: string;
+  experienceId: number;
+  userId: number;
+  user: User;
+}
+
+// Share Interface
+interface Share {
+  id: number;
+  experienceId: number;
+  userId: number;
+  user: User;
+}
+
+
 
 const UserProfile = () => {
   const { userId } = useLocalSearchParams();
@@ -34,11 +135,13 @@ const UserProfile = () => {
   useEffect(() => {
     const fetchUser = async () => {
       try {
+<
         const response = await axios.get(
           `http://192.168.10.13:5000/api/users/${userId}`
         );
         setUser(response.data.user);
         setExperiences(response.data.user.experiences);
+
       } catch (error) {
         setError("Error fetching user data");
         console.error("Error fetching user:", error);
@@ -243,6 +346,7 @@ const UserProfile = () => {
   }
 
   return (
+
     <ScrollView style={styles.container}>
       {/* User Profile Header */}
       <View style={styles.profileHeader}>
@@ -459,6 +563,7 @@ const UserProfile = () => {
         </View>
       )}
     </ScrollView>
+
   );
 };
 

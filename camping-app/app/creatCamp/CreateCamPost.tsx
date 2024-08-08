@@ -128,15 +128,13 @@ const CampingPost = () => {
         });
       });
 
-      const response = await axios.post(
-        "http://192.168.10.13:5000/api/camps/add",
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
+
+      const response = await axios.post('http://192.168.10.4:5000/api/camps/add', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+  
 
       if (response.data.status === 200) {
         alert("Post created successfully");

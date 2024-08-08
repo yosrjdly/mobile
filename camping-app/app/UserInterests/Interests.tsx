@@ -26,8 +26,11 @@ const Interests = () => {
 
   const updateInterests = async (userId: string, interests: Interest[]) => {
     try {
-      const response = await axios.post('http://192.168.10.13:5000/api/users/updateInterests',
-       { userId, interests });
+
+
+      const response = await axios.post('http://192.168.10.4:5000/api/users/updateInterests', { userId, interests });
+
+
       console.log('Success', response.data);
     } catch (error) {
       console.log(error);

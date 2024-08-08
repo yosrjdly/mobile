@@ -6,14 +6,15 @@ const UserCard = ({ user }) => {
   const router = useRouter();
 
   const handlePress = () => {
-    router.push(`/SearchedUserProfile/UserProfile?userId=${user.id}`); 
+    console.log(user)
+    router.replace(`/SearchedUserProfile/UserProfile?userId=${user.id}`); 
   };
 
   return (
     <View style={styles.card}>
       <TouchableOpacity onPress={handlePress}>
         <Image 
-          source={{ uri: user.imagesProfile?.[0] || 'default-image-url' }} 
+          source={{ uri: user.imagesProfile?.[0] || 'https://via.placeholder.com/50' }} 
           style={styles.image} 
         />
       </TouchableOpacity>

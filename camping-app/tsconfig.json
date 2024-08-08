@@ -6,7 +6,12 @@
       "@/": [
         "./"
       ]
-    }
+    },
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "baseUrl": "."
   },
   "include": [
     "/*.ts",

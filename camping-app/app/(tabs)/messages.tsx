@@ -1,151 +1,174 @@
-import { StyleSheet, Text, View, Image, TextInput } from 'react-native';
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TouchableOpacity, FlatList, StyleSheet, TextInput, Dimensions, Image } from 'react-native';
+import axios from 'axios';
+import { useNavigation } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage'; 
+import Icon from 'react-native-vector-icons/MaterialIcons'; 
+import { router } from 'expo-router';
 
-const messages = () => {
-  const remoteImageUrl = 'https://media.sproutsocial.com/uploads/2022/06/profile-picture.jpeg';
-  const searchIconUrl = 'https://example.com/search.png'; // Replace with your search icon URL
+const { width } = Dimensions.get('window');
+
+const Messages = () => {
+  const [conversations, setConversations] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [accountOwnerId, setAccountOwnerId] = useState(null);
+  const navigation = useNavigation();
+
+  useEffect(() => {
+    const fetchConversations = async () => {
+      try {
+        const token = await AsyncStorage.getItem('token'); 
+        const response = await axios.get('http://192.168.10.4:5000/api/chat/conversations', {
+          headers: {
+            Authorization: token, 
+          },
+        });
+        console.log(response.data)
+        setConversations(response.data);
+
+        // Retrieve account owner's ID
+        const accountOwner = await AsyncStorage.getItem('accountOwnerId');
+        setAccountOwnerId(accountOwner);
+
+      } catch (error) {
+        console.error('Error fetching conversations:', error);
+      }
+    };
+
+    fetchConversations();
+  }, []);
+
+  const handleConversationPress = (conversationId) => {
+    router.push(`ConversationMessages/ConversationMessages?conversationId=${conversationId}`);
+  };
+
+  const handleSearchChange = (text) => {
+    setSearchQuery(text);
+    // You might want to filter conversations based on searchQuery here
+  };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Messages</Text>
-      
+      <View style={styles.header}>
+        <Text style={styles.headerText}>Messages</Text>
+      </View>
       <View style={styles.search}>
-        <Image source={{ uri: searchIconUrl }} style={styles.searchIcon} />
         <TextInput
           style={styles.searchInput}
-          placeholder="Look For ..."
-          placeholderTextColor="#B0BEC5"
+          placeholder="Search..."
+          placeholderTextColor="#00796B"
+          value={searchQuery}
+          onChangeText={handleSearchChange}
         />
+        <TouchableOpacity style={styles.searchIconContainer}>
+          <Icon name="search" size={20} color="#00796B" />
+        </TouchableOpacity>
       </View>
+      <FlatList
+        data={conversations.filter(conversation =>
+          conversation.participants
+            .filter(participant => participant.id !== accountOwnerId) // Exclude the account owner
+            .some(participant =>
+              participant.name.toLowerCase().includes(searchQuery.toLowerCase())
+            )
+        )}
+        keyExtractor={(item) => item.id.toString()}
+        renderItem={({ item }) => {
+          // Filter participants excluding the account owner
+          const otherParticipants = item.participants.filter(participant => participant.id !== accountOwnerId);
 
-      <View style={styles.message}>
-        <Image source={{ uri: remoteImageUrl }} style={styles.profile} />
-        <View style={styles.messageContent}>
-          <Text style={styles.name}>Lobna</Text>
-          <Text style={styles.messageText}>Lobna sent a message.</Text>
-        </View>
-        <Text style={styles.time}>12:20</Text>
-      </View>
+          // If there are no other participants, return null
+          if (otherParticipants.length === 0) return null;
 
-      <View style={styles.message}>
-        <Image source={{ uri: remoteImageUrl }} style={styles.profile} />
-        <View style={styles.messageContent}>
-          <Text style={styles.name}>Samir</Text>
-          <Text style={styles.messageText}>Samir sent a message.</Text>
-        </View>
-        <Text style={styles.time}>2:20</Text>
-      </View>
+          // Select the first other participant (not the account owner)
+          const otherParticipant = otherParticipants[0];
 
-      <View style={styles.message}>
-        <Image source={{ uri: remoteImageUrl }} style={styles.profile} />
-        <View style={styles.messageContent}>
-          <Text style={styles.name}>Fathi</Text>
-          <Text style={styles.messageText}>Fathi sent a message.</Text>
-        </View>
-        <Text style={styles.time}>3:20</Text>
-      </View>
-
-      <View style={styles.message}>
-        <Image source={{ uri: remoteImageUrl }} style={styles.profile} />
-        <View style={styles.messageContent}>
-          <Text style={styles.name}>Yassine</Text>
-          <Text style={styles.messageText}>Yassine sent a message.</Text>
-        </View>
-        <Text style={styles.time}>10:20</Text>
-      </View>
-
-      <View style={styles.message}>
-        <Image source={{ uri: remoteImageUrl }} style={styles.profile} />
-        <View style={styles.messageContent}>
-          <Text style={styles.name}>Yosri</Text>
-          <Text style={styles.messageText}>Yosri: Nice camp.</Text>
-        </View>
-        <Text style={styles.time}>8:00</Text>
-      </View>
+          return (
+            <TouchableOpacity style={styles.item} onPress={() => handleConversationPress(item.id)}>
+              <View style={styles.itemContent}>
+                {otherParticipant.imagesProfile.length > 0 ? (
+                  <Image source={{ uri: otherParticipant.imagesProfile[0] }} style={styles.itemImage} />
+                ) : (
+                  <View style={styles.itemImagePlaceholder} />
+                )}
+                <Text style={styles.itemText}>{otherParticipant.name}</Text>
+              </View>
+            </TouchableOpacity>
+          );
+        }}
+      />
     </View>
   );
-}
-
-export default messages;
+};
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#00595E', // Updated background color
-    padding: 16,
-    alignItems: 'center', // Center content horizontally
-    justifyContent: 'flex-start', // Align items to the top
+    padding: 20,
+    backgroundColor: '#00595E', 
   },
-  title: {
-    fontSize: 30,
+  header: {
+    marginBottom: 20,
+  },
+  headerText: {
+    fontSize: 32,
+    fontWeight: 'bold',
     color: '#fff',
-    marginVertical: 20, // Space between title and other elements
-    textAlign: 'center', // Center text horizontally
+    textAlign: 'center',
+    marginTop: 14,
   },
   search: {
-    backgroundColor: '#014043', // Updated color
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-    marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 5,
-    width: '100%', // Ensure search bar spans the width
-    maxWidth: 400, // Optional: limit width for larger screens
-  },
-  searchIcon: {
-    width: 20,
-    height: 20,
-    tintColor: '#fff',
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    padding: 10,
+    marginBottom: 20,
   },
   searchInput: {
     flex: 1,
-    color: '#fff',
     fontSize: 16,
-    marginLeft: 8,
-    padding: 8,
+    color: '#00796B',
   },
-  message: {
-    backgroundColor: '#014043', // Updated color
+  searchIconContainer: {
+    marginLeft: 10,
+  },
+  item: {
+    marginTop: 15,
+    padding: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
+  },
+  itemContent: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 12,
-    borderRadius: 12,
-    marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 5,
-    width: '100%', // Ensure message spans the width
-    maxWidth: 400, // Optional: limit width for larger screens
   },
-  profile: {
+  itemImage: {
     width: 50,
     height: 50,
     borderRadius: 25,
-    marginRight: 16,
+    marginRight: 10,
+    borderWidth: 2, // Border width
+    borderColor: '#fff', // Border color
   },
-  messageContent: {
-    flex: 1,
+  itemImagePlaceholder: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: '#ccc',
+    marginRight: 10,
+    borderWidth: 2, // Border width
+    borderColor: '#fff', // Border color
   },
-  name: {
-    color: '#fff',
-    fontWeight: 'bold',
-    marginBottom: 4,
+  itemText: {
     fontSize: 16,
-  },
-  messageText: {
-    color: '#B0BEC5',
-    fontSize: 14,
-  },
-  time: {
-    color: '#B0BEC5',
-    fontSize: 12,
+    color: '#fff',
   },
 });
+
+export default Messages;
+
+
+
+
+
