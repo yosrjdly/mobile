@@ -18,7 +18,7 @@ const Messages = () => {
     const fetchConversations = async () => {
       try {
         const token = await AsyncStorage.getItem('token'); 
-        const response = await axios.get('http://192.168.10.4:5000/api/chat/conversations', {
+        const response = await axios.get('http://192.168.10.13:5000/api/chat/conversations', {
           headers: {
             Authorization: token, 
           },

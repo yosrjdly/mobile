@@ -10,7 +10,7 @@ export const ChatProvider = ({ children }) => {
   const [conversationId, setConversationId] = useState(null);
 
   useEffect(() => {
-    const socketInstance = io('http://192.168.10.4:5000'); 
+    const socketInstance = io('http://192.168.10.13:5000'); 
     setSocket(socketInstance);
     
     return () => {
@@ -24,7 +24,7 @@ export const ChatProvider = ({ children }) => {
       
       try {
         const token = await AsyncStorage.getItem('token');
-        const response = await fetch(`http://192.168.10.4:5000/api/chat/conversations/${conversationId}/messages`, {
+        const response = await fetch(`http://192.168.10.13:5000/api/chat/conversations/${conversationId}/messages`, {
           headers: { Authorization: token },
         });
         const data = await response.json();

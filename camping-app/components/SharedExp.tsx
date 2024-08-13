@@ -1,18 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, Image, FlatList, ActivityIndicator, StyleSheet } from 'react-native';
 import axios from 'axios';
+import { Ionicons, FontAwesome, AntDesign } from "@expo/vector-icons";
+
 
 const SharedExp = ({ userId }) => {
   const [sharedExperiences, setSharedExperiences] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  
+
   useEffect(() => {
     const fetchSharedExperiences = async () => {
       try {
-
-        const response = await axios.get(`http://192.168.10.4:5000/api/share/all/${userId}`);
-
+        const response = await axios.get(`http://192.168.10.13:5000/api/share/all/${userId}`);
         setSharedExperiences(response.data);
       } catch (err) {
         setError(err);
@@ -73,12 +73,22 @@ const SharedExp = ({ userId }) => {
             <Text style={styles.info}>
               Category: <Text style={styles.infoValue}>{item.experience.category}</Text>
             </Text>
-            <Text style={styles.info}>
-              Shares: <Text style={styles.infoValue}>{item.experience.shareCounter}</Text>
-            </Text>
-            <Text style={styles.info}>
-              Likes: <Text style={styles.infoValue}>{item.experience.likeCounter}</Text>
-            </Text>
+          </View>
+          <View style={styles.actionsContainer}>
+            
+            <View style={styles.actionButton}>
+              <AntDesign name="hearto" size={20} color="#fff" />
+              <Text style={styles.actionText}>{item.experience.likeCounter}</Text>
+            </View>
+            <View style={styles.actionButton}>
+            <FontAwesome name="share" size={24} color="white" />
+              
+              <Text style={styles.actionText}>{item.experience.shareCounter}</Text>
+            </View>
+            <View style={styles.actionButton}>
+              <AntDesign name="message1" size={20} color="#fff" />
+              <Text style={styles.actionText}>Comments</Text>
+            </View>
           </View>
         </View>
       )}
@@ -97,15 +107,15 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   card: {
-    backgroundColor: '#00595E',
-    borderRadius: 8,
+    backgroundColor: '#073436', 
+    borderRadius: 10,
     padding: 16,
     marginBottom: 16,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
-    elevation: 2, // For Android shadow effect
+    elevation: 2,
   },
   userContainer: {
     flexDirection: 'row',
@@ -163,6 +173,19 @@ const styles = StyleSheet.create({
   },
   infoValue: {
     fontWeight: 'bold',
+  },
+  actionsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 16,
+  },
+  actionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  actionText: {
+    marginLeft: 8,
+    color: '#fff',
   },
 });
 

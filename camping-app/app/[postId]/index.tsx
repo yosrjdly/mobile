@@ -79,7 +79,7 @@ const PostDetailScreen: React.FC = () => {
 
 
 
-      const response = await axios.post('http://192.168.10.4:5000/api/joinPosts/add', body);
+      const response = await axios.post('http://192.168.10.13:5000/api/joinPosts/add', body);
 
       console.log('Success', response.data.data);
       setIsSuccessModalVisible(true); // Show success modal
@@ -94,7 +94,7 @@ const PostDetailScreen: React.FC = () => {
     try {
 
 
-      const response = await axios.post('http://192.168.10.4:5000/api/joinPosts/cancel', body);
+      const response = await axios.post('http://192.168.10.13:5000/api/joinPosts/cancel', body);
 
       console.log('Success', response.data);
       setIsCancelSuccessModalVisible(true); // Show cancellation success modal
@@ -110,7 +110,7 @@ const PostDetailScreen: React.FC = () => {
       setLoading(true);
       try {
 
-        const response = await axios.get<ApiResponse>(`http://192.168.10.4:5000/api/camps/${id}`);
+        const response = await axios.get<ApiResponse>(`http://192.168.10.13:5000/api/camps/${id}`);
 
 
         setPost(response.data.data);

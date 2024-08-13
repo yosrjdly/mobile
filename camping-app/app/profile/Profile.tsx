@@ -26,7 +26,7 @@ const Profile = () => {
         const fetchUserData = async (userId: string) => {
             try {
 
-                const response = await axios.get(`http://192.168.10.4:5000/api/users/${userId}`);
+                const response = await axios.get(`http://192.168.10.13:5000/api/users/${userId}`);
 
                 console.log("User data fetched:", response.data, response.data.posts);
                 setUserData({
@@ -64,7 +64,7 @@ const Profile = () => {
                         if (decodedToken && decodedToken.id) {
                             // Fetch user data based on ID from decoded token
 
-                            const response = await axios.get(`http://192.168.10.4:5000/api/users/${decodedToken.id}`);
+                            const response = await axios.get(`http://192.168.10.13:5000/api/users/${decodedToken.id}`);
 
                             setUser(response.data);
                             setUserData({

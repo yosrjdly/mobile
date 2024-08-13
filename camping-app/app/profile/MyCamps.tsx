@@ -69,7 +69,7 @@ const MyCamps = () => {
 
       try {
 
-        const response = await axios.get(`http://192.168.10.4:5000/api/camps/user/${userId}/campings`);
+        const response = await axios.get(`http://192.168.10.13:5000/api/camps/user/${userId}/campings`);
 
         const campsData = response.data.data;
 

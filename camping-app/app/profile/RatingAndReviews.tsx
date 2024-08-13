@@ -51,7 +51,7 @@ const RatingAndReviews = () => {
   const handleUpdateReview = async () => {
     try {
 
-      const response = await fetch('http://192.168.10.4:5000/api/camps/updateReview', {
+      const response = await fetch('http://192.168.10.13:5000/api/camps/updateReview', {
 
         method: 'POST',
         headers: {
@@ -80,35 +80,6 @@ const RatingAndReviews = () => {
   };
 
 
-  const fetchUserData = async (userId: string) => {
-    try {
-      const response = await axios.get(`http://192.168.10.4:5000/api/users/${userId}`);
-      const user = response.data.user;
-      const joinedPosts = user.joinCampingPosts;
-
-      setUserData({
-        id: user.id,
-        name: user.name,
-        camps: response.data.posts,
-        joinCampingPosts: joinedPosts,
-      });
-      setUserId(user.id);
-      if (joinedPosts.length > 0) {
-        setPostId(joinedPosts[0].postId.toString());
-      }
-
-      // Filter posts to include only those with status 'ACCEPTED' and post.status 'Completed'
-      const acceptedAndCompletedPosts = joinedPosts.filter((post: any) =>
-        post.status === 'ACCEPTED' && post.post.status === 'Completed'
-      );
-      setPostsJoined(acceptedAndCompletedPosts);
-    } catch (error) {
-      console.error('Error fetching user data:', error);
-      setError('Failed to fetch user data');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   useEffect(() => {
     const decodeToken = async () => {

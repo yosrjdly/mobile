@@ -64,46 +64,32 @@ const Home = () => {
       useNativeDriver: true,
     }).start();
   };
-
   useEffect(() => {
     const fetchUserAndCamps = async () => {
       try {
-        // Retrieve user data from AsyncStorage
-        const storedUser = await AsyncStorage.getItem('user');
-        if (storedUser) {
-          setUser(JSON.parse(storedUser));
-        } else {
-          // If no user data, fetch token and decode
-          const tokenData = await AsyncStorage.getItem('token');
-          if (tokenData) {
-            const token = tokenData.startsWith('Bearer ') ? tokenData.replace('Bearer ', '') : tokenData;
-            const key = 'mySuperSecretPrivateKey';
+        const tokenData = await AsyncStorage.getItem('token');
+        console.log("token:", tokenData);
 
-            try {
-              const decodedToken = JWT.decode(token, key);
-              if (decodedToken) {
-                const userData: User = {
-                  id: decodedToken.id || '',
-                  name: decodedToken.name || '',
-                  email: decodedToken.email || '',
-                  imagesProfile: decodedToken.imagesProfile,
-                  role: decodedToken.role || '',
-                };
+        if (tokenData) {
+          const token = tokenData.startsWith('Bearer ') ? tokenData.replace('Bearer ', '') : tokenData;
+          const key = 'mySuperSecretPrivateKey'; 
 
-                // Save user data to AsyncStorage
-                await AsyncStorage.setItem('user', JSON.stringify(userData));
-                setUser(userData);
-              } else {
-                console.error('Failed to decode token');
-              }
-            } catch (decodeError) {
-              console.error('Error decoding token:', decodeError);
+          try {
+            const decodedToken = JWT.decode(token, key);
+            if (decodedToken) {
+              setUser({
+                id: decodedToken.id || '',
+                name: decodedToken.name || '',
+                email: decodedToken.email || '',
+                imagesProfile: decodedToken.imagesProfile,
+                role: decodedToken.role || '',
+              });
+            } else {
+              console.error('Failed to decode token');
             }
-          } else {
-            console.error('Token not found in AsyncStorage');
-            setError('Token not found');
+          } catch (decodeError) {
+            console.error('Error decoding token:', decodeError);
           }
-
 
           // Fetch camps data
           const campsResponse = await axios.get('http://192.168.10.13:5000/api/camps/getAll');
@@ -113,23 +99,17 @@ const Home = () => {
         } else {
           console.error('Token not found in AsyncStorage');
           setError('Token not found');
-
         }
-
-        // Fetch camps data
-        const campsResponse = await axios.get('http://192.168.10.4:5000/api/camps/getAll');
-        setCamps(campsResponse.data.data);
-        setFilteredCamps(campsResponse.data.data);
-      } catch (error) {
-        console.error('Failed to fetch data:', error);
-        setError('Failed to fetch data');
+      } catch (storageError) {
+        console.error('Failed to fetch token from AsyncStorage:', storageError);
+        setError('Failed to fetch token');
       } finally {
         setLoading(false);
       }
     };
 
     fetchUserAndCamps();
-  }, []);
+  }, []); // Empty dependency array to run only once
 
 
   // console.log('User:', user);

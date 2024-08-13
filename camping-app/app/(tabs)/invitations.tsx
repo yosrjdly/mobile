@@ -67,7 +67,7 @@ console.log("invitations " ,invitations)
 
   const handleResponse = async (invitationId, status) => {
     try {
-      await axios.post(`http://192.168.1.51:5000/api/invitations/respond`, {
+      await axios.post(`http://192.168.10.13:5000/api/invitations/respond`, {
         invitationId,
         status,
       });

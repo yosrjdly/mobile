@@ -1,5 +1,14 @@
 import React, { useEffect, useState } from "react";
-import { StyleSheet, Text, View, Image, TouchableOpacity, ScrollView, ActivityIndicator, Modal } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  View,
+  Image,
+  TouchableOpacity,
+  ScrollView,
+  ActivityIndicator,
+  Modal,
+} from "react-native";
 import axios from "axios";
 import profileImage from "../../assets/images/default-avatar.webp";
 import { useRouter } from "expo-router";
@@ -14,7 +23,11 @@ const Profile = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
-  
+  const [confirmModalVisible, setConfirmModalVisible] = useState(false);
+  const [actionType, setActionType] = useState<"accept" | "reject" | null>(
+    null
+  );
+  const [selectedParticipant, setSelectedParticipant] = useState<any>(null);
 
   const handleCampPress = (camp: any) => {
     setSelectedCamp(camp);
@@ -24,15 +37,17 @@ const Profile = () => {
 
   const handleAccept = async (userId: string, postId: string) => {
     try {
-
-      await axios.post(`http://192.168.10.4:5000/api/acceptAndReject/${userId}/${postId}`);
-      setParticipants(prevParticipants =>
-        prevParticipants.map(participant =>
+      await axios.post(
+        `http://192.168.10.13:5000/api/acceptAndReject/${userId}/${postId}`
+      );
+      setParticipants((prevParticipants) =>
+        prevParticipants.map((participant) =>
           participant.userId === userId && participant.postId === postId
             ? { ...participant, status: "accepted" }
             : participant
         )
       );
+      setConfirmModalVisible(false);
     } catch (error) {
       console.error("Error accepting participant:", error);
     }
@@ -40,27 +55,38 @@ const Profile = () => {
 
   const handleReject = async (userId: string, postId: string) => {
     try {
-
-      await axios.post(`http://192.168.10.4:5000/api/acceptAndReject/reject/${userId}/${postId}`);
-
-      setParticipants(prevParticipants =>
-        prevParticipants.map(participant =>
+      await axios.post(
+        `http://192.168.10.13:5000/api/acceptAndReject/reject/${userId}/${postId}`
+      );
+      setParticipants((prevParticipants) =>
+        prevParticipants.map((participant) =>
           participant.userId === userId && participant.postId === postId
             ? { ...participant, status: "rejected" }
             : participant
         )
       );
+      setConfirmModalVisible(false);
     } catch (error) {
       console.error("Error rejecting participant:", error);
     }
   };
 
+  const confirmAction = (type: "accept" | "reject", participant: any) => {
+    setActionType(type);
+    setConfirmModalVisible(true);
+    setModalVisible(false);
+
+
+
+    setSelectedParticipant(participant);
+  };
+
   useEffect(() => {
     const fetchUserData = async (userId: string) => {
       try {
-
-        const response = await axios.get(`http://192.168.10.4:5000/api/users/${userId}`);
-
+        const response = await axios.get(
+          `http://192.168.10.13:5000/api/users/${userId}`
+        );
         setUserData({
           id: response.data.user.id,
           name: response.data.user.name,
@@ -103,8 +129,9 @@ const Profile = () => {
 
   const fetchParticipants = async (campId: string) => {
     try {
-
-      const response = await axios.get(`http://192.168.10.4:5000/api/camps/participants/${campId}`);
+      const response = await axios.get(
+        `http://192.168.10.13:5000/api/camps/participants/${campId}`
+      );
       setParticipants(response.data.data.joinCampingPosts);
     } catch (error) {
       console.error("Error fetching participants:", error);
@@ -143,7 +170,9 @@ const Profile = () => {
                 )}
                 <View style={styles.textOverlay}>
                   <Text style={styles.campTitle}>{item.post.title}</Text>
-                  <Text style={styles.campDescription}>{item.post.description}</Text>
+                  <Text style={styles.campDescription}>
+                    {item.post.description}
+                  </Text>
                 </View>
               </TouchableOpacity>
             ))
@@ -164,26 +193,51 @@ const Profile = () => {
             <View style={styles.modalContent}>
               <Text style={styles.sectionTitle}>Participants</Text>
               {participants.length > 0 ? (
-                participants.map(participant => {
-                  const image = participant.user.imagesProfile[0] ? { uri: participant.user.imagesProfile[0] } : profileImage;
+                participants.map((participant) => {
+                  const image = participant.user.imagesProfile[0]
+                    ? { uri: participant.user.imagesProfile[0] }
+                    : profileImage;
+                  console.log("participant", participant);
                   return (
                     <View key={participant.id} style={styles.participantCard}>
                       <Image source={image} style={styles.profileImage} />
                       <View style={styles.participantInfo}>
-                        <Text style={styles.participantName}>{participant.user.name}</Text>
+                        <Text style={styles.participantName}>
+                          {participant.user.name}
+                        </Text>
                         <View style={styles.participantActions}>
-                          <TouchableOpacity
-                            style={[styles.actionButton, styles.acceptButton]}
-                            onPress={() => handleAccept(participant.userId, selectedCamp.id)}
-                          >
-                            <Text style={styles.buttonText}>Accept</Text>
-                          </TouchableOpacity>
-                          <TouchableOpacity
-                            style={[styles.actionButton, styles.rejectButton]}
-                            onPress={() => handleReject(participant.userId, selectedCamp.id)}
-                          >
-                            <Text style={styles.buttonText}>Reject</Text>
-                          </TouchableOpacity>
+                          {participant.status === "PENDING" ? (
+                            <>
+                              <TouchableOpacity
+                                style={[
+                                  styles.actionButton,
+                                  styles.acceptButton,
+                                ]}
+                                onPress={() =>
+                                  confirmAction("accept", participant)
+                                }
+                              >
+                                <Text style={styles.buttonText}>Accept</Text>
+                              </TouchableOpacity>
+                              <TouchableOpacity
+                                style={[
+                                  styles.actionButton,
+                                  styles.rejectButton,
+                                ]}
+                                onPress={() =>
+                                  confirmAction("reject", participant)
+                                }
+                              >
+                                <Text style={styles.buttonText}>Reject</Text>
+                              </TouchableOpacity>
+                            </>
+                          ) : (
+                            <Text style={styles.statusText}>
+                              {participant.status === "ACCEPTED"
+                                ? "Accepted"
+                                : "Rejected"}
+                            </Text>
+                          )}
                         </View>
                       </View>
                     </View>
@@ -202,6 +256,45 @@ const Profile = () => {
           </View>
         </Modal>
       )}
+
+      {/* Confirmation Modal */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={confirmModalVisible}
+        onRequestClose={() => setConfirmModalVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.sectionTitle}>
+              Confirm {actionType === "accept" ? "Acceptance" : "Rejection"}
+            </Text>
+            <Text style={styles.confirmText}>
+              Are you sure you want to {actionType} this participant?
+            </Text>
+            <View style={styles.participantActions}>
+              <TouchableOpacity
+                style={[styles.actionButton, styles.acceptButton]}
+                onPress={() => {
+                  if (actionType === "accept" && selectedParticipant) {
+                    handleAccept(selectedParticipant.userId, selectedCamp.id);
+                  } else if (actionType === "reject" && selectedParticipant) {
+                    handleReject(selectedParticipant.userId, selectedCamp.id);
+                  }
+                }}
+              >
+                <Text style={styles.buttonText}>Yes</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.actionButton, styles.rejectButton]}
+                onPress={() => setConfirmModalVisible(false)}
+              >
+                <Text style={styles.buttonText}>No</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </ScrollView>
   );
 };
@@ -327,6 +420,18 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     justifyContent: "center",
     alignItems: "center",
+  },
+  confirmText: {
+    fontSize: 18,
+    color: "#fff",
+    textAlign: "center",
+    marginVertical: 20,
+  },
+
+  statusText: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#ffff",
   },
 });
 
